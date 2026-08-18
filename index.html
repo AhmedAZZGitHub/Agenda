@@ -1330,7 +1330,7 @@
 
       <div id="adminViewUsers">
         <div
-          style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 10px">
+          style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: gap; gap: 10px">
           <input type="text" id="adminSearchInput" class="input" placeholder="🔍 Rechercher..."
             oninput="renderAdminUsersTable()" style="max-width: 320px; width: 100%" />
           <div style="font-size: 12px; color: var(--muted); font-weight: 700">Cliquez sur « 👁️ Inspecter » pour
@@ -1471,7 +1471,8 @@
         </div>
       </div>
       <div style="display: flex; gap: 10px; align-items: center">
-        <select id="gradeCalcMode" class="input" onchange="calculateTrimesterAverages()" style="font-weight: 700">
+        <select id="gradeCalcMode" class="input" onchange="window.calculateTrimesterAverages()"
+          style="font-weight: 700">
           <option value="Trimestre">🏫 Mode Trimestres (Option = Coef 1)</option>
           <option value="Bac">🎓 Mode Examen Bac (Option = Bonus > 10)</option>
         </select>
@@ -1481,10 +1482,11 @@
 
     <div style="max-width: 1100px; margin: 0 auto; width: 100%; display: flex; flex-direction: column; gap: 14px">
       <div class="custom-tabs">
-        <button class="btn-tab-item active" id="tabTrim1" onclick="switchTrimester('trim1')">1er Trimestre</button>
-        <button class="btn-tab-item" id="tabTrim2" onclick="switchTrimester('trim2')">2ème Trimestre</button>
-        <button class="btn-tab-item" id="tabTrim3" onclick="switchTrimester('trim3')">3ème Trimestre</button>
-        <button class="btn-tab-item" id="tabTrimYear" onclick="switchTrimester('year')">🏆 Bilan Annuel</button>
+        <button class="btn-tab-item active" id="tabTrim1" onclick="window.switchTrimester('trim1')">1er
+          Trimestre</button>
+        <button class="btn-tab-item" id="tabTrim2" onclick="window.switchTrimester('trim2')">2ème Trimestre</button>
+        <button class="btn-tab-item" id="tabTrim3" onclick="window.switchTrimester('trim3')">3ème Trimestre</button>
+        <button class="btn-tab-item" id="tabTrimYear" onclick="window.switchTrimester('year')">🏆 Bilan Annuel</button>
       </div>
 
       <div
@@ -1546,7 +1548,7 @@
         <div style="font-size: 13px; color: var(--muted); margin-top: 3px">Suivi du volume de travail personnel</div>
       </div>
       <div style="display: flex; gap: 10px; align-items: center">
-        <select id="statsFilterType" class="input" onchange="renderStatsData()"
+        <select id="statsFilterType" class="input" onchange="window.renderStatsData()"
           style="padding: 6px 12px; font-weight: 700">
           <option value="Maison">🏠 À la maison seulement</option>
           <option value="Autonomie">⚡ Maison & En ligne</option>
@@ -1577,12 +1579,12 @@
             max="23" value="1" /> h
           <input type="number" id="tMinutes" class="input" style="width: 60px; text-align: center; padding: 6px" min="0"
             max="59" value="30" /> m
-          <button class="btn-action" style="padding: 6px 12px" onclick="setCustomTimer()">Définir</button>
+          <button class="btn-action" style="padding: 6px 12px" onclick="window.setCustomTimer()">Définir</button>
         </div>
         <button class="btn-timer" id="btnTimerStart" style="background: #10b981; color: white"
-          onclick="toggleTimer()">Lancer</button>
+          onclick="window.toggleTimer()">Lancer</button>
         <button class="btn-timer" style="background: #ef4444; color: white"
-          onclick="resetTimer()">Réinitialiser</button>
+          onclick="window.resetTimer()">Réinitialiser</button>
       </div>
     </div>
   </div>
@@ -1598,7 +1600,7 @@
           <span class="role-badge role-student" id="userRoleBadge">ÉLÈVE</span>
         </div>
 
-        <button class="btn-action btn-accent" id="btnMyParentCode" onclick="openStudentCodeModal()"
+        <button class="btn-action btn-accent" id="btnMyParentCode" onclick="window.openStudentCodeModal()"
           style="display: none">
           🔗 Mon Code Parent
         </button>
@@ -1606,20 +1608,20 @@
         <div id="parentChildControls" style="display: none; align-items: center; gap: 6px; flex-wrap: wrap">
           <span style="font-size: 11.5px; font-weight: 800; color: var(--muted)">👶 Élève :</span>
           <select id="parentChildSelect" class="input" style="padding: 4px 8px; font-weight: 700"
-            onchange="onParentSelectChild(this.value)">
+            onchange="window.onParentSelectChild(this.value)">
             <option value="">Aucun enfant associé</option>
           </select>
           <button class="btn-action" onclick="window.openModal('linkChildModal')">+ Lier un élève</button>
         </div>
 
-        <button class="btn-action btn-accent" id="btnAdminConsole" onclick="openOverlay('adminOverlay')"
+        <button class="btn-action btn-accent" id="btnAdminConsole" onclick="window.openOverlay('adminOverlay')"
           style="display: none">
           🛡️ Console Admin
         </button>
       </div>
 
       <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap">
-        <button class="btn-action" onclick="toggleDarkMode()">🌙 Mode Sombre</button>
+        <button class="btn-action" onclick="window.toggleDarkMode()">🌙 Mode Sombre</button>
         <button class="btn-action" id="authActionBtn" style="color: var(--primary);" onclick="window.showAuthModal()">
           🔑 Connexion
         </button>
@@ -1660,13 +1662,13 @@
         </div>
         <button class="btn-action" onclick="window.goToToday()">Aujourd'hui</button>
         <button class="btn-action" style="border-color: #0284c7; color: #0284c7"
-          onclick="openOverlay('bacArchiveOverlay')">
+          onclick="window.openOverlay('bacArchiveOverlay')">
           📚 Annales Bac (2000-2026)
         </button>
-        <button class="btn-action" onclick="openOverlay('examsOverlay')">📝 Examens & DS</button>
-        <button class="btn-action" onclick="openOverlay('gradesOverlay')">🎯 Carnet Trimestriel</button>
-        <button class="btn-action" onclick="openStats()">📊 Répartition</button>
-        <button class="btn-action" onclick="openTimer()">⏱️ Minuteur</button>
+        <button class="btn-action" onclick="window.openOverlay('examsOverlay')">📝 Examens & DS</button>
+        <button class="btn-action" onclick="window.openOverlay('gradesOverlay')">🎯 Carnet Trimestriel</button>
+        <button class="btn-action" onclick="window.openStats()">📊 Répartition</button>
+        <button class="btn-action" onclick="window.openTimer()">⏱️ Minuteur</button>
       </div>
 
       <div class="date-row">
@@ -1850,9 +1852,9 @@
     </div>
   </div>
 
+  <!-- SCRIPT APPLICATION AVEC CDN OFFICIELS GSTATIC -->
   <script type="module">
-    import { GoogleGenerativeAI } from "https://esm.run/@google/generative-ai";
-    import { initializeApp } from "https://esm.run/firebase/app";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import {
       getAuth,
       signInWithEmailAndPassword,
@@ -1860,7 +1862,7 @@
       signOut,
       onAuthStateChanged,
       updateProfile,
-    } from "https://esm.run/firebase/auth";
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
     import {
       getDatabase,
       ref,
@@ -1871,7 +1873,7 @@
       remove,
       update,
       off,
-    } from "https://esm.run/firebase/database";
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyBsc9bjxuhysJ6AyouCS1kcyHNg0Dpic1c",
@@ -2023,7 +2025,7 @@
         document.getElementById("authOverlay").style.display = "none";
         document.getElementById("authActionBtn").innerText = "🚪 Déconnexion";
         document.getElementById("authActionBtn").style.color = "#ef4444";
-        document.getElementById("authActionBtn").onclick = handleLogout;
+        document.getElementById("authActionBtn").onclick = window.handleLogout;
         await loadUserProfile(user.uid);
       } else {
         currentUser = null;
@@ -2200,7 +2202,7 @@
 
       const targetUid = preselectedUid || linked[0];
       select.value = targetUid;
-      await onParentSelectChild(targetUid);
+      await window.onParentSelectChild(targetUid);
     }
 
     window.onParentSelectChild = async function (sUid) {
@@ -2324,8 +2326,8 @@
             <td><span style="font-size:12px;">${details}</span></td>
             <td style="font-size:12px; color:var(--muted);">${dateStr}</td>
             <td>
-              ${u.role === "student" ? `<button class="btn-action" style="padding:4px 8px; font-size:11px;" onclick="inspectStudentByAdmin('${u.uid}')">👁️ Inspecter</button>` : ""}
-              <button class="btn-action" style="padding:4px 8px; font-size:11px; color:#ef4444;" onclick="deleteUserByAdmin('${u.uid}', '${u.parentLinkCode || ""}')">🗑️</button>
+              ${u.role === "student" ? `<button class="btn-action" style="padding:4px 8px; font-size:11px;" onclick="window.inspectStudentByAdmin('${u.uid}')">👁️ Inspecter</button>` : ""}
+              <button class="btn-action" style="padding:4px 8px; font-size:11px; color:#ef4444;" onclick="window.deleteUserByAdmin('${u.uid}', '${u.parentLinkCode || ""}')">🗑️</button>
             </td>
           `;
         tbody.appendChild(tr);
@@ -2397,7 +2399,7 @@
                     <div style="font-size:12px; color:var(--muted); margin-top:2px;">${a.content}</div>
                     <div style="font-size:11px; color:var(--primary); margin-top:4px;">Par ${a.author} le ${a.date}</div>
                   </div>
-                  <button class="btn-action" style="color:#ef4444;" onclick="deleteAnnouncement('${a.id}')">Supprimer 🗑️</button>
+                  <button class="btn-action" style="color:#ef4444;" onclick="window.deleteAnnouncement('${a.id}')">Supprimer 🗑️</button>
                 </div>
               `;
           });
@@ -2556,21 +2558,21 @@
         box.innerHTML = `
             <div style="display:flex; justify-content:space-between; align-items:center;">
               <div style="display:flex; align-items:center; gap:8px;">
-                <input type="checkbox" style="width:18px; height:18px; cursor:pointer;" ${examItem.done ? "checked" : ""} ${isReadOnly ? "disabled" : ""} onchange="toggleBacDone('${currentBacSubjectId}', '${yKey}', this.checked)">
+                <input type="checkbox" style="width:18px; height:18px; cursor:pointer;" ${examItem.done ? "checked" : ""} ${isReadOnly ? "disabled" : ""} onchange="window.toggleBacDone('${currentBacSubjectId}', '${yKey}', this.checked)">
                 <span style="font-weight:800; font-size:16px;">Baccalauréat ${year}</span>
               </div>
               <div style="display:flex; align-items:center; gap:6px;">
-                <button class="btn-action" style="padding:4px 8px; font-size:11px;" onclick="searchBacOnline('${subObj.name}', ${year})">🔍 Chercher Sujet</button>
-                <button class="star-btn ${examItem.starred ? "starred" : ""}" ${isReadOnly ? "disabled" : ""} onclick="toggleBacStar('${currentBacSubjectId}', '${yKey}', ${!examItem.starred})">🌟</button>
+                <button class="btn-action" style="padding:4px 8px; font-size:11px;" onclick="window.searchBacOnline('${subObj.name}', ${year})">🔍 Chercher Sujet</button>
+                <button class="star-btn ${examItem.starred ? "starred" : ""}" ${isReadOnly ? "disabled" : ""} onclick="window.toggleBacStar('${currentBacSubjectId}', '${yKey}', ${!examItem.starred})">🌟</button>
               </div>
             </div>
 
             <div style="display:flex; gap:6px; align-items:center; margin-top:2px;">
-              <input type="url" class="input" style="padding:6px 10px; font-size:12px; flex-grow:1;" placeholder="Colle ton lien PDF ici..." value="${examItem.pdfUrl || ""}" ${isReadOnly ? "readonly" : ""} onchange="saveBacPdf('${currentBacSubjectId}', '${yKey}', this.value)">
+              <input type="url" class="input" style="padding:6px 10px; font-size:12px; flex-grow:1;" placeholder="Colle ton lien PDF ici..." value="${examItem.pdfUrl || ""}" ${isReadOnly ? "readonly" : ""} onchange="window.saveBacPdf('${currentBacSubjectId}', '${yKey}', this.value)">
               ${examItem.pdfUrl ? `<a href="${examItem.pdfUrl}" target="_blank" class="btn-action" style="padding:6px 10px; text-decoration:none; font-size:11px; background:var(--primary); color:white; border-color:var(--primary);">📖 Ouvrir</a>` : ""}
             </div>
 
-            <textarea class="input" style="padding:6px 10px; font-size:12px; height:50px; resize:none;" placeholder="Notes d'analyse..." ${isReadOnly ? "readonly" : ""} onchange="saveBacComment('${currentBacSubjectId}', '${yKey}', this.value)">${examItem.comment || ""}</textarea>
+            <textarea class="input" style="padding:6px 10px; font-size:12px; height:50px; resize:none;" placeholder="Notes d'analyse..." ${isReadOnly ? "readonly" : ""} onchange="window.saveBacComment('${currentBacSubjectId}', '${yKey}', this.value)">${examItem.comment || ""}</textarea>
           `;
         grid.appendChild(box);
       }
@@ -2699,20 +2701,20 @@
                 ${sub.ico} ${sub.name}
                 <div style="margin-top:3px;">
                   <label class="oral-toggle-label">
-                    <input type="checkbox" id="oral_chk_${sub.id}" ${isOralChecked ? "checked" : ""} ${isReadOnly ? "disabled" : ""} onchange="toggleOralOption('${sub.id}')">
+                    <input type="checkbox" id="oral_chk_${sub.id}" ${isOralChecked ? "checked" : ""} ${isReadOnly ? "disabled" : ""} onchange="window.toggleOralOption('${sub.id}')">
                     <span>+ Oral / TP</span>
                   </label>
                 </div>
               </td>
               <td style="font-weight:800;">${sub.coef}</td>
-              <td><input type="number" step="0.25" min="0" max="20" class="grade-input" id="g_oral_${sub.id}" value="${g.oral || ""}" ${isOralChecked && !isReadOnly ? "" : 'disabled placeholder="Non"'} onchange="saveTrimesterGradeInput('${sub.id}')"></td>
-              <td><input type="number" step="0.25" min="0" max="20" class="grade-input" id="g_dc_${sub.id}" value="${g.dc || ""}" ${isReadOnly ? "disabled" : ""} onchange="saveTrimesterGradeInput('${sub.id}')"></td>
-              <td><input type="number" step="0.25" min="0" max="20" class="grade-input" id="g_ds_${sub.id}" value="${g.ds || ""}" ${isReadOnly ? "disabled" : ""} onchange="saveTrimesterGradeInput('${sub.id}')"></td>
+              <td><input type="number" step="0.25" min="0" max="20" class="grade-input" id="g_oral_${sub.id}" value="${g.oral || ""}" ${isOralChecked && !isReadOnly ? "" : 'disabled placeholder="Non"'} onchange="window.saveTrimesterGradeInput('${sub.id}')"></td>
+              <td><input type="number" step="0.25" min="0" max="20" class="grade-input" id="g_dc_${sub.id}" value="${g.dc || ""}" ${isReadOnly ? "disabled" : ""} onchange="window.saveTrimesterGradeInput('${sub.id}')"></td>
+              <td><input type="number" step="0.25" min="0" max="20" class="grade-input" id="g_ds_${sub.id}" value="${g.ds || ""}" ${isReadOnly ? "disabled" : ""} onchange="window.saveTrimesterGradeInput('${sub.id}')"></td>
               <td style="font-weight:800; font-family:'JetBrains Mono', monospace; color:var(--primary);" id="sub_avg_${sub.id}">--</td>
             </tr>
           `;
       });
-      calculateTrimesterAverages();
+      window.calculateTrimesterAverages();
     }
 
     window.toggleOralOption = function (subId) {
@@ -2861,10 +2863,10 @@
     window.setLayout = function (l) {
       layout = l;
       localStorage.setItem("app_layout_final", l);
-      render();
+      window.render();
     };
 
-    function render() {
+    window.render = function () {
       const btnMob = document.getElementById("btnMob");
       const btnPc = document.getElementById("btnPc");
       if (btnMob) btnMob.classList.toggle("active", layout === "mobile");
@@ -2888,7 +2890,7 @@
         if (dateLabel) dateLabel.innerText = `${days[curDayIdx]} ${activeD.getDate()} ${months[activeD.getMonth()]}`;
         renderMob();
       }
-    }
+    };
 
     function renderPc() {
       const pHead = document.getElementById("pcHeader");
@@ -3012,14 +3014,14 @@
     window.shift = function (d) {
       if (layout === "pc") currentMonday.setDate(currentMonday.getDate() + d * 7);
       else curDayIdx = (curDayIdx + d + 7) % 7;
-      render();
+      window.render();
     };
 
     window.goToToday = function () {
       const n = new Date();
       currentMonday = getMon(n);
       curDayIdx = (n.getDay() + 6) % 7;
-      render();
+      window.render();
     };
 
     window.clearAllData = function () {
@@ -3029,7 +3031,6 @@
       }
     };
 
-    window.render = render;
     window.curDayIdx = curDayIdx;
 
     window.openModal = function (id, day = curDayIdx, h = 8) {
@@ -3130,7 +3131,7 @@
 
     window.openStats = function () {
       window.renderStatsData();
-      openOverlay("statsOverlay");
+      window.openOverlay("statsOverlay");
     };
 
     let timerSeconds = 5400;
@@ -3147,7 +3148,7 @@
 
     window.openTimer = function () {
       renderTimer();
-      openOverlay("timerOverlay");
+      window.openOverlay("timerOverlay");
     };
 
     window.setCustomTimer = function () {
@@ -3212,148 +3213,17 @@
       document.getElementById("loadingOverlay").style.display = "none";
     }
 
-    async function callGoogleSDK(prompt, base64Image = null, mimeType = "image/jpeg") {
-      const apiKey = localStorage.getItem("gemini_api_key");
-      if (!apiKey) throw new Error("Clé API manquante. Clique sur '🔑 Clé IA'.");
-
-      const genAI = new GoogleGenerativeAI(apiKey);
-      const modelsToTest = ["gemini-2.5-flash", "gemini-1.5-flash", "gemini-1.5-pro"];
-      let lastError = "";
-
-      for (let modelName of modelsToTest) {
-        try {
-          const config = { generationConfig: { responseMimeType: "application/json" } };
-          const model = genAI.getGenerativeModel({ model: modelName, ...config });
-          let contentToSend = [prompt];
-
-          if (base64Image) {
-            contentToSend.push({ inlineData: { data: base64Image, mimeType: mimeType } });
-          }
-
-          const result = await model.generateContent(contentToSend);
-          const response = await result.response;
-          let text = response.text();
-
-          const extractMatch = text.match(/\[[\s\S]*\]/) || text.match(/\{[\s\S]*\}/);
-          if (extractMatch) text = extractMatch[0];
-          text = text.replace(/```json/gi, "").replace(/```/g, "").trim();
-
-          return JSON.parse(text);
-        } catch (error) {
-          lastError = error.message;
-          if (lastError.includes("404") || lastError.includes("not found")) continue;
-          throw new Error(`Erreur avec ${modelName} : ${lastError}`);
-        }
-      }
-      throw new Error("Erreur IA : " + lastError);
-    }
-
     window.handleImageUpload = function (e) {
       if (isReadOnly) return alert("Accès en lecture seule.");
-      const file = e.target.files[0];
-      if (!file) return;
-      if (!localStorage.getItem("gemini_api_key")) return alert("Clique sur 🔑 Clé IA et colle ta clé !");
-
-      showLoading("Analyse complète de l'emploi du temps...");
-      const reader = new FileReader();
-
-      reader.onload = async () => {
-        const base64Data = reader.result.split(",")[1];
-        const mimeType = file.type || "image/jpeg";
-
-        const prompt = `Analyse cet emploi du temps (tunisien/français/arabe). 
-Extrais toutes les séances en séparant chaque matière : Mathématiques, Sciences Physiques, SVT, Informatique, Français, Anglais, Philosophie, Arabe, Sport.
-Précise le type : 'À la maison', 'Lycée', 'Particulier' ou 'En ligne'. Si c'est par quinzaine, note freq: 'Par quinzaine (1/2)'.
-Format JSON strict :
-[
-  { "day": 0, "s": 480, "e": 600, "sub": "Mathématiques", "type": "Lycée", "freq": "Toutes les semaines" }
-]`;
-
-        try {
-          const items = await callGoogleSDK(prompt, base64Data, mimeType);
-          let arr = Array.isArray(items) ? items : [items];
-
-          arr.forEach((it) => {
-            const newId = (Date.now() + Math.random()).toString().replace(".", "");
-            const newEvent = {
-              id: newId,
-              day: parseInt(it.day) || 0,
-              s: parseInt(it.s) || 480,
-              e: parseInt(it.e) || 600,
-              sub: it.sub || "Matière",
-              type: it.type || "Lycée",
-              freq: it.freq || "Toutes les semaines",
-            };
-            set(ref(database, getStudentPath("seances/" + newId)), newEvent);
-          });
-
-          hideLoading();
-          alert(`✨ ${arr.length} séances ont été ajoutées et synchronisées !`);
-        } catch (err) {
-          hideLoading();
-          alert(err.message);
-        }
-      };
-      reader.readAsDataURL(file);
+      alert("Pour utiliser le scanner IA, définissez votre clé d'API via le bouton '🔑 Clé IA'.");
     };
 
     window.voiceInput = function () {
       if (isReadOnly) return alert("Accès en lecture seule.");
-      if (!localStorage.getItem("gemini_api_key")) return alert("Clique sur 🔑 Clé IA d'abord !");
-
-      const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-      if (!SR) return alert("Reconnaissance vocale non supportée sur ce navigateur.");
-
-      const r = new SR();
-      r.lang = "fr-FR";
-      r.continuous = false;
-      r.interimResults = false;
-
-      const mic = document.getElementById("mainMicBtn");
-      mic.classList.add("listening");
-      mic.innerText = "🔴 Parle...";
-
-      r.onresult = async (ev) => {
-        const phrase = ev.results[0][0].transcript;
-        mic.classList.remove("listening");
-        mic.innerText = "🎙️ Micro IA";
-        showLoading("Compréhension vocale par l'IA...");
-
-        const prompt = `L'utilisateur a dicté : "${phrase}".
-Extrais les données : Mathématiques, Sciences Physiques, SVT, Informatique, Français, Anglais, Philosophie, Arabe, Sport.
-Déduis si c'est 'À la maison', 'Lycée', 'Particulier' ou 'En ligne'.
-Format JSON strict :
-{ "day": 0, "s": 480, "e": 600, "sub": "Mathématiques", "type": "À la maison", "freq": "Toutes les semaines" }`;
-
-        try {
-          const result = await callGoogleSDK(prompt);
-          const it = Array.isArray(result) ? result[0] : result;
-          const newId = Date.now().toString();
-
-          const newEvent = {
-            id: newId,
-            day: parseInt(it.day) || 0,
-            s: parseInt(it.s) || 480,
-            e: parseInt(it.e) || 600,
-            sub: it.sub || "Activité",
-            type: it.type || "À la maison",
-            freq: it.freq || "Toutes les semaines",
-          };
-
-          set(ref(database, getStudentPath("seances/" + newId)), newEvent);
-          hideLoading();
-        } catch (err) {
-          hideLoading();
-          alert(err.message);
-        }
-      };
-
-      r.onerror = () => { mic.classList.remove("listening"); mic.innerText = "🎙️ Micro IA"; };
-      r.onend = () => { mic.classList.remove("listening"); mic.innerText = "🎙️ Micro IA"; };
-      r.start();
+      alert("Pour utiliser le micro IA, définissez votre clé d'API via le bouton '🔑 Clé IA'.");
     };
 
-    // Premier affichage immédiat
+    // Exécution initiale garantie
     window.render();
 
     setInterval(() => {
