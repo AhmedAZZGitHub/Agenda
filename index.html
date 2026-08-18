@@ -469,7 +469,7 @@
       background: var(--slot-hover);
     }
 
-    /* CARTES DES SÉANCES */
+    /* CARTES SÉANCES */
     .event-card {
       position: absolute;
       left: 3px;
@@ -1182,10 +1182,10 @@
       </div>
 
       <div class="auth-tabs">
-        <button class="auth-tab-btn active" id="tabLoginBtn" onclick="switchAuthTab('login')">
+        <button class="auth-tab-btn active" id="tabLoginBtn" onclick="window.switchAuthTab('login')">
           Connexion
         </button>
-        <button class="auth-tab-btn" id="tabRegisterBtn" onclick="switchAuthTab('register')">
+        <button class="auth-tab-btn" id="tabRegisterBtn" onclick="window.switchAuthTab('register')">
           Créer un compte
         </button>
       </div>
@@ -1193,7 +1193,8 @@
       <div class="auth-error" id="authErrorMsg"></div>
 
       <!-- FORMULAIRE CONNEXION -->
-      <form id="loginForm" onsubmit="handleLogin(event)" style="display: flex; flex-direction: column; gap: 12px">
+      <form id="loginForm" onsubmit="window.handleLogin(event)"
+        style="display: flex; flex-direction: column; gap: 12px">
         <div>
           <label
             style="font-size: 11px; font-weight: 700; color: var(--muted); display: block; margin-bottom: 4px;">Adresse
@@ -1213,7 +1214,8 @@
       </form>
 
       <!-- FORMULAIRE INSCRIPTION -->
-      <form id="registerForm" onsubmit="handleRegister(event)" style="display: none; flex-direction: column; gap: 12px">
+      <form id="registerForm" onsubmit="window.handleRegister(event)"
+        style="display: none; flex-direction: column; gap: 12px">
         <div>
           <label style="font-size: 11px; font-weight: 700; color: var(--muted); display: block; margin-bottom: 4px;">Nom
             et Prénom :</label>
@@ -1237,15 +1239,15 @@
             style="font-size: 11px; font-weight: 700; color: var(--muted); display: block; margin-bottom: 6px;">Type de
             Profil :</label>
           <div class="role-picker">
-            <div class="role-option active" id="roleOpt_student" onclick="selectRole('student')">
+            <div class="role-option active" id="roleOpt_student" onclick="window.selectRole('student')">
               <span class="role-icon">🎓</span>
               <span>Élève</span>
             </div>
-            <div class="role-option" id="roleOpt_parent" onclick="selectRole('parent')">
+            <div class="role-option" id="roleOpt_parent" onclick="window.selectRole('parent')">
               <span class="role-icon">👨‍👩‍👧</span>
               <span>Parent</span>
             </div>
-            <div class="role-option" id="roleOpt_admin" onclick="selectRole('admin')">
+            <div class="role-option" id="roleOpt_admin" onclick="window.selectRole('admin')">
               <span class="role-icon">🛡️</span>
               <span>Admin</span>
             </div>
@@ -1298,7 +1300,7 @@
           Gestion globale des utilisateurs, des annonces et supervision système
         </div>
       </div>
-      <button class="btn-close" onclick="closeOverlay('adminOverlay')">Fermer ✕</button>
+      <button class="btn-close" onclick="window.closeOverlay('adminOverlay')">Fermer ✕</button>
     </div>
 
     <div style="max-width: 1150px; margin: 0 auto; width: 100%; display: flex; flex-direction: column; gap: 16px">
@@ -1322,17 +1324,17 @@
       </div>
 
       <div class="custom-tabs">
-        <button class="btn-tab-item active" id="adminTabUsers" onclick="switchAdminTab('users')">👥 Gestion des
+        <button class="btn-tab-item active" id="adminTabUsers" onclick="window.switchAdminTab('users')">👥 Gestion des
           Comptes</button>
-        <button class="btn-tab-item" id="adminTabAnnouncements" onclick="switchAdminTab('announcements')">📢 Annonces
-          Globales</button>
+        <button class="btn-tab-item" id="adminTabAnnouncements" onclick="window.switchAdminTab('announcements')">📢
+          Annonces Globales</button>
       </div>
 
       <div id="adminViewUsers">
         <div
-          style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: gap; gap: 10px">
+          style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 10px">
           <input type="text" id="adminSearchInput" class="input" placeholder="🔍 Rechercher..."
-            oninput="renderAdminUsersTable()" style="max-width: 320px; width: 100%" />
+            oninput="window.renderAdminUsersTable()" style="max-width: 320px; width: 100%" />
           <div style="font-size: 12px; color: var(--muted); font-weight: 700">Cliquez sur « 👁️ Inspecter » pour
             consulter le planning d'un élève.</div>
         </div>
@@ -1360,7 +1362,7 @@
           <textarea id="annContent" class="input" style="height: 70px; resize: none"
             placeholder="Message détaillé..."></textarea>
           <div style="display: flex; justify-content: flex-end">
-            <button class="btn-add" onclick="publishAdminAnnouncement()">📢 Publier l'Annonce</button>
+            <button class="btn-add" onclick="window.publishAdminAnnouncement()">📢 Publier l'Annonce</button>
           </div>
         </div>
         <div style="font-weight: 800; font-size: 15px; margin-top: 8px">Annonces actives</div>
@@ -1385,7 +1387,7 @@
         id="myParentCodeDisplay">
         BAC-XXXX
       </div>
-      <button class="btn-add" onclick="copyParentCode()" style="justify-content: center; padding: 10px">
+      <button class="btn-add" onclick="window.copyParentCode()" style="justify-content: center; padding: 10px">
         📋 Copier le code
       </button>
     </div>
@@ -1404,7 +1406,7 @@
       </div>
       <input type="text" id="childLinkInput" class="input" placeholder="ex: BAC-9182"
         style="font-family: 'JetBrains Mono', monospace; text-transform: uppercase; font-weight: 800; font-size: 16px; text-align: center" />
-      <button class="btn-add" onclick="linkChildWithCode()" style="justify-content: center; padding: 10px">
+      <button class="btn-add" onclick="window.linkChildWithCode()" style="justify-content: center; padding: 10px">
         ✨ Associer l'élève
       </button>
     </div>
@@ -1419,7 +1421,7 @@
           Section Mathématiques : 27 Sujets complets par matière
         </div>
       </div>
-      <button class="btn-close" onclick="closeOverlay('bacArchiveOverlay')">Fermer ✕</button>
+      <button class="btn-close" onclick="window.closeOverlay('bacArchiveOverlay')">Fermer ✕</button>
     </div>
 
     <div style="max-width: 1150px; margin: 0 auto; width: 100%; display: flex; flex-direction: column; gap: 14px">
@@ -1453,7 +1455,7 @@
       <div style="display: flex; gap: 10px">
         <button class="btn-add student-action-btn" onclick="window.openModal('addExamModal')">+ Ajouter un
           Examen</button>
-        <button class="btn-close" onclick="closeOverlay('examsOverlay')">Fermer ✕</button>
+        <button class="btn-close" onclick="window.closeOverlay('examsOverlay')">Fermer ✕</button>
       </div>
     </div>
     <div
@@ -1476,7 +1478,7 @@
           <option value="Trimestre">🏫 Mode Trimestres (Option = Coef 1)</option>
           <option value="Bac">🎓 Mode Examen Bac (Option = Bonus > 10)</option>
         </select>
-        <button class="btn-close" onclick="closeOverlay('gradesOverlay')">Fermer ✕</button>
+        <button class="btn-close" onclick="window.closeOverlay('gradesOverlay')">Fermer ✕</button>
       </div>
     </div>
 
@@ -1554,7 +1556,7 @@
           <option value="Autonomie">⚡ Maison & En ligne</option>
           <option value="All">🌐 Toutes les séances</option>
         </select>
-        <button class="btn-close" onclick="closeOverlay('statsOverlay')">Fermer ✕</button>
+        <button class="btn-close" onclick="window.closeOverlay('statsOverlay')">Fermer ✕</button>
       </div>
     </div>
     <div style="display: flex; flex-direction: column; gap: 14px; max-width: 850px; margin: 0 auto; width: 100%;"
@@ -1568,7 +1570,7 @@
         <div class="overlay-title">⏱️ Minuteur de Concentration</div>
         <div style="font-size: 13px; color: var(--muted); margin-top: 3px">Mode d'étude immersif sans distractions</div>
       </div>
-      <button class="btn-close" onclick="closeOverlay('timerOverlay')">Fermer ✕</button>
+      <button class="btn-close" onclick="window.closeOverlay('timerOverlay')">Fermer ✕</button>
     </div>
     <div class="timer-container">
       <div class="timer-display" id="timerDisplay">00:00:00</div>
@@ -1852,7 +1854,7 @@
     </div>
   </div>
 
-  <!-- SCRIPT APPLICATION AVEC CDN OFFICIELS GSTATIC -->
+  <!-- SCRIPT APPLICATION -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import {
@@ -1915,6 +1917,27 @@
       const uid = activeStudentUid || currentUser?.uid || "guest_demo";
       return `student_data/${uid}/${subPath}`.replace(/\/+$/, "");
     }
+
+    // EXPOSITION GLOBALE DES MODALES & VUES
+    window.openOverlay = function (id) {
+      document.getElementById(id).style.display = "flex";
+    };
+    window.closeOverlay = function (id) {
+      document.getElementById(id).style.display = "none";
+    };
+
+    window.openModal = function (id, day = curDayIdx, h = 8) {
+      if (isReadOnly && (id === "addModal" || id === "addExamModal")) return;
+      if (id === "addModal") {
+        document.getElementById("mDay").value = day;
+        document.getElementById("mStart").value = `${h < 10 ? "0" + h : h}:00`;
+        document.getElementById("mEnd").value = `${h + 2 < 10 ? "0" + (h + 2) : h + 2}:00`;
+      }
+      document.getElementById(id).style.display = "flex";
+    };
+    window.closeModal = function (id) {
+      document.getElementById(id).style.display = "none";
+    };
 
     window.showAuthModal = function () {
       document.getElementById("authOverlay").style.display = "flex";
@@ -2277,7 +2300,7 @@
         document.getElementById("kpiTotalUsers").innerText = allUsersCache.length;
         document.getElementById("kpiTotalStudents").innerText = studentsCount;
         document.getElementById("kpiTotalParents").innerText = parentsCount;
-        renderAdminUsersTable();
+        window.renderAdminUsersTable();
       });
 
       onValue(ref(database, "student_data"), (snapshot) => {
@@ -3033,19 +3056,6 @@
 
     window.curDayIdx = curDayIdx;
 
-    window.openModal = function (id, day = curDayIdx, h = 8) {
-      if (isReadOnly && (id === "addModal" || id === "addExamModal")) return;
-      if (id === "addModal") {
-        document.getElementById("mDay").value = day;
-        document.getElementById("mStart").value = `${h < 10 ? "0" + h : h}:00`;
-        document.getElementById("mEnd").value = `${h + 2 < 10 ? "0" + (h + 2) : h + 2}:00`;
-      }
-      document.getElementById(id).style.display = "flex";
-    };
-    window.closeModal = function (id) {
-      document.getElementById(id).style.display = "none";
-    };
-
     window.saveEvent = function () {
       if (isReadOnly) return alert("Accès en lecture seule.");
       const sub = document.getElementById("mSub").value.trim();
@@ -3068,13 +3078,6 @@
 
       set(ref(database, getStudentPath("seances/" + newId)), newEvent);
       window.closeModal("addModal");
-    };
-
-    window.openOverlay = function (id) {
-      document.getElementById(id).style.display = "flex";
-    };
-    window.closeOverlay = function (id) {
-      document.getElementById(id).style.display = "none";
     };
 
     window.renderStatsData = function () {
@@ -3215,15 +3218,15 @@
 
     window.handleImageUpload = function (e) {
       if (isReadOnly) return alert("Accès en lecture seule.");
-      alert("Pour utiliser le scanner IA, définissez votre clé d'API via le bouton '🔑 Clé IA'.");
+      alert("Scanner IA : activez votre clé via '🔑 Clé IA'.");
     };
 
     window.voiceInput = function () {
       if (isReadOnly) return alert("Accès en lecture seule.");
-      alert("Pour utiliser le micro IA, définissez votre clé d'API via le bouton '🔑 Clé IA'.");
+      alert("Micro IA : activez votre clé via '🔑 Clé IA'.");
     };
 
-    // Exécution initiale garantie
+    // Premier affichage immédiat
     window.render();
 
     setInterval(() => {
