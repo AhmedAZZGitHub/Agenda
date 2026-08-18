@@ -1,0 +1,4343 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <title>Planning & Tableau de Bord Baccalauréat Pro</title>
+    <meta name="theme-color" content="#0284c7" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --primary: #0284c7;
+        --primary-hover: #0369a1;
+        --primary-light: #e0f2fe;
+        --bg: #f8fafc;
+        --card: #ffffff;
+        --text: #0f172a;
+        --muted: #64748b;
+        --dash: #e2e8f0;
+        --card-border: #e2e8f0;
+        --slot-hover: #f1f5f9;
+        --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.03);
+        --shadow-md: 0 6px 18px rgba(0, 0, 0, 0.05);
+        --shadow-lg: 0 12px 30px rgba(0, 0, 0, 0.08);
+      }
+      body.dark-mode {
+        --primary-light: #082f49;
+        --bg: #0b0f19;
+        --card: #131d2e;
+        --text: #f8fafc;
+        --muted: #94a3b8;
+        --dash: #1e293b;
+        --card-border: #1e293b;
+        --slot-hover: #172439;
+        --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.2);
+        --shadow-md: 0 6px 18px rgba(0, 0, 0, 0.3);
+        --shadow-lg: 0 12px 30px rgba(0, 0, 0, 0.4);
+      }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        font-family: "Plus Jakarta Sans", sans-serif;
+      }
+      body {
+        background: var(--bg);
+        color: var(--text);
+        padding: 12px;
+        display: flex;
+        justify-content: center;
+        min-height: 100vh;
+        transition: background 0.3s ease, color 0.3s ease;
+      }
+      .main-wrap {
+        width: 100%;
+        max-width: 1350px;
+        background: var(--card);
+        border-radius: 20px;
+        padding: 16px;
+        box-shadow: var(--shadow-md);
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        border: 1px solid var(--card-border);
+      }
+
+      /* BARRE UTILISATEUR TOP */
+      .user-top-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: var(--bg);
+        border: 1.5px solid var(--dash);
+        border-radius: 14px;
+        padding: 8px 14px;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+      .user-info-group {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+      .user-avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--primary), #4f46e5);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 800;
+        font-size: 15px;
+        box-shadow: var(--shadow-sm);
+      }
+      .user-name-role {
+        display: flex;
+        flex-direction: column;
+      }
+      .user-name {
+        font-weight: 800;
+        font-size: 13.5px;
+        letter-spacing: -0.2px;
+      }
+      .role-badge {
+        font-size: 10.5px;
+        font-weight: 700;
+        padding: 2px 8px;
+        border-radius: 99px;
+        width: fit-content;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+      }
+      .role-student {
+        background: #e0f2fe;
+        color: #0369a1;
+      }
+      .role-parent {
+        background: #fef3c7;
+        color: #b45309;
+      }
+      .role-admin {
+        background: #fce7f3;
+        color: #be185d;
+      }
+      body.dark-mode .role-student {
+        background: #0c4a6e;
+        color: #7dd3fc;
+      }
+      body.dark-mode .role-parent {
+        background: #78350f;
+        color: #fde68a;
+      }
+      body.dark-mode .role-admin {
+        background: #831843;
+        color: #fbcfe8;
+      }
+
+      /* BANNIÈRE DE CONSULTATION (PARENT OU ADMIN EN INSPECTION) */
+      .view-context-banner {
+        background: linear-gradient(135deg, #f59e0b, #ea580c);
+        color: white;
+        border-radius: 12px;
+        padding: 8px 14px;
+        font-size: 12.5px;
+        font-weight: 700;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: var(--shadow-sm);
+        animation: fadeIn 0.3s ease;
+      }
+
+      /* BANDEAUX TOP STATS */
+      .top-stats-row {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 10px;
+      }
+      @media (max-width: 768px) {
+        .top-stats-row {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .bac-countdown-bar {
+        background: linear-gradient(135deg, #0284c7, #4f46e5);
+        color: white;
+        border-radius: 14px;
+        padding: 10px 16px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
+        box-shadow: 0 4px 14px rgba(2, 132, 199, 0.25);
+      }
+      .bac-countdown-title {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 700;
+        font-size: 13px;
+      }
+      .bac-countdown-digits {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 13px;
+        font-weight: 800;
+        letter-spacing: 0.5px;
+        background: rgba(255, 255, 255, 0.2);
+        padding: 5px 12px;
+        border-radius: 99px;
+        backdrop-filter: blur(4px);
+      }
+      .streak-badge {
+        background: linear-gradient(135deg, #ea580c, #f59e0b);
+        color: white;
+        border-radius: 14px;
+        padding: 10px 16px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 800;
+        font-size: 13px;
+        box-shadow: 0 4px 14px rgba(234, 88, 12, 0.25);
+      }
+
+      /* ANNONCES BANNER */
+      .announcement-bar {
+        background: linear-gradient(135deg, #6366f1, #8b5cf6);
+        color: white;
+        padding: 9px 14px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-size: 12.5px;
+        font-weight: 700;
+        box-shadow: var(--shadow-sm);
+      }
+
+      /* HEADER & CONTRÔLES */
+      .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+      .switch-mode {
+        display: flex;
+        background: var(--dash);
+        padding: 3px;
+        border-radius: 99px;
+      }
+      .btn-toggle {
+        border: none;
+        background: transparent;
+        padding: 6px 14px;
+        border-radius: 99px;
+        font-weight: 700;
+        font-size: 12px;
+        color: var(--muted);
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+      .btn-toggle.active {
+        background: var(--card);
+        color: var(--primary);
+        box-shadow: var(--shadow-sm);
+      }
+
+      .btn-action {
+        background: var(--card);
+        border: 1.5px solid var(--dash);
+        color: var(--text);
+        padding: 6px 13px;
+        border-radius: 99px;
+        font-weight: 700;
+        font-size: 12px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+      }
+      .btn-action:hover {
+        border-color: var(--primary);
+        color: var(--primary);
+        transform: translateY(-1px);
+      }
+      .btn-action.btn-accent {
+        background: var(--primary-light);
+        border-color: var(--primary);
+        color: var(--primary);
+      }
+
+      .btn-mic {
+        background: #ef4444;
+        color: white;
+        border: none;
+        padding: 7px 15px;
+        border-radius: 99px;
+        font-weight: 700;
+        font-size: 12px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        box-shadow: 0 2px 8px rgba(239, 68, 68, 0.25);
+        transition: all 0.2s;
+      }
+      .btn-mic:hover {
+        background: #dc2626;
+        transform: translateY(-1px);
+      }
+      .btn-mic.listening {
+        background: #b91c1c;
+        animation: pulse 1s infinite alternate;
+      }
+
+      .btn-vision {
+        background: #059669;
+        color: white;
+        border: none;
+        padding: 7px 15px;
+        border-radius: 99px;
+        font-weight: 700;
+        font-size: 12px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        box-shadow: 0 2px 8px rgba(5, 150, 105, 0.25);
+        transition: all 0.2s;
+      }
+      .btn-vision:hover {
+        background: #047857;
+        transform: translateY(-1px);
+      }
+      @keyframes pulse {
+        0% {
+          transform: scale(1);
+        }
+        100% {
+          transform: scale(1.05);
+        }
+      }
+
+      .btn-api {
+        background: var(--dash);
+        border: 1.5px solid var(--dash);
+        color: var(--text);
+        padding: 6px 12px;
+        border-radius: 99px;
+        font-size: 11px;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      .btn-add {
+        background: var(--primary);
+        color: white;
+        border: none;
+        padding: 7px 16px;
+        border-radius: 99px;
+        font-weight: 700;
+        font-size: 12px;
+        cursor: pointer;
+        box-shadow: 0 2px 8px rgba(2, 132, 199, 0.3);
+        transition: all 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+      }
+      .btn-add:hover {
+        background: var(--primary-hover);
+        transform: translateY(-1px);
+      }
+
+      .date-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 800;
+        font-size: 13px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+      .btn-circ {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        border: 1.5px solid var(--dash);
+        background: var(--card);
+        color: var(--text);
+        cursor: pointer;
+        font-weight: 800;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+      }
+      .btn-circ:hover {
+        border-color: var(--primary);
+        color: var(--primary);
+      }
+
+      /* GRILLE PC */
+      .pc-grid {
+        border: 1.5px solid var(--dash);
+        border-radius: 14px;
+        overflow-x: auto;
+        max-height: 600px;
+        background: var(--card);
+      }
+      .grid-table {
+        display: flex;
+        min-width: 900px;
+      }
+      .col-time {
+        width: 55px;
+        border-right: 1px dashed var(--dash);
+        flex-shrink: 0;
+        background: var(--card);
+        position: sticky;
+        left: 0;
+        z-index: 20;
+      }
+      .col-day {
+        flex: 1;
+        min-width: 120px;
+        border-right: 1px dashed var(--dash);
+        position: relative;
+        background: var(--card);
+      }
+      .h-slot {
+        height: 46px;
+        border-bottom: 1px dashed var(--dash);
+        font-size: 10.5px;
+        color: var(--muted);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        cursor: pointer;
+        transition: background 0.15s;
+      }
+      .h-slot:hover {
+        background: var(--slot-hover);
+      }
+
+      /* CARTES DES SÉANCES */
+      .event-card {
+        position: absolute;
+        left: 3px;
+        right: 3px;
+        border-radius: 8px;
+        padding: 4px 7px;
+        box-shadow: var(--shadow-sm);
+        cursor: pointer;
+        font-size: 10.5px;
+        z-index: 10;
+        border: 1px solid var(--card-border);
+        border-left: 5px solid var(--primary);
+        transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1),
+          box-shadow 0.15s ease;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+      }
+      .event-card:hover {
+        transform: scale(1.02);
+        z-index: 30;
+        box-shadow: var(--shadow-md);
+      }
+
+      /* PALETTE DES MATIÈRES */
+      .sub-math {
+        border-left-color: #2563eb !important;
+        background: #eff6ff !important;
+        color: #1e40af !important;
+        border-color: #bfdbfe !important;
+      }
+      .sub-phys {
+        border-left-color: #7c3aed !important;
+        background: #f5f3ff !important;
+        color: #5b21b6 !important;
+        border-color: #ddd6fe !important;
+      }
+      .sub-svt {
+        border-left-color: #059669 !important;
+        background: #ecfdf5 !important;
+        color: #065f46 !important;
+        border-color: #a7f3d0 !important;
+      }
+      .sub-info {
+        border-left-color: #0891b2 !important;
+        background: #ecfeff !important;
+        color: #155e75 !important;
+        border-color: #a5f3fc !important;
+      }
+      .sub-arab {
+        border-left-color: #d97706 !important;
+        background: #fffbeb !important;
+        color: #92400e !important;
+        border-color: #fde68a !important;
+      }
+      .sub-franc {
+        border-left-color: #e11d48 !important;
+        background: #fff1f2 !important;
+        color: #9f1239 !important;
+        border-color: #fecdd3 !important;
+      }
+      .sub-angl {
+        border-left-color: #4f46e5 !important;
+        background: #eef2ff !important;
+        color: #3730a3 !important;
+        border-color: #c7d2fe !important;
+      }
+      .sub-philo {
+        border-left-color: #9333ea !important;
+        background: #faf5ff !important;
+        color: #6b21a8 !important;
+        border-color: #e9d5ff !important;
+      }
+      .sub-sport {
+        border-left-color: #ea580c !important;
+        background: #fff7ed !important;
+        color: #9a3412 !important;
+        border-color: #fed7aa !important;
+      }
+      .sub-opt {
+        border-left-color: #475569 !important;
+        background: #f8fafc !important;
+        color: #334155 !important;
+        border-color: #cbd5e1 !important;
+      }
+
+      body.dark-mode .sub-math {
+        background: #172554 !important;
+        color: #bfdbfe !important;
+        border-color: #1e3a8a !important;
+      }
+      body.dark-mode .sub-phys {
+        background: #2e1065 !important;
+        color: #ddd6fe !important;
+        border-color: #4c1d95 !important;
+      }
+      body.dark-mode .sub-svt {
+        background: #022c22 !important;
+        color: #a7f3d0 !important;
+        border-color: #064e3b !important;
+      }
+      body.dark-mode .sub-info {
+        background: #083344 !important;
+        color: #a5f3fc !important;
+        border-color: #164e63 !important;
+      }
+      body.dark-mode .sub-arab {
+        background: #451a03 !important;
+        color: #fde68a !important;
+        border-color: #78350f !important;
+      }
+      body.dark-mode .sub-franc {
+        background: #4c0519 !important;
+        color: #fecdd3 !important;
+        border-color: #881337 !important;
+      }
+      body.dark-mode .sub-angl {
+        background: #1e1b4b !important;
+        color: #c7d2fe !important;
+        border-color: #312e81 !important;
+      }
+      body.dark-mode .sub-philo {
+        background: #3b0764 !important;
+        color: #e9d5ff !important;
+        border-color: #581c87 !important;
+      }
+      body.dark-mode .sub-sport {
+        background: #431407 !important;
+        color: #fed7aa !important;
+        border-color: #7c2d12 !important;
+      }
+      body.dark-mode .sub-opt {
+        background: #1e293b !important;
+        color: #cbd5e1 !important;
+        border-color: #334155 !important;
+      }
+
+      /* STATUTS */
+      .status-done {
+        opacity: 0.45 !important;
+        border-left-color: #94a3b8 !important;
+        background: #f1f5f9 !important;
+        color: #64748b !important;
+        border-color: #cbd5e1 !important;
+      }
+      body.dark-mode .status-done {
+        background: #131d2e !important;
+        color: #64748b !important;
+        border-color: #1e293b !important;
+      }
+      .status-now {
+        border-left-color: #10b981 !important;
+        border-color: #34d399 !important;
+        z-index: 15 !important;
+        animation: live-pulse 2s infinite;
+      }
+
+      .badge-status {
+        font-size: 8px;
+        font-weight: 800;
+        padding: 1.5px 5px;
+        border-radius: 4px;
+        display: inline-block;
+        width: fit-content;
+        text-transform: uppercase;
+        margin-bottom: 2px;
+      }
+      .badge-done {
+        background: #cbd5e1;
+        color: #475569;
+      }
+      .badge-now {
+        background: #10b981;
+        color: #ffffff;
+      }
+      .tag-meta {
+        font-size: 8px;
+        font-weight: 700;
+        padding: 1px 4px;
+        border-radius: 4px;
+        background: rgba(0, 0, 0, 0.06);
+        display: inline-block;
+        margin-right: 2px;
+      }
+      body.dark-mode .tag-meta {
+        background: rgba(255, 255, 255, 0.12);
+      }
+      @keyframes live-pulse {
+        0% {
+          box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4);
+        }
+        70% {
+          box-shadow: 0 0 0 6px rgba(16, 185, 129, 0);
+        }
+        100% {
+          box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+        }
+      }
+
+      /* VUE MOBILE */
+      .mob-scroller {
+        display: flex;
+        gap: 6px;
+        overflow-x: auto;
+        padding-bottom: 4px;
+      }
+      .mob-chip {
+        flex: 0 0 76px;
+        background: var(--dash);
+        border: 1.5px solid var(--dash);
+        border-radius: 12px;
+        padding: 8px 4px;
+        text-align: center;
+        cursor: pointer;
+        color: var(--text);
+        transition: all 0.2s;
+      }
+      .mob-chip.active {
+        background: var(--primary);
+        color: white;
+        border-color: var(--primary);
+      }
+      .mob-list {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        min-height: 350px;
+      }
+      .mob-card {
+        background: var(--card);
+        border: 1px solid var(--dash);
+        border-left: 5px solid var(--primary);
+        border-radius: 14px;
+        padding: 12px 14px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: var(--shadow-sm);
+      }
+
+      /* OVERLAYS PLEIN ÉCRAN */
+      .fullscreen-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: var(--bg);
+        z-index: 10000;
+        flex-direction: column;
+        padding: 24px;
+        overflow-y: auto;
+      }
+      .overlay-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        border-bottom: 1.5px solid var(--dash);
+        padding-bottom: 14px;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+      .overlay-title {
+        font-size: 22px;
+        font-weight: 800;
+        letter-spacing: -0.5px;
+      }
+      .btn-close {
+        background: #ef4444;
+        color: white;
+        border: none;
+        padding: 8px 18px;
+        border-radius: 99px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+      .btn-close:hover {
+        background: #dc2626;
+        transform: scale(1.03);
+      }
+
+      /* ONGLETS */
+      .custom-tabs {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 16px;
+        overflow-x: auto;
+        padding-bottom: 4px;
+      }
+      .btn-tab-item {
+        background: var(--card);
+        border: 1.5px solid var(--dash);
+        color: var(--text);
+        padding: 8px 16px;
+        border-radius: 99px;
+        font-weight: 800;
+        font-size: 13px;
+        cursor: pointer;
+        transition: all 0.2s;
+        white-space: nowrap;
+      }
+      .btn-tab-item.active {
+        background: var(--primary);
+        color: white;
+        border-color: var(--primary);
+        box-shadow: var(--shadow-sm);
+      }
+
+      /* ANNALES BAC (2000-2026) */
+      .bac-archive-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 12px;
+        margin-top: 10px;
+      }
+      .bac-exam-box {
+        background: var(--card);
+        border: 1.5px solid var(--dash);
+        border-radius: 14px;
+        padding: 14px;
+        box-shadow: var(--shadow-sm);
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        transition: transform 0.15s ease;
+      }
+      .bac-exam-box.is-done {
+        border-color: #10b981;
+        background: rgba(16, 185, 129, 0.04);
+      }
+      .bac-exam-box.is-starred {
+        box-shadow: 0 0 0 2px #f59e0b;
+      }
+      .star-btn {
+        background: none;
+        border: none;
+        font-size: 20px;
+        cursor: pointer;
+        opacity: 0.35;
+        transition: transform 0.2s, opacity 0.2s;
+      }
+      .star-btn.starred {
+        opacity: 1;
+        transform: scale(1.15);
+        filter: drop-shadow(0 0 4px #f59e0b);
+      }
+
+      /* TABLEAU DES NOTES */
+      .grades-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+      }
+      .grades-table th,
+      .grades-table td {
+        padding: 10px;
+        border: 1px solid var(--dash);
+        text-align: center;
+        font-size: 13px;
+      }
+      .grades-table th {
+        background: var(--dash);
+        font-weight: 800;
+      }
+      .grade-input {
+        width: 70px;
+        padding: 6px;
+        border-radius: 6px;
+        border: 1px solid var(--dash);
+        background: var(--card);
+        color: var(--text);
+        text-align: center;
+        font-weight: 700;
+      }
+      .grade-input:disabled {
+        background: var(--dash);
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+      .oral-toggle-label {
+        font-size: 11px;
+        font-weight: 700;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        cursor: pointer;
+        color: var(--muted);
+      }
+
+      /* MINUTEUR */
+      .timer-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        margin: auto 0;
+        gap: 20px;
+      }
+      .timer-display {
+        font-family: "JetBrains Mono", monospace;
+        font-size: min(18vw, 130px);
+        font-weight: 800;
+        font-variant-numeric: tabular-nums;
+        text-align: center;
+        letter-spacing: 2px;
+        color: var(--primary);
+        text-shadow: 0 4px 20px rgba(2, 132, 199, 0.15);
+      }
+      .timer-controls {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+      .btn-timer {
+        padding: 12px 28px;
+        border-radius: 99px;
+        font-size: 15px;
+        font-weight: 800;
+        border: none;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+      .btn-timer:hover {
+        transform: translateY(-2px);
+      }
+
+      /* MODALES & FORMULAIRES */
+      .loading-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.85);
+        backdrop-filter: blur(5px);
+        z-index: 99999;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        gap: 14px;
+      }
+      .modal {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(4px);
+        z-index: 999;
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
+      }
+      .modal-box {
+        background: var(--card);
+        color: var(--text);
+        width: 100%;
+        max-width: 540px;
+        border-radius: 18px;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        border: 1px solid var(--dash);
+        box-shadow: var(--shadow-md);
+      }
+      .input {
+        padding: 10px 12px;
+        border-radius: 10px;
+        border: 1.5px solid var(--dash);
+        background: var(--card);
+        color: var(--text);
+        font-size: 13px;
+        outline: none;
+        transition: border-color 0.2s;
+      }
+      .input:focus {
+        border-color: var(--primary);
+      }
+
+      /* AUTH OVERLAY & DESIGN */
+      .auth-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(11, 15, 25, 0.85);
+        backdrop-filter: blur(8px);
+        z-index: 50000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
+      }
+      .auth-card {
+        background: var(--card);
+        color: var(--text);
+        width: 100%;
+        max-width: 460px;
+        border-radius: 22px;
+        padding: 28px;
+        box-shadow: var(--shadow-lg);
+        border: 1.5px solid var(--dash);
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+        animation: fadeIn 0.3s ease;
+      }
+      .auth-logo {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        font-size: 20px;
+        font-weight: 900;
+        color: var(--primary);
+        text-align: center;
+      }
+      .auth-tabs {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        background: var(--dash);
+        padding: 4px;
+        border-radius: 12px;
+        gap: 4px;
+      }
+      .auth-tab-btn {
+        padding: 8px;
+        border: none;
+        background: transparent;
+        border-radius: 10px;
+        font-weight: 800;
+        font-size: 13px;
+        color: var(--muted);
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+      .auth-tab-btn.active {
+        background: var(--card);
+        color: var(--text);
+        box-shadow: var(--shadow-sm);
+      }
+      .role-picker {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+      }
+      .role-option {
+        border: 2px solid var(--dash);
+        border-radius: 12px;
+        padding: 10px 6px;
+        text-align: center;
+        cursor: pointer;
+        font-size: 11px;
+        font-weight: 700;
+        transition: all 0.2s;
+        background: var(--bg);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+      }
+      .role-option.active {
+        border-color: var(--primary);
+        background: var(--primary-light);
+        color: var(--primary);
+      }
+      .role-option .role-icon {
+        font-size: 20px;
+      }
+      .auth-error {
+        color: #ef4444;
+        font-size: 12px;
+        font-weight: 700;
+        background: #fee2e2;
+        padding: 8px 12px;
+        border-radius: 8px;
+        display: none;
+      }
+      body.dark-mode .auth-error {
+        background: #450a0a;
+        color: #fca5a5;
+      }
+
+      /* ADMIN CONSOLE DESIGN */
+      .admin-kpi-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 12px;
+        margin-bottom: 14px;
+      }
+      .admin-kpi-card {
+        background: var(--card);
+        border: 1.5px solid var(--dash);
+        border-radius: 14px;
+        padding: 14px;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        box-shadow: var(--shadow-sm);
+      }
+      .admin-kpi-val {
+        font-size: 26px;
+        font-weight: 900;
+        font-family: "JetBrains Mono", monospace;
+        color: var(--primary);
+      }
+      .admin-table {
+        width: 100%;
+        border-collapse: collapse;
+        background: var(--card);
+        border: 1.5px solid var(--dash);
+        border-radius: 14px;
+        overflow: hidden;
+      }
+      .admin-table th,
+      .admin-table td {
+        padding: 10px 14px;
+        border-bottom: 1px solid var(--dash);
+        text-align: left;
+        font-size: 12.5px;
+      }
+      .admin-table th {
+        background: var(--dash);
+        font-weight: 800;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(6px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- OVERLAY AUTHENTIFICATION / CONNEXION / INSCRIPTION -->
+    <div class="auth-overlay" id="authOverlay" style="display: none">
+      <div class="auth-card">
+        <div class="auth-logo">
+          <span>🎓</span>
+          <span>Mon Planning Bac</span>
+        </div>
+        <div style="text-align: center; font-size: 13px; color: var(--muted)">
+          Plateforme collaborative de gestion & suivi scolaire
+        </div>
+
+        <div class="auth-tabs">
+          <button
+            class="auth-tab-btn active"
+            id="tabLoginBtn"
+            onclick="switchAuthTab('login')"
+          >
+            Connexion
+          </button>
+          <button
+            class="auth-tab-btn"
+            id="tabRegisterBtn"
+            onclick="switchAuthTab('register')"
+          >
+            Créer un compte
+          </button>
+        </div>
+
+        <div class="auth-error" id="authErrorMsg"></div>
+
+        <!-- FORMULAIRE CONNEXION -->
+        <form
+          id="loginForm"
+          onsubmit="handleLogin(event)"
+          style="display: flex; flex-direction: column; gap: 12px"
+        >
+          <div>
+            <label
+              style="
+                font-size: 11px;
+                font-weight: 700;
+                color: var(--muted);
+                display: block;
+                margin-bottom: 4px;
+              "
+              >Adresse Email :</label
+            >
+            <input
+              type="email"
+              id="loginEmail"
+              class="input"
+              style="width: 100%"
+              placeholder="ex: eleve@planningbac.tn"
+              required
+            />
+          </div>
+          <div>
+            <label
+              style="
+                font-size: 11px;
+                font-weight: 700;
+                color: var(--muted);
+                display: block;
+                margin-bottom: 4px;
+              "
+              >Mot de passe :</label
+            >
+            <input
+              type="password"
+              id="loginPassword"
+              class="input"
+              style="width: 100%"
+              placeholder="••••••••"
+              required
+            />
+          </div>
+          <button
+            type="submit"
+            class="btn-add"
+            style="
+              width: 100%;
+              padding: 12px;
+              justify-content: center;
+              font-size: 14px;
+              margin-top: 4px;
+            "
+          >
+            Se connecter 🚀
+          </button>
+        </form>
+
+        <!-- FORMULAIRE INSCRIPTION -->
+        <form
+          id="registerForm"
+          onsubmit="handleRegister(event)"
+          style="display: none; flex-direction: column; gap: 12px"
+        >
+          <div>
+            <label
+              style="
+                font-size: 11px;
+                font-weight: 700;
+                color: var(--muted);
+                display: block;
+                margin-bottom: 4px;
+              "
+              >Nom et Prénom :</label
+            >
+            <input
+              type="text"
+              id="regName"
+              class="input"
+              style="width: 100%"
+              placeholder="ex: Sami Trabelsi"
+              required
+            />
+          </div>
+          <div>
+            <label
+              style="
+                font-size: 11px;
+                font-weight: 700;
+                color: var(--muted);
+                display: block;
+                margin-bottom: 4px;
+              "
+              >Adresse Email :</label
+            >
+            <input
+              type="email"
+              id="regEmail"
+              class="input"
+              style="width: 100%"
+              placeholder="ex: sami@bac.tn"
+              required
+            />
+          </div>
+          <div>
+            <label
+              style="
+                font-size: 11px;
+                font-weight: 700;
+                color: var(--muted);
+                display: block;
+                margin-bottom: 4px;
+              "
+              >Mot de passe (min 6 caractères) :</label
+            >
+            <input
+              type="password"
+              id="regPassword"
+              class="input"
+              style="width: 100%"
+              placeholder="••••••••"
+              minlength="6"
+              required
+            />
+          </div>
+
+          <div>
+            <label
+              style="
+                font-size: 11px;
+                font-weight: 700;
+                color: var(--muted);
+                display: block;
+                margin-bottom: 6px;
+              "
+              >Type de Profil :</label
+            >
+            <div class="role-picker">
+              <div
+                class="role-option active"
+                id="roleOpt_student"
+                onclick="selectRole('student')"
+              >
+                <span class="role-icon">🎓</span>
+                <span>Élève</span>
+              </div>
+              <div
+                class="role-option"
+                id="roleOpt_parent"
+                onclick="selectRole('parent')"
+              >
+                <span class="role-icon">👨‍👩‍👧</span>
+                <span>Parent</span>
+              </div>
+              <div
+                class="role-option"
+                id="roleOpt_admin"
+                onclick="selectRole('admin')"
+              >
+                <span class="role-icon">🛡️</span>
+                <span>Admin</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- OPTION ÉLÈVE : SECTION BAC -->
+          <div id="regSectionGroup">
+            <label
+              style="
+                font-size: 11px;
+                font-weight: 700;
+                color: var(--muted);
+                display: block;
+                margin-bottom: 4px;
+              "
+              >Section / Filière Bac :</label
+            >
+            <select id="regSection" class="input" style="width: 100%">
+              <option value="Mathematiques">📐 Baccalauréat Mathématiques</option>
+              <option value="Sciences">🔬 Baccalauréat Sciences Expérimentales</option>
+              <option value="Informatique">💻 Baccalauréat Informatique (TIC)</option>
+              <option value="Economie">📊 Baccalauréat Économie & Gestion</option>
+              <option value="Technique">⚙️ Baccalauréat Sciences Techniques</option>
+              <option value="Lettres">📖 Baccalauréat Lettres</option>
+            </select>
+          </div>
+
+          <!-- OPTION ADMIN : CODE SECRET -->
+          <div id="regAdminKeyGroup" style="display: none">
+            <label
+              style="
+                font-size: 11px;
+                font-weight: 700;
+                color: var(--muted);
+                display: block;
+                margin-bottom: 4px;
+              "
+              >Clé secrète de sécurité Admin :</label
+            >
+            <input
+              type="password"
+              id="regAdminKey"
+              class="input"
+              style="width: 100%"
+              placeholder="Code administrateur requis (par défaut: ADMIN2026)"
+            />
+          </div>
+
+          <button
+            type="submit"
+            class="btn-add"
+            style="
+              width: 100%;
+              padding: 12px;
+              justify-content: center;
+              font-size: 14px;
+              margin-top: 4px;
+            "
+          >
+            Créer mon compte ✨
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- CHARGEMENT IA -->
+    <div class="loading-overlay" id="loadingOverlay">
+      <div style="font-size: 44px; animation: pulse 1s infinite alternate">
+        🧠
+      </div>
+      <div
+        style="font-size: 16px; font-weight: 700; letter-spacing: 0.3px"
+        id="loadingText"
+      >
+        Synchronisation en cours...
+      </div>
+    </div>
+
+    <!-- OVERLAY CONSOLE D'ADMINISTRATION (POUR LE PROFIL ADMIN) -->
+    <div class="fullscreen-overlay" id="adminOverlay">
+      <div class="overlay-header">
+        <div>
+          <div class="overlay-title">🛡️ Console d'Administration & Supervision</div>
+          <div style="font-size: 13px; color: var(--muted); margin-top: 3px">
+            Gestion globale des utilisateurs, des annonces et supervision système
+          </div>
+        </div>
+        <button class="btn-close" onclick="closeOverlay('adminOverlay')">
+          Fermer ✕
+        </button>
+      </div>
+
+      <div style="max-width: 1150px; margin: 0 auto; width: 100%; display: flex; flex-direction: column; gap: 16px">
+        <!-- KPI CARDS -->
+        <div class="admin-kpi-grid">
+          <div class="admin-kpi-card">
+            <span style="font-size: 12px; font-weight: 700; color: var(--muted)">👥 TOTAL UTILISATEURS</span>
+            <span class="admin-kpi-val" id="kpiTotalUsers">0</span>
+          </div>
+          <div class="admin-kpi-card">
+            <span style="font-size: 12px; font-weight: 700; color: var(--muted)">🎓 ÉLÈVES INSCRITS</span>
+            <span class="admin-kpi-val" id="kpiTotalStudents">0</span>
+          </div>
+          <div class="admin-kpi-card">
+            <span style="font-size: 12px; font-weight: 700; color: var(--muted)">👨‍👩‍👧 PARENTS CONNECTÉS</span>
+            <span class="admin-kpi-val" id="kpiTotalParents">0</span>
+          </div>
+          <div class="admin-kpi-card">
+            <span style="font-size: 12px; font-weight: 700; color: var(--muted)">📅 TOTAL SÉANCES GLOBALES</span>
+            <span class="admin-kpi-val" id="kpiTotalSessions">0</span>
+          </div>
+        </div>
+
+        <!-- ONGLETS ADMIN -->
+        <div class="custom-tabs">
+          <button class="btn-tab-item active" id="adminTabUsers" onclick="switchAdminTab('users')">👥 Gestion des Comptes</button>
+          <button class="btn-tab-item" id="adminTabAnnouncements" onclick="switchAdminTab('announcements')">📢 Annonces Globales</button>
+        </div>
+
+        <!-- VUE COMPTES UTILISATEURS -->
+        <div id="adminViewUsers">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 10px">
+            <input type="text" id="adminSearchInput" class="input" placeholder="🔍 Rechercher un nom, email ou code..." oninput="renderAdminUsersTable()" style="max-width: 320px; width: 100%" />
+            <div style="font-size: 12px; color: var(--muted); font-weight: 700">Cliquez sur « 👁️ Inspecter » pour consulter le planning d'un élève.</div>
+          </div>
+          <div style="overflow-x: auto">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Nom & Email</th>
+                  <th>Rôle</th>
+                  <th>Section / Code Liaison</th>
+                  <th>Date Inscription</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="adminUsersTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- VUE ANNONCES GLOBALES -->
+        <div id="adminViewAnnouncements" style="display: none; flex-direction: column; gap: 14px">
+          <div style="background: var(--card); border: 1.5px solid var(--dash); border-radius: 16px; padding: 18px; display: flex; flex-direction: column; gap: 10px">
+            <div style="font-weight: 800; font-size: 15px">Publier une nouvelle annonce pour tous les utilisateurs</div>
+            <input type="text" id="annTitle" class="input" placeholder="Titre de l'annonce (ex: Bac Blanc National, Conseil d'étude...)" />
+            <textarea id="annContent" class="input" style="height: 70px; resize: none" placeholder="Message détaillé..."></textarea>
+            <div style="display: flex; justify-content: flex-end">
+              <button class="btn-add" onclick="publishAdminAnnouncement()">📢 Publier l'Annonce</button>
+            </div>
+          </div>
+          <div style="font-weight: 800; font-size: 15px; margin-top: 8px">Annonces actives</div>
+          <div id="adminAnnouncementsList" style="display: flex; flex-direction: column; gap: 10px"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODALE CODE PARENT POUR L'ÉLÈVE -->
+    <div class="modal" id="studentCodeModal">
+      <div class="modal-box" style="text-align: center; gap: 14px">
+        <div style="display: flex; justify-content: space-between; align-items: center">
+          <span style="font-weight: 800; font-size: 16px">🔗 Mon Code de Liaison Parent</span>
+          <span onclick="window.closeModal('studentCodeModal')" style="cursor: pointer; color: #ef4444; font-size: 18px">✕</span>
+        </div>
+        <div style="font-size: 13px; color: var(--muted)">
+          Transmettez ce code unique à vos parents pour qu'ils puissent suivre votre emploi du temps, vos devoirs et vos notes en temps réel :
+        </div>
+        <div style="background: var(--dash); border: 2px dashed var(--primary); border-radius: 14px; padding: 16px; font-family: 'JetBrains Mono', monospace; font-size: 26px; font-weight: 900; letter-spacing: 2px; color: var(--primary)" id="myParentCodeDisplay">
+          BAC-XXXX
+        </div>
+        <button class="btn-add" onclick="copyParentCode()" style="justify-content: center; padding: 10px">
+          📋 Copier le code
+        </button>
+      </div>
+    </div>
+
+    <!-- MODALE LIER UN ENFANT POUR LE PARENT -->
+    <div class="modal" id="linkChildModal">
+      <div class="modal-box" style="gap: 14px">
+        <div style="display: flex; justify-content: space-between; align-items: center">
+          <span style="font-weight: 800; font-size: 16px">👨‍👩‍👧 Lier le compte d'un Élève</span>
+          <span onclick="window.closeModal('linkChildModal')" style="cursor: pointer; color: #ef4444; font-size: 18px">✕</span>
+        </div>
+        <div style="font-size: 13px; color: var(--muted)">
+          Saisissez le code de liaison à 8 caractères fourni par votre enfant (ex: <code>BAC-8492</code>) :
+        </div>
+        <input type="text" id="childLinkInput" class="input" placeholder="ex: BAC-9182" style="font-family: 'JetBrains Mono', monospace; text-transform: uppercase; font-weight: 800; font-size: 16px; text-align: center" />
+        <button class="btn-add" onclick="linkChildWithCode()" style="justify-content: center; padding: 10px">
+          ✨ Associer l'élève
+        </button>
+      </div>
+    </div>
+
+    <!-- OVERLAY ANNALES DU BAC 2000-2026 -->
+    <div class="fullscreen-overlay" id="bacArchiveOverlay">
+      <div class="overlay-header">
+        <div>
+          <div class="overlay-title">
+            📚 Annales Officielles du Baccalauréat (2000 → 2026)
+          </div>
+          <div style="font-size: 13px; color: var(--muted); margin-top: 3px">
+            Section Mathématiques : 27 Sujets complets par matière
+          </div>
+        </div>
+        <button class="btn-close" onclick="closeOverlay('bacArchiveOverlay')">
+          Fermer ✕
+        </button>
+      </div>
+
+      <div
+        style="
+          max-width: 1150px;
+          margin: 0 auto;
+          width: 100%;
+          display: flex;
+          flex-direction: column;
+          gap: 14px;
+        "
+      >
+        <!-- SÉLECTEUR DE MATIÈRE -->
+        <div class="custom-tabs" id="bacArchiveSubjectTabs"></div>
+
+        <!-- CARTE BILAN PROGRESSION MATIÈRE -->
+        <div
+          style="
+            background: linear-gradient(135deg, #0284c7, #4f46e5);
+            color: white;
+            border-radius: 16px;
+            padding: 18px 22px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            box-shadow: var(--shadow-md);
+          "
+        >
+          <div>
+            <div
+              style="font-size: 13px; opacity: 0.9; font-weight: 700"
+              id="bacCurrentSubjectName"
+            >
+              Mathématiques
+            </div>
+            <div
+              style="
+                font-family: 'JetBrains Mono', monospace;
+                font-size: 30px;
+                font-weight: 900;
+              "
+              id="bacSubjectProgressCount"
+            >
+              0 / 27 Sujets Réalisés
+            </div>
+          </div>
+          <div
+            style="
+              background: rgba(255, 255, 255, 0.2);
+              padding: 8px 16px;
+              border-radius: 99px;
+              font-weight: 800;
+              font-size: 14px;
+            "
+            id="bacSubjectProgressPct"
+          >
+            0% Complété
+          </div>
+        </div>
+
+        <!-- GRILLE DES 27 ÉPREUVES (2000 -> 2026) -->
+        <div class="bac-archive-grid" id="bacExamsGrid"></div>
+      </div>
+    </div>
+
+    <!-- OVERLAY GESTIONNAIRE D'EXAMENS & DS -->
+    <div class="fullscreen-overlay" id="examsOverlay">
+      <div class="overlay-header">
+        <div>
+          <div class="overlay-title">📝 Gestionnaire d'Examens & DS</div>
+          <div style="font-size: 13px; color: var(--muted); margin-top: 3px">
+            Planifie et suis tous tes devoirs surveillés et synthèses
+          </div>
+        </div>
+        <div style="display: flex; gap: 10px">
+          <button class="btn-add student-action-btn" onclick="window.openModal('addExamModal')">
+            + Ajouter un Examen
+          </button>
+          <button class="btn-close" onclick="closeOverlay('examsOverlay')">
+            Fermer ✕
+          </button>
+        </div>
+      </div>
+      <div
+        style="
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+          gap: 14px;
+          max-width: 1100px;
+          margin: 0 auto;
+          width: 100%;
+        "
+        id="examsList"
+      ></div>
+    </div>
+
+    <!-- OVERLAY CARNET DE NOTES & CALCULATEUR TRIMESTRIEL -->
+    <div class="fullscreen-overlay" id="gradesOverlay">
+      <div class="overlay-header">
+        <div>
+          <div class="overlay-title">
+            🎯 Calculateur de Moyenne & Carnet Trimestriel
+          </div>
+          <div style="font-size: 13px; color: var(--muted); margin-top: 3px">
+            Section Mathématiques (Formules officielles avec Oral/TP modulable)
+          </div>
+        </div>
+        <div style="display: flex; gap: 10px; align-items: center">
+          <select
+            id="gradeCalcMode"
+            class="input"
+            onchange="calculateTrimesterAverages()"
+            style="font-weight: 700"
+          >
+            <option value="Trimestre">
+              🏫 Mode Trimestres (Option = Coef 1)
+            </option>
+            <option value="Bac">
+              🎓 Mode Examen Bac (Option = Bonus > 10)
+            </option>
+          </select>
+          <button class="btn-close" onclick="closeOverlay('gradesOverlay')">
+            Fermer ✕
+          </button>
+        </div>
+      </div>
+
+      <div
+        style="
+          max-width: 1100px;
+          margin: 0 auto;
+          width: 100%;
+          display: flex;
+          flex-direction: column;
+          gap: 14px;
+        "
+      >
+        <!-- ONGLETS TRIMESTRES -->
+        <div class="custom-tabs">
+          <button
+            class="btn-tab-item active"
+            id="tabTrim1"
+            onclick="switchTrimester('trim1')"
+          >
+            1er Trimestre
+          </button>
+          <button
+            class="btn-tab-item"
+            id="tabTrim2"
+            onclick="switchTrimester('trim2')"
+          >
+            2ème Trimestre
+          </button>
+          <button
+            class="btn-tab-item"
+            id="tabTrim3"
+            onclick="switchTrimester('trim3')"
+          >
+            3ème Trimestre
+          </button>
+          <button
+            class="btn-tab-item"
+            id="tabTrimYear"
+            onclick="switchTrimester('year')"
+          >
+            🏆 Bilan Annuel
+          </button>
+        </div>
+
+        <!-- CARTE BILAN MOYENNE -->
+        <div
+          style="
+            background: linear-gradient(135deg, #0284c7, #4f46e5);
+            color: white;
+            border-radius: 16px;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 14px;
+            box-shadow: var(--shadow-md);
+          "
+        >
+          <div>
+            <div
+              style="font-size: 13px; opacity: 0.9; font-weight: 700"
+              id="avgCardTitle"
+            >
+              MOYENNE DU 1ER TRIMESTRE
+            </div>
+            <div
+              style="
+                font-family: 'JetBrains Mono', monospace;
+                font-size: 38px;
+                font-weight: 900;
+              "
+              id="totalTrimesterAverage"
+            >
+              -- / 20
+            </div>
+          </div>
+          <div style="text-align: right">
+            <div style="font-size: 13px; opacity: 0.9; font-weight: 700">
+              TOTAL DES POINTS : <span id="totalPointsSum">--</span>
+            </div>
+            <div style="font-size: 13px; opacity: 0.9; font-weight: 700">
+              TOTAL COEFFICIENTS : <span id="totalCoefSum">--</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- TABLEAU TRIMESTRIEL -->
+        <div
+          id="trimesterTableView"
+          style="
+            overflow-x: auto;
+            background: var(--card);
+            border: 1.5px solid var(--dash);
+            border-radius: 16px;
+            padding: 14px;
+            box-shadow: var(--shadow-sm);
+          "
+        >
+          <table class="grades-table">
+            <thead>
+              <tr>
+                <th style="text-align: left">Matière</th>
+                <th>Coef</th>
+                <th>Oral / TP (Coef 1)</th>
+                <th>DC (Coef 1)</th>
+                <th>DS / Synthèse (Coef 2)</th>
+                <th>Moyenne Trimestre</th>
+              </tr>
+            </thead>
+            <tbody id="gradesTableBody"></tbody>
+          </table>
+        </div>
+
+        <!-- TABLEAU ANNUEL -->
+        <div
+          id="annualSummaryView"
+          style="
+            display: none;
+            overflow-x: auto;
+            background: var(--card);
+            border: 1.5px solid var(--dash);
+            border-radius: 16px;
+            padding: 14px;
+            box-shadow: var(--shadow-sm);
+          "
+        >
+          <table class="grades-table">
+            <thead>
+              <tr>
+                <th style="text-align: left">Matière</th>
+                <th>Coef</th>
+                <th>Moyenne Trimestre 1</th>
+                <th>Moyenne Trimestre 2</th>
+                <th>Moyenne Trimestre 3</th>
+                <th>Moyenne Annuelle</th>
+              </tr>
+            </thead>
+            <tbody id="annualGradesTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- OVERLAY REPARTITION -->
+    <div class="fullscreen-overlay" id="statsOverlay">
+      <div class="overlay-header">
+        <div>
+          <div class="overlay-title">📊 Répartition des Heures d'Étude</div>
+          <div style="font-size: 13px; color: var(--muted); margin-top: 3px">
+            Suivi du volume de travail personnel
+          </div>
+        </div>
+        <div style="display: flex; gap: 10px; align-items: center">
+          <select
+            id="statsFilterType"
+            class="input"
+            onchange="renderStatsData()"
+            style="padding: 6px 12px; font-weight: 700"
+          >
+            <option value="Maison">🏠 À la maison seulement</option>
+            <option value="Autonomie">⚡ Maison & En ligne</option>
+            <option value="All">🌐 Toutes les séances</option>
+          </select>
+          <button class="btn-close" onclick="closeOverlay('statsOverlay')">
+            Fermer ✕
+          </button>
+        </div>
+      </div>
+      <div
+        style="
+          display: flex;
+          flex-direction: column;
+          gap: 14px;
+          max-width: 850px;
+          margin: 0 auto;
+          width: 100%;
+        "
+        id="statsContent"
+      ></div>
+    </div>
+
+    <!-- OVERLAY MINUTEUR -->
+    <div class="fullscreen-overlay" id="timerOverlay">
+      <div class="overlay-header">
+        <div>
+          <div class="overlay-title">⏱️ Minuteur de Concentration</div>
+          <div style="font-size: 13px; color: var(--muted); margin-top: 3px">
+            Mode d'étude immersif sans distractions
+          </div>
+        </div>
+        <button class="btn-close" onclick="closeOverlay('timerOverlay')">
+          Fermer ✕
+        </button>
+      </div>
+      <div class="timer-container">
+        <div class="timer-display" id="timerDisplay">00:00:00</div>
+        <div class="timer-controls">
+          <div
+            style="
+              display: flex;
+              align-items: center;
+              gap: 8px;
+              background: var(--dash);
+              padding: 6px 12px;
+              border-radius: 99px;
+            "
+          >
+            <input
+              type="number"
+              id="tHours"
+              class="input"
+              style="width: 60px; text-align: center; padding: 6px"
+              min="0"
+              max="23"
+              value="1"
+            />
+            h
+            <input
+              type="number"
+              id="tMinutes"
+              class="input"
+              style="width: 60px; text-align: center; padding: 6px"
+              min="0"
+              max="59"
+              value="30"
+            />
+            m
+            <button
+              class="btn-action"
+              style="padding: 6px 12px"
+              onclick="setCustomTimer()"
+            >
+              Définir
+            </button>
+          </div>
+          <button
+            class="btn-timer"
+            id="btnTimerStart"
+            style="background: #10b981; color: white"
+            onclick="toggleTimer()"
+          >
+            Lancer
+          </button>
+          <button
+            class="btn-timer"
+            style="background: #ef4444; color: white"
+            onclick="resetTimer()"
+          >
+            Réinitialiser
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- INTERFACE PRINCIPALE -->
+    <div class="main-wrap">
+      <!-- BARRE UTILISATEUR EN HAUT -->
+      <div class="user-top-bar" id="userTopBar">
+        <div class="user-info-group">
+          <div class="user-avatar" id="userAvatarIco">👤</div>
+          <div class="user-name-role">
+            <span class="user-name" id="userNameLabel">Chargement...</span>
+            <span class="role-badge role-student" id="userRoleBadge">ÉLÈVE</span>
+          </div>
+
+          <!-- BOUTON CODE PARENT (POUR ÉLÈVE) -->
+          <button
+            class="btn-action btn-accent"
+            id="btnMyParentCode"
+            onclick="openStudentCodeModal()"
+            style="display: none"
+          >
+            🔗 Mon Code Parent
+          </button>
+
+          <!-- SÉLECTEUR D'ENFANTS (POUR PARENT) -->
+          <div id="parentChildControls" style="display: none; align-items: center; gap: 6px; flex-wrap: wrap">
+            <span style="font-size: 11.5px; font-weight: 800; color: var(--muted)">👶 Élève :</span>
+            <select id="parentChildSelect" class="input" style="padding: 4px 8px; font-weight: 700" onchange="onParentSelectChild(this.value)">
+              <option value="">Aucun enfant associé</option>
+            </select>
+            <button class="btn-action" onclick="window.openModal('linkChildModal')">
+              + Lier un élève
+            </button>
+          </div>
+
+          <!-- CONSOLE ADMIN (POUR ADMIN) -->
+          <button
+            class="btn-action btn-accent"
+            id="btnAdminConsole"
+            onclick="openOverlay('adminOverlay')"
+            style="display: none"
+          >
+            🛡️ Console Admin
+          </button>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap">
+          <button class="btn-action" onclick="toggleDarkMode()">
+            🌙 Mode Sombre
+          </button>
+          <button class="btn-action" style="color: #ef4444; border-color: #fca5a5" onclick="handleLogout()">
+            🚪 Déconnexion
+          </button>
+        </div>
+      </div>
+
+      <!-- BANNIÈRE DE CONSULTATION CONTEXTUELLE -->
+      <div class="view-context-banner" id="viewContextBanner" style="display: none">
+        <span id="viewContextText">👁️ Mode Consultation en Direct</span>
+        <span style="font-size: 11px; opacity: 0.9">Lecture seule</span>
+      </div>
+
+      <!-- BANDEAU D'ANNONCE GLOBALE -->
+      <div class="announcement-bar" id="activeAnnouncementBar" style="display: none">
+        <span id="activeAnnouncementText">📢 Bienvenue sur l'application Planning Baccalauréat !</span>
+        <span style="cursor: pointer; opacity: 0.8" onclick="document.getElementById('activeAnnouncementBar').style.display='none'">✕</span>
+      </div>
+
+      <!-- BANDEAU TOP : BAC + STREAK -->
+      <div class="top-stats-row">
+        <div class="bac-countdown-bar">
+          <div class="bac-countdown-title">
+            <span>🎓</span>
+            <span>Épreuves Nationales du Baccalauréat :</span>
+          </div>
+          <div class="bac-countdown-digits" id="bacCountdownText">
+            Calcul en cours...
+          </div>
+        </div>
+        <div class="streak-badge" id="streakBadgeDisplay">
+          <span>🔥</span>
+          <span
+            >Série d'étude (Maison/Ligne) :
+            <b id="streakDaysCount">1</b> j</span
+          >
+        </div>
+      </div>
+
+      <div class="header">
+        <div
+          style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap"
+        >
+          <div class="switch-mode">
+            <button
+              class="btn-toggle"
+              id="btnMob"
+              onclick="window.setLayout('mobile')"
+            >
+              📱 Mobile
+            </button>
+            <button
+              class="btn-toggle"
+              id="btnPc"
+              onclick="window.setLayout('pc')"
+            >
+              💻 PC
+            </button>
+          </div>
+          <button class="btn-action" onclick="window.goToToday()">
+            Aujourd'hui
+          </button>
+          <button
+            class="btn-action"
+            style="border-color: #0284c7; color: #0284c7"
+            onclick="openOverlay('bacArchiveOverlay')"
+          >
+            📚 Annales Bac (2000-2026)
+          </button>
+          <button class="btn-action" onclick="openOverlay('examsOverlay')">
+            📝 Examens & DS
+          </button>
+          <button class="btn-action" onclick="openOverlay('gradesOverlay')">
+            🎯 Carnet Trimestriel
+          </button>
+          <button class="btn-action" onclick="openStats()">
+            📊 Répartition
+          </button>
+          <button class="btn-action" onclick="openTimer()">⏱️ Minuteur</button>
+        </div>
+
+        <div class="date-row">
+          <button class="btn-circ" onclick="window.shift(-1)">&lt;</button>
+          <span id="dateLabel">...</span>
+          <button class="btn-circ" onclick="window.shift(1)">&gt;</button>
+        </div>
+
+        <div
+          style="display: flex; gap: 6px; flex-wrap: wrap; align-items: center"
+        >
+          <button class="btn-api student-action-btn" onclick="window.setApiKey()">
+            🔑 Clé IA
+          </button>
+          <input
+            type="file"
+            id="photoInput"
+            accept="image/*"
+            style="display: none"
+            onchange="window.handleImageUpload(event)"
+          />
+          <button
+            class="btn-vision student-action-btn"
+            onclick="document.getElementById('photoInput').click()"
+          >
+            📸 Scanner
+          </button>
+          <button class="btn-mic student-action-btn" id="mainMicBtn" onclick="window.voiceInput()">
+            🎙️ Micro IA
+          </button>
+          <button class="btn-add student-action-btn" onclick="window.openModal('addModal')">
+            + Séance
+          </button>
+          <button
+            class="btn-action student-action-btn"
+            onclick="window.clearAllData()"
+            style="color: #ef4444; border-color: #fca5a5"
+          >
+            🗑️ Vider
+          </button>
+        </div>
+      </div>
+
+      <div id="pcView">
+        <div
+          style="
+            display: grid;
+            grid-template-columns: 55px repeat(7, 1fr);
+            gap: 6px;
+            margin-bottom: 6px;
+          "
+          id="pcHeader"
+        ></div>
+        <div class="pc-grid">
+          <div class="grid-table">
+            <div class="col-time" id="timeCol"></div>
+            <div style="display: flex; flex-grow: 1" id="daysCol"></div>
+          </div>
+        </div>
+      </div>
+
+      <div
+        id="mobView"
+        style="display: none; flex-direction: column; gap: 12px"
+      >
+        <div class="mob-scroller" id="mobScroller"></div>
+        <div class="mob-list" id="mobList"></div>
+      </div>
+    </div>
+
+    <!-- MODALE CRÉATION SÉANCE -->
+    <div class="modal" id="addModal">
+      <div class="modal-box">
+        <div
+          style="
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 800;
+            font-size: 16px;
+          "
+        >
+          Ajouter une Séance
+          <span
+            onclick="window.closeModal('addModal')"
+            style="cursor: pointer; color: #ef4444; font-size: 18px"
+            >✕</span
+          >
+        </div>
+
+        <div>
+          <label
+            style="
+              font-size: 11px;
+              font-weight: 700;
+              color: var(--muted);
+              display: block;
+              margin-bottom: 4px;
+            "
+            >Matière :</label
+          >
+          <select id="mSub" class="input" style="width: 100%">
+            <option value="Mathématiques">📐 Mathématiques (Coef 4)</option>
+            <option value="Physique-Chimie">
+              🔬 Sciences Physiques (Coef 4)
+            </option>
+            <option value="Sciences SVT">🧬 SVT (Coef 1)</option>
+            <option value="Informatique">💻 Informatique (Coef 1)</option>
+            <option value="Français">🇫🇷 Français (Coef 1)</option>
+            <option value="Anglais">🇬🇧 Anglais (Coef 1)</option>
+            <option value="Philosophie">🧠 Philosophie (Coef 1)</option>
+            <option value="Arabe">📖 Arabe (Coef 1)</option>
+            <option value="Sport">
+              🏃 Éducation physique (Sport - Coef 1)
+            </option>
+            <option value="Option">📌 Matière Optionnelle</option>
+          </select>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px">
+          <div>
+            <label
+              style="
+                font-size: 11px;
+                font-weight: 700;
+                color: var(--muted);
+                display: block;
+                margin-bottom: 4px;
+              "
+              >Lieu / Type :</label
+            >
+            <select id="mType" class="input" style="width: 100%">
+              <option value="À la maison">🏠 À la maison (Autonomie)</option>
+              <option value="En ligne">💻 En ligne</option>
+              <option value="Lycée">🏫 Lycée</option>
+              <option value="Particulier">👨‍🏫 Étude / Particulier</option>
+            </select>
+          </div>
+          <div>
+            <label
+              style="
+                font-size: 11px;
+                font-weight: 700;
+                color: var(--muted);
+                display: block;
+                margin-bottom: 4px;
+              "
+              >Fréquence :</label
+            >
+            <select id="mFreq" class="input" style="width: 100%">
+              <option value="Toutes les semaines">Chaque semaine</option>
+              <option value="Par quinzaine (1/2)">
+                1 semaine sur 2 (Quinzaine)
+              </option>
+            </select>
+          </div>
+        </div>
+
+        <div
+          style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px"
+        >
+          <div>
+            <label
+              style="
+                font-size: 11px;
+                font-weight: 700;
+                color: var(--muted);
+                display: block;
+                margin-bottom: 4px;
+              "
+              >Jour :</label
+            >
+            <select id="mDay" class="input" style="width: 100%">
+              <option value="0">Lundi</option>
+              <option value="1">Mardi</option>
+              <option value="2">Mercredi</option>
+              <option value="3">Jeudi</option>
+              <option value="4">Vendredi</option>
+              <option value="5">Samedi</option>
+              <option value="6">Dimanche</option>
+            </select>
+          </div>
+          <div>
+            <label
+              style="
+                font-size: 11px;
+                font-weight: 700;
+                color: var(--muted);
+                display: block;
+                margin-bottom: 4px;
+              "
+              >Début :</label
+            >
+            <input
+              type="time"
+              id="mStart"
+              class="input"
+              style="width: 100%"
+              value="08:00"
+            />
+          </div>
+          <div>
+            <label
+              style="
+                font-size: 11px;
+                font-weight: 700;
+                color: var(--muted);
+                display: block;
+                margin-bottom: 4px;
+              "
+              >Fin :</label
+            >
+            <input
+              type="time"
+              id="mEnd"
+              class="input"
+              style="width: 100%"
+              value="10:00"
+            />
+          </div>
+        </div>
+
+        <button
+          class="btn-add"
+          onclick="window.saveEvent()"
+          style="width: 100%; margin-top: 6px; padding: 10px; justify-content: center;"
+        >
+          Enregistrer dans le planning
+        </button>
+      </div>
+    </div>
+
+    <!-- MODALE CRÉATION EXAMEN / DS -->
+    <div class="modal" id="addExamModal">
+      <div class="modal-box">
+        <div
+          style="
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 800;
+            font-size: 16px;
+          "
+        >
+          Planifier un Devoir / Examen
+          <span
+            onclick="window.closeModal('addExamModal')"
+            style="cursor: pointer; color: #ef4444; font-size: 18px"
+            >✕</span
+          >
+        </div>
+
+        <div>
+          <label
+            style="
+              font-size: 11px;
+              font-weight: 700;
+              color: var(--muted);
+              display: block;
+              margin-bottom: 4px;
+            "
+            >Matière :</label
+          >
+          <select id="exSub" class="input" style="width: 100%">
+            <option value="Mathématiques">📐 Mathématiques</option>
+            <option value="Physique-Chimie">🔬 Sciences Physiques</option>
+            <option value="Sciences SVT">🧬 SVT</option>
+            <option value="Informatique">💻 Informatique</option>
+            <option value="Français">🇫🇷 Français</option>
+            <option value="Anglais">🇬🇧 Anglais</option>
+            <option value="Philosophie">🧠 Philosophie</option>
+            <option value="Arabe">📖 Arabe</option>
+            <option value="Sport">🏃 Sport</option>
+            <option value="Option">📌 Option</option>
+          </select>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px">
+          <div>
+            <label
+              style="
+                font-size: 11px;
+                font-weight: 700;
+                color: var(--muted);
+                display: block;
+                margin-bottom: 4px;
+              "
+              >Type d'examen :</label
+            >
+            <select id="exType" class="input" style="width: 100%">
+              <option value="Devoir Surveillé (DS)">
+                📝 Devoir Surveillé (DS - Coef 2)
+              </option>
+              <option value="Devoir de Contrôle (DC)">
+                📋 Devoir de Contrôle (DC - Coef 1)
+              </option>
+              <option value="Devoir de Synthèse">📑 Devoir de Synthèse</option>
+              <option value="Examen Blanc / Bac Blanc">🎓 Bac Blanc</option>
+            </select>
+          </div>
+          <div>
+            <label
+              style="
+                font-size: 11px;
+                font-weight: 700;
+                color: var(--muted);
+                display: block;
+                margin-bottom: 4px;
+              "
+              >Date de l'épreuve :</label
+            >
+            <input type="date" id="exDate" class="input" style="width: 100%" />
+          </div>
+        </div>
+
+        <input
+          type="text"
+          id="exDesc"
+          class="input"
+          placeholder="Chapitres au programme (ex: Suites, Complexes, Électrostatique...)"
+        />
+
+        <button
+          class="btn-add"
+          onclick="window.saveExam()"
+          style="width: 100%; margin-top: 6px; padding: 10px; justify-content: center;"
+        >
+          Enregistrer l'examen
+        </button>
+      </div>
+    </div>
+
+    <script type="module">
+      import { GoogleGenerativeAI } from "https://esm.run/@google/generative-ai";
+      import { initializeApp } from "https://esm.run/firebase/app";
+      import {
+        getAuth,
+        signInWithEmailAndPassword,
+        createUserWithEmailAndPassword,
+        signOut,
+        onAuthStateChanged,
+        updateProfile,
+      } from "https://esm.run/firebase/auth";
+      import {
+        getDatabase,
+        ref,
+        onValue,
+        set,
+        get,
+        child,
+        remove,
+        update,
+        off,
+      } from "https://esm.run/firebase/database";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyBfoddDtf1LaoeQ-6Fw_e9ZnGOKWEustlU",
+        authDomain: "planning-bac.firebaseapp.com",
+        projectId: "planning-bac",
+        storageBucket: "planning-bac.firebasestorage.app",
+        messagingSenderId: "546807403827",
+        appId: "1:546807403827:web:183f8c869a1dd6d9181a46",
+        databaseURL: "https://planning-bac-default-rtdb.firebaseio.com",
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const auth = getAuth(app);
+      const database = getDatabase(app);
+
+      // ÉTAT GLOBAL DE L'APPLICATION
+      let currentUser = null;
+      let currentUserProfile = null;
+      let activeStudentUid = null;
+      let activeStudentProfile = null;
+      let isReadOnly = false;
+      let selectedRegRole = "student";
+      let activeDataListeners = [];
+      let allUsersCache = [];
+
+      const days = [
+        "Lundi",
+        "Mardi",
+        "Mercredi",
+        "Jeudi",
+        "Vendredi",
+        "Samedi",
+        "Dimanche",
+      ];
+      const months = [
+        "Janv",
+        "Févr",
+        "Mars",
+        "Avr",
+        "Mai",
+        "Juin",
+        "Juil",
+        "Août",
+        "Sept",
+        "Oct",
+        "Nov",
+        "Déc",
+      ];
+      let layout =
+        localStorage.getItem("app_layout_final") ||
+        (window.innerWidth < 768 ? "mobile" : "pc");
+      let currentMonday = getMon(new Date());
+      let curDayIdx = (new Date().getDay() + 6) % 7;
+      let db = [];
+      let examsDb = [];
+      let userGrades = {};
+      let bacArchiveData = {};
+      let currentTrimester = "trim1";
+      let currentBacSubjectId = "math";
+
+      // HELPER CHEMIN BASE DE DONNÉES MULTI-TENANT
+      function getStudentPath(subPath = "") {
+        const uid = activeStudentUid || currentUser?.uid || "default_user";
+        return `student_data/${uid}/${subPath}`.replace(/\/+$/, "");
+      }
+
+      // ==========================================
+      // AUTHENTIFICATION & GESTION DES PROFILS
+      // ==========================================
+      window.switchAuthTab = function (tab) {
+        document.getElementById("authErrorMsg").style.display = "none";
+        document
+          .getElementById("tabLoginBtn")
+          .classList.toggle("active", tab === "login");
+        document
+          .getElementById("tabRegisterBtn")
+          .classList.toggle("active", tab === "register");
+        document.getElementById("loginForm").style.display =
+          tab === "login" ? "flex" : "none";
+        document.getElementById("registerForm").style.display =
+          tab === "register" ? "flex" : "none";
+      };
+
+      window.selectRole = function (role) {
+        selectedRegRole = role;
+        document
+          .querySelectorAll(".role-option")
+          .forEach((el) => el.classList.remove("active"));
+        document.getElementById(`roleOpt_${role}`).classList.add("active");
+
+        document.getElementById("regSectionGroup").style.display =
+          role === "student" ? "block" : "none";
+        document.getElementById("regAdminKeyGroup").style.display =
+          role === "admin" ? "block" : "none";
+      };
+
+      window.handleLogin = async function (e) {
+        e.preventDefault();
+        const email = document.getElementById("loginEmail").value.trim();
+        const pass = document.getElementById("loginPassword").value;
+        const errDiv = document.getElementById("authErrorMsg");
+        errDiv.style.display = "none";
+
+        try {
+          showLoading("Connexion à votre espace...");
+          await signInWithEmailAndPassword(auth, email, pass);
+          hideLoading();
+        } catch (err) {
+          hideLoading();
+          errDiv.innerText = formatAuthError(err.code || err.message);
+          errDiv.style.display = "block";
+        }
+      };
+
+      window.handleRegister = async function (e) {
+        e.preventDefault();
+        const name = document.getElementById("regName").value.trim();
+        const email = document.getElementById("regEmail").value.trim();
+        const pass = document.getElementById("regPassword").value;
+        const section = document.getElementById("regSection").value;
+        const adminKey = document.getElementById("regAdminKey").value.trim();
+        const errDiv = document.getElementById("authErrorMsg");
+        errDiv.style.display = "none";
+
+        if (selectedRegRole === "admin" && adminKey !== "ADMIN2026") {
+          errDiv.innerText =
+            "Clé secrète Administrateur invalide. (Clé requise : ADMIN2026)";
+          errDiv.style.display = "block";
+          return;
+        }
+
+        try {
+          showLoading("Création de votre profil...");
+          const userCred = await createUserWithEmailAndPassword(
+            auth,
+            email,
+            pass
+          );
+          const uid = userCred.user.uid;
+          await updateProfile(userCred.user, { displayName: name });
+
+          let parentCode = "";
+          if (selectedRegRole === "student") {
+            parentCode =
+              "BAC-" +
+              Math.random().toString(36).substring(2, 6).toUpperCase();
+            await set(ref(database, `parent_codes/${parentCode}`), uid);
+          }
+
+          const profileData = {
+            uid: uid,
+            email: email,
+            displayName: name,
+            role: selectedRegRole,
+            section: selectedRegRole === "student" ? section : null,
+            parentLinkCode: parentCode || null,
+            linkedStudents: selectedRegRole === "parent" ? [] : null,
+            createdAt: Date.now(),
+          };
+
+          await set(ref(database, `users/${uid}`), profileData);
+          hideLoading();
+        } catch (err) {
+          hideLoading();
+          errDiv.innerText = formatAuthError(err.code || err.message);
+          errDiv.style.display = "block";
+        }
+      };
+
+      window.handleLogout = async function () {
+        if (confirm("Êtes-vous sûr de vouloir vous déconnecter ?")) {
+          detachAllDataListeners();
+          await signOut(auth);
+        }
+      };
+
+      function formatAuthError(code) {
+        if (code.includes("user-not-found") || code.includes("wrong-password") || code.includes("invalid-credential"))
+          return "Identifiants invalides. Vérifiez votre email et mot de passe.";
+        if (code.includes("email-already-in-use"))
+          return "Cette adresse email est déjà enregistrée. Veuillez vous connecter.";
+        if (code.includes("weak-password"))
+          return "Le mot de passe doit contenir au moins 6 caractères.";
+        return "Erreur d'authentification : " + code;
+      }
+
+      // OBSERVATEUR D'ÉTAT AUTHENTIFICATION
+      onAuthStateChanged(auth, async (user) => {
+        if (user) {
+          currentUser = user;
+          document.getElementById("authOverlay").style.display = "none";
+          await loadUserProfile(user.uid);
+        } else {
+          currentUser = null;
+          currentUserProfile = null;
+          activeStudentUid = null;
+          activeStudentProfile = null;
+          document.getElementById("authOverlay").style.display = "flex";
+        }
+      });
+
+      async function loadUserProfile(uid) {
+        showLoading("Chargement de vos données...");
+        const userSnap = await get(ref(database, `users/${uid}`));
+        if (!userSnap.exists()) {
+          // Initialisation profil par défaut si inexistant
+          currentUserProfile = {
+            uid: uid,
+            email: currentUser.email,
+            displayName: currentUser.displayName || "Utilisateur",
+            role: "student",
+            parentLinkCode:
+              "BAC-" + Math.random().toString(36).substring(2, 6).toUpperCase(),
+            createdAt: Date.now(),
+          };
+          await set(ref(database, `users/${uid}`), currentUserProfile);
+          await set(
+            ref(database, `parent_codes/${currentUserProfile.parentLinkCode}`),
+            uid
+          );
+        } else {
+          currentUserProfile = userSnap.val();
+        }
+
+        renderUserProfileBar();
+
+        if (currentUserProfile.role === "student") {
+          activeStudentUid = uid;
+          activeStudentProfile = currentUserProfile;
+          isReadOnly = false;
+          updateReadOnlyUI();
+          attachStudentDataListeners(uid);
+        } else if (currentUserProfile.role === "parent") {
+          isReadOnly = true;
+          updateReadOnlyUI();
+          await setupParentDashboard();
+        } else if (currentUserProfile.role === "admin") {
+          activeStudentUid = uid;
+          activeStudentProfile = currentUserProfile;
+          isReadOnly = false;
+          updateReadOnlyUI();
+          attachStudentDataListeners(uid);
+          loadAdminKPIs();
+        }
+
+        listenToAnnouncements();
+        hideLoading();
+      }
+
+      function renderUserProfileBar() {
+        const nameEl = document.getElementById("userNameLabel");
+        const roleBadge = document.getElementById("userRoleBadge");
+        const avatarEl = document.getElementById("userAvatarIco");
+
+        nameEl.innerText = currentUserProfile.displayName || currentUserProfile.email;
+        roleBadge.className = `role-badge role-${currentUserProfile.role}`;
+
+        const roleLabels = {
+          student: `🎓 Élève (${currentUserProfile.section || "Maths"})`,
+          parent: "👨‍👩‍👧 Parent d'élève",
+          admin: "🛡️ Administrateur",
+        };
+        roleBadge.innerText = roleLabels[currentUserProfile.role] || "UTILISATEUR";
+
+        const firstLetter = (currentUserProfile.displayName || "U")[0].toUpperCase();
+        avatarEl.innerText = firstLetter;
+
+        document.getElementById("btnMyParentCode").style.display =
+          currentUserProfile.role === "student" ? "inline-flex" : "none";
+        document.getElementById("parentChildControls").style.display =
+          currentUserProfile.role === "parent" ? "inline-flex" : "none";
+        document.getElementById("btnAdminConsole").style.display =
+          currentUserProfile.role === "admin" ? "inline-flex" : "none";
+
+        if (currentUserProfile.role === "student" && currentUserProfile.parentLinkCode) {
+          document.getElementById("myParentCodeDisplay").innerText =
+            currentUserProfile.parentLinkCode;
+        }
+      }
+
+      function updateReadOnlyUI() {
+        const isConsultation = isReadOnly;
+        const banner = document.getElementById("viewContextBanner");
+        const text = document.getElementById("viewContextText");
+
+        if (currentUserProfile?.role === "parent") {
+          banner.style.display = "flex";
+          const name = activeStudentProfile?.displayName || "votre enfant";
+          text.innerText = `👁️ Consultation en direct du planning et des notes de : ${name}`;
+        } else if (currentUserProfile?.role === "admin" && activeStudentUid !== currentUser.uid) {
+          banner.style.display = "flex";
+          text.innerText = `🛡️ Supervision Admin sur l'élève : ${activeStudentProfile?.displayName || activeStudentUid}`;
+        } else {
+          banner.style.display = "none";
+        }
+
+        // Masquer ou désactiver les boutons de modification pour le profil Parent
+        document.querySelectorAll(".student-action-btn").forEach((btn) => {
+          btn.style.display = isConsultation ? "none" : "";
+        });
+      }
+
+      // ==========================================
+      // GESTION DU PROFIL PARENT (LIAISON ENFANT)
+      // ==========================================
+      window.openStudentCodeModal = function () {
+        document.getElementById("studentCodeModal").style.display = "flex";
+      };
+
+      window.copyParentCode = function () {
+        const code = document.getElementById("myParentCodeDisplay").innerText;
+        navigator.clipboard.writeText(code);
+        alert("✨ Code copié dans le presse-papier ! Transmettez-le à vos parents.");
+      };
+
+      window.linkChildWithCode = async function () {
+        const code = document
+          .getElementById("childLinkInput")
+          .value.trim()
+          .toUpperCase();
+        if (!code) return alert("Veuillez saisir un code.");
+
+        showLoading("Vérification du code de l'élève...");
+        try {
+          const codeSnap = await get(ref(database, `parent_codes/${code}`));
+          if (!codeSnap.exists()) {
+            hideLoading();
+            return alert("Code introuvable. Veuillez vérifier le code fourni par l'élève.");
+          }
+
+          const studentUid = codeSnap.val();
+          const currentLinked = currentUserProfile.linkedStudents || [];
+          if (!currentLinked.includes(studentUid)) {
+            currentLinked.push(studentUid);
+            await update(ref(database, `users/${currentUser.uid}`), {
+              linkedStudents: currentLinked,
+            });
+            currentUserProfile.linkedStudents = currentLinked;
+          }
+
+          hideLoading();
+          window.closeModal("linkChildModal");
+          alert("🎉 Élève lié avec succès à votre compte parent !");
+          await setupParentDashboard(studentUid);
+        } catch (e) {
+          hideLoading();
+          alert("Erreur lors de la liaison : " + e.message);
+        }
+      };
+
+      async function setupParentDashboard(preselectedUid = null) {
+        const select = document.getElementById("parentChildSelect");
+        select.innerHTML = "";
+        const linked = currentUserProfile.linkedStudents || [];
+
+        if (!linked.length) {
+          select.innerHTML = '<option value="">Aucun élève lié (+ Lier)</option>';
+          activeStudentUid = null;
+          activeStudentProfile = null;
+          db = [];
+          examsDb = [];
+          userGrades = {};
+          bacArchiveData = {};
+          window.render();
+          return;
+        }
+
+        for (let sUid of linked) {
+          const sSnap = await get(ref(database, `users/${sUid}`));
+          const sData = sSnap.val() || { displayName: "Élève (" + sUid.substring(0, 4) + ")" };
+          const opt = document.createElement("option");
+          opt.value = sUid;
+          opt.innerText = `🎓 ${sData.displayName || sData.email} (${sData.section || "Maths"})`;
+          select.appendChild(opt);
+        }
+
+        const targetUid = preselectedUid || linked[0];
+        select.value = targetUid;
+        await onParentSelectChild(targetUid);
+      }
+
+      window.onParentSelectChild = async function (sUid) {
+        if (!sUid) return;
+        activeStudentUid = sUid;
+        const sSnap = await get(ref(database, `users/${sUid}`));
+        activeStudentProfile = sSnap.val();
+        updateReadOnlyUI();
+        attachStudentDataListeners(sUid);
+      };
+
+      // ==========================================
+      // SYNCHRONISATION MULTI-TENANT EN TEMPS RÉEL
+      // ==========================================
+      function detachAllDataListeners() {
+        activeDataListeners.forEach((r) => off(r));
+        activeDataListeners = [];
+      }
+
+      function attachStudentDataListeners(sUid) {
+        detachAllDataListeners();
+
+        const seancesRef = ref(database, `student_data/${sUid}/seances`);
+        const examsRef = ref(database, `student_data/${sUid}/examens`);
+        const gradesRef = ref(database, `student_data/${sUid}/notes_trimestrielles`);
+        const bacArchiveRef = ref(database, `student_data/${sUid}/bac_archive_2000_2026`);
+
+        activeDataListeners.push(seancesRef, examsRef, gradesRef, bacArchiveRef);
+
+        onValue(seancesRef, (snapshot) => {
+          db = [];
+          snapshot.forEach((childSnapshot) => {
+            db.push(childSnapshot.val());
+          });
+          window.render();
+          updateHomeStreak();
+        });
+
+        onValue(examsRef, (snapshot) => {
+          examsDb = [];
+          snapshot.forEach((childSnapshot) => {
+            examsDb.push(childSnapshot.val());
+          });
+          renderExams();
+        });
+
+        onValue(gradesRef, (snapshot) => {
+          userGrades = snapshot.val() || { trim1: {}, trim2: {}, trim3: {} };
+          if (currentTrimester === "year") buildAnnualSummaryTable();
+          else buildTrimesterTable();
+        });
+
+        onValue(bacArchiveRef, (snapshot) => {
+          bacArchiveData = snapshot.val() || {};
+          renderBacArchiveGrid();
+        });
+      }
+
+      // ==========================================
+      // CONSOLE D'ADMINISTRATION
+      // ==========================================
+      window.switchAdminTab = function (tab) {
+        document
+          .getElementById("adminTabUsers")
+          .classList.toggle("active", tab === "users");
+        document
+          .getElementById("adminTabAnnouncements")
+          .classList.toggle("active", tab === "announcements");
+        document.getElementById("adminViewUsers").style.display =
+          tab === "users" ? "block" : "none";
+        document.getElementById("adminViewAnnouncements").style.display =
+          tab === "announcements" ? "flex" : "none";
+      };
+
+      async function loadAdminKPIs() {
+        onValue(ref(database, "users"), (snapshot) => {
+          allUsersCache = [];
+          let studentsCount = 0;
+          let parentsCount = 0;
+
+          snapshot.forEach((childSnap) => {
+            const u = childSnap.val();
+            allUsersCache.push(u);
+            if (u.role === "student") studentsCount++;
+            if (u.role === "parent") parentsCount++;
+          });
+
+          document.getElementById("kpiTotalUsers").innerText =
+            allUsersCache.length;
+          document.getElementById("kpiTotalStudents").innerText = studentsCount;
+          document.getElementById("kpiTotalParents").innerText = parentsCount;
+          renderAdminUsersTable();
+        });
+
+        onValue(ref(database, "student_data"), (snapshot) => {
+          let totalSessions = 0;
+          snapshot.forEach((childSnap) => {
+            const data = childSnap.val();
+            if (data?.seances) totalSessions += Object.keys(data.seances).length;
+          });
+          document.getElementById("kpiTotalSessions").innerText = totalSessions;
+        });
+      }
+
+      window.renderAdminUsersTable = function () {
+        const tbody = document.getElementById("adminUsersTableBody");
+        if (!tbody) return;
+        tbody.innerHTML = "";
+
+        const query = (
+          document.getElementById("adminSearchInput")?.value || ""
+        ).toLowerCase();
+
+        const filtered = allUsersCache.filter((u) => {
+          const matchName = (u.displayName || "").toLowerCase().includes(query);
+          const matchEmail = (u.email || "").toLowerCase().includes(query);
+          const matchCode = (u.parentLinkCode || "").toLowerCase().includes(query);
+          return matchName || matchEmail || matchCode;
+        });
+
+        if (!filtered.length) {
+          tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:20px; color:var(--muted)">Aucun utilisateur correspondant.</td></tr>`;
+          return;
+        }
+
+        filtered.forEach((u) => {
+          const tr = document.createElement("tr");
+          const dateStr = u.createdAt
+            ? new Date(u.createdAt).toLocaleDateString("fr-FR")
+            : "N/A";
+          const roleBadgeClass = `role-${u.role || "student"}`;
+
+          let details = "-";
+          if (u.role === "student")
+            details = `Section: <b>${u.section || "Maths"}</b> | Code: <code>${u.parentLinkCode || "N/A"}</code>`;
+          else if (u.role === "parent")
+            details = `${(u.linkedStudents || []).length} élève(s) associé(s)`;
+
+          tr.innerHTML = `
+            <td>
+              <div style="font-weight:800;">${u.displayName || "Sans nom"}</div>
+              <div style="font-size:11px; color:var(--muted);">${u.email || ""}</div>
+            </td>
+            <td><span class="role-badge ${roleBadgeClass}">${(u.role || "student").toUpperCase()}</span></td>
+            <td><span style="font-size:12px;">${details}</span></td>
+            <td style="font-size:12px; color:var(--muted);">${dateStr}</td>
+            <td>
+              ${
+                u.role === "student"
+                  ? `<button class="btn-action" style="padding:4px 8px; font-size:11px;" onclick="inspectStudentByAdmin('${u.uid}')">👁️ Inspecter</button>`
+                  : ""
+              }
+              <button class="btn-action" style="padding:4px 8px; font-size:11px; color:#ef4444;" onclick="deleteUserByAdmin('${u.uid}', '${u.parentLinkCode || ""}')">🗑️</button>
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
+      };
+
+      window.inspectStudentByAdmin = async function (studentUid) {
+        activeStudentUid = studentUid;
+        const sSnap = await get(ref(database, `users/${studentUid}`));
+        activeStudentProfile = sSnap.val();
+        isReadOnly = false;
+        updateReadOnlyUI();
+        attachStudentDataListeners(studentUid);
+        window.closeOverlay("adminOverlay");
+        alert(`Vous supervisez maintenant le tableau de bord de : ${activeStudentProfile?.displayName || studentUid}`);
+      };
+
+      window.deleteUserByAdmin = async function (uid, parentCode) {
+        if (confirm("Supprimer définitivement ce compte et toutes ses données associées ?")) {
+          await remove(ref(database, `users/${uid}`));
+          await remove(ref(database, `student_data/${uid}`));
+          if (parentCode) await remove(ref(database, `parent_codes/${parentCode}`));
+          alert("Utilisateur supprimé.");
+        }
+      };
+
+      window.publishAdminAnnouncement = async function () {
+        const title = document.getElementById("annTitle").value.trim();
+        const content = document.getElementById("annContent").value.trim();
+        if (!title || !content) return alert("Veuillez renseigner un titre et un message.");
+
+        const newId = Date.now().toString();
+        await set(ref(database, `system_config/announcements/${newId}`), {
+          id: newId,
+          title,
+          content,
+          date: new Date().toLocaleDateString("fr-FR"),
+          author: currentUserProfile?.displayName || "Admin",
+        });
+
+        document.getElementById("annTitle").value = "";
+        document.getElementById("annContent").value = "";
+        alert("✨ Annonce publiée pour tous les élèves et parents !");
+      };
+
+      function listenToAnnouncements() {
+        onValue(ref(database, "system_config/announcements"), (snapshot) => {
+          const annList = [];
+          snapshot.forEach((c) => annList.push(c.val()));
+
+          // Rendu dans la barre principale
+          const bar = document.getElementById("activeAnnouncementBar");
+          const barText = document.getElementById("activeAnnouncementText");
+          if (annList.length > 0) {
+            const latest = annList[annList.length - 1];
+            barText.innerHTML = `📢 <b>${latest.title}</b> : ${latest.content} <span style="font-size:10px; opacity:0.8">(${latest.date})</span>`;
+            bar.style.display = "flex";
+          } else {
+            bar.style.display = "none";
+          }
+
+          // Rendu dans la console admin
+          const adminList = document.getElementById("adminAnnouncementsList");
+          if (adminList) {
+            adminList.innerHTML = "";
+            annList.forEach((a) => {
+              adminList.innerHTML += `
+                <div style="background:var(--bg); border:1.5px solid var(--dash); border-radius:12px; padding:12px; display:flex; justify-content:space-between; align-items:center;">
+                  <div>
+                    <div style="font-weight:800; font-size:14px;">${a.title}</div>
+                    <div style="font-size:12px; color:var(--muted); margin-top:2px;">${a.content}</div>
+                    <div style="font-size:11px; color:var(--primary); margin-top:4px;">Par ${a.author} le ${a.date}</div>
+                  </div>
+                  <button class="btn-action" style="color:#ef4444;" onclick="deleteAnnouncement('${a.id}')">Supprimer 🗑️</button>
+                </div>
+              `;
+            });
+          }
+        });
+      }
+
+      window.deleteAnnouncement = function (id) {
+        if (confirm("Supprimer cette annonce ?")) {
+          remove(ref(database, `system_config/announcements/${id}`));
+        }
+      };
+
+      // ==========================================
+      // COMPTE À REBOURS DU BACCALAURÉAT
+      // ==========================================
+      function updateBacCountdown() {
+        const bacDate = new Date("2027-06-09T08:00:00");
+        const now = new Date();
+        const diff = bacDate - now;
+
+        if (diff <= 0) {
+          document.getElementById("bacCountdownText").innerText =
+            "Bonne chance pour les épreuves !";
+          return;
+        }
+
+        const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const h = Math.floor((diff / (1000 * 60 * 60)) % 24);
+        const m = Math.floor((diff / 1000 / 60) % 60);
+        const s = Math.floor((diff / 1000) % 60);
+        document.getElementById(
+          "bacCountdownText"
+        ).innerText = `J-${d} | ${h}h ${m}m ${s}s`;
+      }
+      setInterval(updateBacCountdown, 1000);
+      updateBacCountdown();
+
+      // STREAK SUR LES HEURES À LA MAISON & EN LIGNE
+      function updateHomeStreak() {
+        const today = new Date();
+        const todayDay = (today.getDay() + 6) % 7;
+
+        const hasSelfStudyToday = db.some((ev) => {
+          const isHomeOrOnline =
+            ev.type &&
+            (ev.type.includes("maison") || ev.type.includes("ligne"));
+          return ev.day === todayDay && isHomeOrOnline;
+        });
+
+        const todayStr = today.toDateString();
+        const lastActive = localStorage.getItem("bac_last_self_study_date");
+        let streak = parseInt(
+          localStorage.getItem("bac_self_study_streak") || "1"
+        );
+
+        if (hasSelfStudyToday && lastActive !== todayStr) {
+          if (lastActive) {
+            const lastDate = new Date(lastActive);
+            const diffDays = Math.floor(
+              (new Date(todayStr) - lastDate) / (1000 * 60 * 60 * 24)
+            );
+            if (diffDays === 1) streak++;
+            else if (diffDays > 1) streak = 1;
+          }
+          localStorage.setItem("bac_self_study_streak", streak.toString());
+          localStorage.setItem("bac_last_self_study_date", todayStr);
+        }
+        document.getElementById("streakDaysCount").innerText = streak;
+      }
+
+      // DARK MODE
+      window.toggleDarkMode = function () {
+        document.body.classList.toggle("dark-mode");
+        localStorage.setItem(
+          "bac_dark_mode",
+          document.body.classList.contains("dark-mode") ? "1" : "0"
+        );
+      };
+      if (localStorage.getItem("bac_dark_mode") === "1") {
+        document.body.classList.add("dark-mode");
+      }
+
+      // STRUCTURE DES MATIÈRES BAC
+      const BAC_SUBJECTS = [
+        {
+          id: "math",
+          name: "Mathématiques",
+          coef: 4,
+          ico: "📐",
+          cls: "sub-math",
+          color: "#2563eb",
+        },
+        {
+          id: "phys",
+          name: "Sciences Physiques",
+          coef: 4,
+          ico: "🔬",
+          cls: "sub-phys",
+          color: "#7c3aed",
+        },
+        {
+          id: "svt",
+          name: "SVT",
+          coef: 1,
+          ico: "🧬",
+          cls: "sub-svt",
+          color: "#059669",
+        },
+        {
+          id: "info",
+          name: "Informatique",
+          coef: 1,
+          ico: "💻",
+          cls: "sub-info",
+          color: "#0891b2",
+        },
+        {
+          id: "franc",
+          name: "Français",
+          coef: 1,
+          ico: "🇫🇷",
+          cls: "sub-franc",
+          color: "#e11d48",
+        },
+        {
+          id: "angl",
+          name: "Anglais",
+          coef: 1,
+          ico: "🇬🇧",
+          cls: "sub-angl",
+          color: "#4f46e5",
+        },
+        {
+          id: "philo",
+          name: "Philosophie",
+          coef: 1,
+          ico: "🧠",
+          cls: "sub-philo",
+          color: "#9333ea",
+        },
+        {
+          id: "arab",
+          name: "Arabe",
+          coef: 1,
+          ico: "📖",
+          cls: "sub-arab",
+          color: "#d97706",
+        },
+        {
+          id: "sport",
+          name: "Sport",
+          coef: 1,
+          ico: "🏃",
+          cls: "sub-sport",
+          color: "#ea580c",
+        },
+        {
+          id: "option",
+          name: "Option (Allemand/Espagnol/Musique...)",
+          coef: 1,
+          isOption: true,
+          ico: "📌",
+          cls: "sub-opt",
+          color: "#0284c7",
+        },
+      ];
+
+      function getSubjectMeta(sub = "") {
+        const s = sub.toLowerCase();
+        if (s.includes("math")) return BAC_SUBJECTS[0];
+        if (s.includes("phys") || s.includes("chim")) return BAC_SUBJECTS[1];
+        if (s.includes("svt") || s.includes("scien") || s.includes("bio"))
+          return BAC_SUBJECTS[2];
+        if (s.includes("info") || s.includes("algo") || s.includes("tic"))
+          return BAC_SUBJECTS[3];
+        if (s.includes("franc")) return BAC_SUBJECTS[4];
+        if (s.includes("angl")) return BAC_SUBJECTS[5];
+        if (s.includes("philo")) return BAC_SUBJECTS[6];
+        if (s.includes("arab")) return BAC_SUBJECTS[7];
+        if (s.includes("sport") || s.includes("eps")) return BAC_SUBJECTS[8];
+        return BAC_SUBJECTS[9];
+      }
+
+      function getEventStatus(eventDay, startMins, endMins) {
+        const now = new Date();
+        const realMonday = getMon(now);
+        const isThisWeek =
+          currentMonday.getDate() === realMonday.getDate() &&
+          currentMonday.getMonth() === realMonday.getMonth();
+
+        if (!isThisWeek) return { class: "", text: "" };
+
+        const currentRealDay = (now.getDay() + 6) % 7;
+        const currentMins = now.getHours() * 60 + now.getMinutes();
+
+        if (
+          eventDay < currentRealDay ||
+          (eventDay === currentRealDay && endMins <= currentMins)
+        ) {
+          return {
+            class: "status-done",
+            text: "<span class='badge-status badge-done'>✓ Fait</span>",
+          };
+        } else if (
+          eventDay === currentRealDay &&
+          startMins <= currentMins &&
+          endMins > currentMins
+        ) {
+          return {
+            class: "status-now",
+            text: "<span class='badge-status badge-now'>▶ En cours</span>",
+          };
+        }
+        return { class: "", text: "" };
+      }
+
+      // MODULE DES ANNALES BAC (2000 -> 2026)
+      function initBacArchiveTabs() {
+        const cont = document.getElementById("bacArchiveSubjectTabs");
+        if (!cont) return;
+        cont.innerHTML = "";
+        BAC_SUBJECTS.forEach((sub) => {
+          const btn = document.createElement("button");
+          btn.className = `btn-tab-item ${
+            sub.id === currentBacSubjectId ? "active" : ""
+          }`;
+          btn.innerText = `${sub.ico} ${sub.name}`;
+          btn.onclick = () => {
+            currentBacSubjectId = sub.id;
+            document
+              .querySelectorAll("#bacArchiveSubjectTabs .btn-tab-item")
+              .forEach((b) => b.classList.remove("active"));
+            btn.classList.add("active");
+            renderBacArchiveGrid();
+          };
+          cont.appendChild(btn);
+        });
+      }
+      initBacArchiveTabs();
+
+      window.searchBacOnline = function (subjectName, year) {
+        const query = encodeURIComponent(
+          `bac tunisie ${year} ${subjectName} section mathematiques pdf`
+        );
+        window.open(`https://www.google.com/search?q=${query}`, "_blank");
+      };
+
+      function renderBacArchiveGrid() {
+        const subObj =
+          BAC_SUBJECTS.find((s) => s.id === currentBacSubjectId) ||
+          BAC_SUBJECTS[0];
+        const titleEl = document.getElementById("bacCurrentSubjectName");
+        if (titleEl)
+          titleEl.innerText = `${subObj.ico} Annales : ${subObj.name} (Section Math)`;
+
+        const subData = bacArchiveData[currentBacSubjectId] || {};
+        let doneCount = 0;
+        const totalYears = 27;
+
+        const grid = document.getElementById("bacExamsGrid");
+        if (!grid) return;
+        grid.innerHTML = "";
+
+        for (let year = 2026; year >= 2000; year--) {
+          const yKey = `bac_${year}`;
+          const examItem = subData[yKey] || {
+            done: false,
+            starred: false,
+            comment: "",
+            pdfUrl: "",
+          };
+          if (examItem.done) doneCount++;
+
+          const box = document.createElement("div");
+          box.className = `bac-exam-box ${examItem.done ? "is-done" : ""} ${
+            examItem.starred ? "is-starred" : ""
+          }`;
+
+          box.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <div style="display:flex; align-items:center; gap:8px;">
+            <input type="checkbox" style="width:18px; height:18px; cursor:pointer;" ${
+              examItem.done ? "checked" : ""
+            } ${isReadOnly ? "disabled" : ""} onchange="toggleBacDone('${currentBacSubjectId}', '${yKey}', this.checked)">
+            <span style="font-weight:800; font-size:16px;">Baccalauréat ${year}</span>
+          </div>
+          <div style="display:flex; align-items:center; gap:6px;">
+            <button class="btn-action" style="padding:4px 8px; font-size:11px;" onclick="searchBacOnline('${
+              subObj.name
+            }', ${year})">🔍 Chercher Sujet</button>
+            <button class="star-btn ${
+              examItem.starred ? "starred" : ""
+            }" ${isReadOnly ? "disabled" : ""} onclick="toggleBacStar('${currentBacSubjectId}', '${yKey}', ${!examItem.starred})">🌟</button>
+          </div>
+        </div>
+
+        <div style="display:flex; gap:6px; align-items:center; margin-top:2px;">
+          <input type="url" class="input" style="padding:6px 10px; font-size:12px; flex-grow:1;" placeholder="Colle ton lien PDF ici (Drive / Web)..." value="${
+            examItem.pdfUrl || ""
+          }" ${isReadOnly ? "readonly" : ""} onchange="saveBacPdf('${currentBacSubjectId}', '${yKey}', this.value)">
+          ${
+            examItem.pdfUrl
+              ? `<a href="${examItem.pdfUrl}" target="_blank" class="btn-action" style="padding:6px 10px; text-decoration:none; font-size:11px; background:var(--primary); color:white; border-color:var(--primary);">📖 Ouvrir</a>`
+              : ""
+          }
+        </div>
+
+        <textarea class="input" style="padding:6px 10px; font-size:12px; height:50px; resize:none;" placeholder="Notes d'analyse (difficulté, fautes commises, astuces du corrigé...)" ${isReadOnly ? "readonly" : ""} onchange="saveBacComment('${currentBacSubjectId}', '${yKey}', this.value)">${
+            examItem.comment || ""
+          }</textarea>
+      `;
+          grid.appendChild(box);
+        }
+
+        const pct = ((doneCount / totalYears) * 100).toFixed(1);
+        document.getElementById(
+          "bacSubjectProgressCount"
+        ).innerText = `${doneCount} / ${totalYears} Sujets Réalisés`;
+        document.getElementById(
+          "bacSubjectProgressPct"
+        ).innerText = `${pct}% Complété`;
+      }
+
+      window.toggleBacDone = function (subId, yKey, isDone) {
+        if (isReadOnly) return;
+        set(
+          ref(
+            database,
+            getStudentPath(`bac_archive_2000_2026/${subId}/${yKey}/done`)
+          ),
+          isDone
+        );
+      };
+
+      window.toggleBacStar = function (subId, yKey, isStarred) {
+        if (isReadOnly) return;
+        set(
+          ref(
+            database,
+            getStudentPath(`bac_archive_2000_2026/${subId}/${yKey}/starred`)
+          ),
+          isStarred
+        );
+      };
+
+      window.saveBacPdf = function (subId, yKey, url) {
+        if (isReadOnly) return;
+        set(
+          ref(
+            database,
+            getStudentPath(`bac_archive_2000_2026/${subId}/${yKey}/pdfUrl`)
+          ),
+          url.trim()
+        );
+      };
+
+      window.saveBacComment = function (subId, yKey, comment) {
+        if (isReadOnly) return;
+        set(
+          ref(
+            database,
+            getStudentPath(`bac_archive_2000_2026/${subId}/${yKey}/comment`)
+          ),
+          comment.trim()
+        );
+      };
+
+      // GESTION DES EXAMENS
+      window.saveExam = function () {
+        if (isReadOnly) return alert("Accès en lecture seule.");
+        const sub = document.getElementById("exSub").value;
+        const type = document.getElementById("exType").value;
+        const date = document.getElementById("exDate").value;
+        const desc = document.getElementById("exDesc").value.trim();
+
+        if (!date) return alert("Veuillez sélectionner une date.");
+
+        const newId = Date.now().toString();
+        const examData = { id: newId, sub, type, date, desc };
+        set(ref(database, getStudentPath("examens/" + newId)), examData);
+        window.closeModal("addExamModal");
+      };
+
+      function renderExams() {
+        const list = document.getElementById("examsList");
+        if (!list) return;
+        list.innerHTML = "";
+
+        if (!examsDb.length) {
+          list.innerHTML =
+            '<div style="text-align:center; grid-column:1/-1; padding:50px; color:var(--muted);">Aucun examen planifié.</div>';
+          return;
+        }
+
+        examsDb
+          .sort((a, b) => new Date(a.date) - new Date(b.date))
+          .forEach((ex) => {
+            const meta = getSubjectMeta(ex.sub);
+            const exDate = new Date(ex.date);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const diffDays = Math.ceil(
+              (exDate - today) / (1000 * 60 * 60 * 24)
+            );
+
+            let countdownBadge = "";
+            if (diffDays < 0)
+              countdownBadge =
+                '<span class="badge-status badge-done">Terminé</span>';
+            else if (diffDays === 0)
+              countdownBadge =
+                '<span class="badge-status badge-now" style="background:#ef4444;">Aujourd\'hui !</span>';
+            else
+              countdownBadge = `<span class="badge-status badge-now">Dans ${diffDays} jour${
+                diffDays > 1 ? "s" : ""
+              }</span>`;
+
+            list.innerHTML += `
+        <div style="background:var(--card); border:1.5px solid var(--dash); border-left:6px solid ${
+          meta.color
+        }; border-radius:14px; padding:16px; box-shadow:var(--shadow-sm); display:flex; flex-direction:column; justify-content:space-between; gap:10px;">
+          <div>
+            <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+              <div>
+                <div style="font-weight:800; font-size:15px;">${meta.ico} ${
+              ex.sub
+            }</div>
+                <div style="font-size:12px; font-weight:700; color:var(--primary); margin-top:2px;">${
+                  ex.type
+                }</div>
+              </div>
+              <div>${countdownBadge}</div>
+            </div>
+            <div style="font-size:12px; color:var(--muted); margin-top:8px; font-weight:600;">📅 Date : ${exDate.toLocaleDateString(
+              "fr-FR",
+              {
+                weekday: "long",
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+              }
+            )}</div>
+            ${
+              ex.desc
+                ? `<div style="font-size:12px; margin-top:6px; background:var(--dash); padding:8px 10px; border-radius:8px;">📌 <b>Programme :</b> ${ex.desc}</div>`
+                : ""
+            }
+          </div>
+          ${
+            !isReadOnly
+              ? `<div style="display:flex; justify-content:flex-end;">
+                  <button onclick="window.deleteExam('${ex.id}')" style="background:none; border:none; color:#ef4444; font-weight:700; font-size:12px; cursor:pointer;">Supprimer 🗑️</button>
+                </div>`
+              : ""
+          }
+        </div>
+      `;
+          });
+      }
+
+      window.deleteExam = function (id) {
+        if (isReadOnly) return;
+        if (confirm("Supprimer cet examen ?"))
+          remove(ref(database, getStudentPath("examens/" + id)));
+      };
+
+      // CALCULATEUR TRIMESTRIEL
+      window.switchTrimester = function (trim) {
+        currentTrimester = trim;
+        document
+          .querySelectorAll(".btn-tab-item")
+          .forEach((b) => b.classList.remove("active"));
+
+        if (trim === "trim1")
+          document.getElementById("tabTrim1")?.classList.add("active");
+        if (trim === "trim2")
+          document.getElementById("tabTrim2")?.classList.add("active");
+        if (trim === "trim3")
+          document.getElementById("tabTrim3")?.classList.add("active");
+        if (trim === "year")
+          document.getElementById("tabTrimYear")?.classList.add("active");
+
+        if (trim === "year") {
+          document.getElementById("trimesterTableView").style.display = "none";
+          document.getElementById("annualSummaryView").style.display = "block";
+          document.getElementById("avgCardTitle").innerText =
+            "MOYENNE ANNUELLE GÉNÉRALE";
+          buildAnnualSummaryTable();
+        } else {
+          document.getElementById("trimesterTableView").style.display = "block";
+          document.getElementById("annualSummaryView").style.display = "none";
+          const titles = {
+            trim1: "MOYENNE DU 1ER TRIMESTRE",
+            trim2: "MOYENNE DU 2ÈME TRIMESTRE",
+            trim3: "MOYENNE DU 3ÈME TRIMESTRE",
+          };
+          document.getElementById("avgCardTitle").innerText = titles[trim];
+          buildTrimesterTable();
+        }
+      };
+
+      function buildTrimesterTable() {
+        const tbody = document.getElementById("gradesTableBody");
+        if (!tbody) return;
+        tbody.innerHTML = "";
+        const currentData = userGrades[currentTrimester] || {};
+
+        BAC_SUBJECTS.forEach((sub) => {
+          const g = currentData[sub.id] || {
+            oral: "",
+            dc: "",
+            ds: "",
+            hasOral: false,
+          };
+          const isOralChecked = g.hasOral === true;
+
+          tbody.innerHTML += `
+        <tr>
+          <td style="text-align:left; font-weight:700;">
+            ${sub.ico} ${sub.name}
+            <div style="margin-top:3px;">
+              <label class="oral-toggle-label">
+                <input type="checkbox" id="oral_chk_${sub.id}" ${
+            isOralChecked ? "checked" : ""
+          } ${isReadOnly ? "disabled" : ""} onchange="toggleOralOption('${sub.id}')">
+                <span>+ Oral / TP</span>
+              </label>
+            </div>
+          </td>
+          <td style="font-weight:800;">${sub.coef}</td>
+          <td>
+            <input type="number" step="0.25" min="0" max="20" class="grade-input" id="g_oral_${
+              sub.id
+            }" value="${g.oral || ""}" ${
+            isOralChecked && !isReadOnly ? "" : 'disabled placeholder="Non"'
+          } onchange="saveTrimesterGradeInput('${sub.id}')">
+          </td>
+          <td>
+            <input type="number" step="0.25" min="0" max="20" class="grade-input" id="g_dc_${
+              sub.id
+            }" value="${g.dc || ""}" ${isReadOnly ? "disabled" : ""} onchange="saveTrimesterGradeInput('${
+            sub.id
+          }')">
+          </td>
+          <td>
+            <input type="number" step="0.25" min="0" max="20" class="grade-input" id="g_ds_${
+              sub.id
+            }" value="${g.ds || ""}" ${isReadOnly ? "disabled" : ""} onchange="saveTrimesterGradeInput('${
+            sub.id
+          }')">
+          </td>
+          <td style="font-weight:800; font-family:'JetBrains Mono', monospace; color:var(--primary);" id="sub_avg_${
+            sub.id
+          }">--</td>
+        </tr>
+      `;
+        });
+        calculateTrimesterAverages();
+      }
+
+      window.toggleOralOption = function (subId) {
+        if (isReadOnly) return;
+        const chk = document.getElementById(`oral_chk_${subId}`).checked;
+        const oralInput = document.getElementById(`g_oral_${subId}`);
+        oralInput.disabled = !chk;
+        if (!chk) oralInput.value = "";
+        window.saveTrimesterGradeInput(subId);
+      };
+
+      window.saveTrimesterGradeInput = function (subId) {
+        if (isReadOnly) return;
+        const hasOral = document.getElementById(`oral_chk_${subId}`).checked;
+        const oral = document.getElementById(`g_oral_${subId}`).value;
+        const dc = document.getElementById(`g_dc_${subId}`).value;
+        const ds = document.getElementById(`g_ds_${subId}`).value;
+
+        const data = { hasOral, oral, dc, ds };
+        set(
+          ref(
+            database,
+            getStudentPath(`notes_trimestrielles/${currentTrimester}/${subId}`)
+          ),
+          data
+        );
+      };
+
+      function computeSubjectAverage(g) {
+        if (!g) return null;
+        const o = parseFloat(g.oral);
+        const dc = parseFloat(g.dc);
+        const ds = parseFloat(g.ds);
+        const hasOral = g.hasOral === true;
+
+        let sum = 0,
+          div = 0;
+        if (!isNaN(ds)) {
+          sum += ds * 2;
+          div += 2;
+        }
+        if (!isNaN(dc)) {
+          sum += dc * 1;
+          div += 1;
+        }
+        if (hasOral && !isNaN(o)) {
+          sum += o * 1;
+          div += 1;
+        }
+
+        return div > 0 ? sum / div : null;
+      }
+
+      window.calculateTrimesterAverages = function () {
+        const mode = document.getElementById("gradeCalcMode")?.value || "Trimestre";
+        const currentData = userGrades[currentTrimester] || {};
+        let totalPoints = 0,
+          totalCoef = 0;
+
+        BAC_SUBJECTS.forEach((sub) => {
+          const g = currentData[sub.id];
+          const avg = computeSubjectAverage(g);
+
+          const avgEl = document.getElementById(`sub_avg_${sub.id}`);
+          if (avg !== null) {
+            if (avgEl) avgEl.innerText = avg.toFixed(2);
+            if (sub.isOption && mode === "Bac") {
+              if (avg > 10) totalPoints += avg - 10;
+            } else {
+              totalPoints += avg * sub.coef;
+              totalCoef += sub.coef;
+            }
+          } else {
+            if (avgEl) avgEl.innerText = "--";
+          }
+        });
+
+        if (totalCoef > 0) {
+          const genAvg = totalPoints / totalCoef;
+          document.getElementById("totalTrimesterAverage").innerText =
+            genAvg.toFixed(2) + " / 20";
+          document.getElementById("totalPointsSum").innerText =
+            totalPoints.toFixed(2);
+          document.getElementById("totalCoefSum").innerText = totalCoef;
+        } else {
+          document.getElementById("totalTrimesterAverage").innerText =
+            "-- / 20";
+          document.getElementById("totalPointsSum").innerText = "--";
+          document.getElementById("totalCoefSum").innerText = "--";
+        }
+      };
+
+      function buildAnnualSummaryTable() {
+        const tbody = document.getElementById("annualGradesTableBody");
+        if (!tbody) return;
+        tbody.innerHTML = "";
+        const mode = document.getElementById("gradeCalcMode")?.value || "Trimestre";
+        let annualTotalPoints = 0,
+          annualTotalCoef = 0;
+
+        BAC_SUBJECTS.forEach((sub) => {
+          const a1 = computeSubjectAverage(
+            userGrades.trim1 ? userGrades.trim1[sub.id] : null
+          );
+          const a2 = computeSubjectAverage(
+            userGrades.trim2 ? userGrades.trim2[sub.id] : null
+          );
+          const a3 = computeSubjectAverage(
+            userGrades.trim3 ? userGrades.trim3[sub.id] : null
+          );
+
+          let validSums = 0,
+            validCounts = 0;
+          if (a1 !== null) {
+            validSums += a1;
+            validCounts++;
+          }
+          if (a2 !== null) {
+            validSums += a2;
+            validCounts++;
+          }
+          if (a3 !== null) {
+            validSums += a3;
+            validCounts++;
+          }
+
+          const annualSubAvg = validCounts > 0 ? validSums / validCounts : null;
+
+          if (annualSubAvg !== null) {
+            if (sub.isOption && mode === "Bac") {
+              if (annualSubAvg > 10) annualTotalPoints += annualSubAvg - 10;
+            } else {
+              annualTotalPoints += annualSubAvg * sub.coef;
+              annualTotalCoef += sub.coef;
+            }
+          }
+
+          tbody.innerHTML += `
+        <tr>
+          <td style="text-align:left; font-weight:700;">${sub.ico} ${
+            sub.name
+          }</td>
+          <td style="font-weight:800;">${sub.coef}</td>
+          <td style="font-family:'JetBrains Mono', monospace;">${
+            a1 !== null ? a1.toFixed(2) : "--"
+          }</td>
+          <td style="font-family:'JetBrains Mono', monospace;">${
+            a2 !== null ? a2.toFixed(2) : "--"
+          }</td>
+          <td style="font-family:'JetBrains Mono', monospace;">${
+            a3 !== null ? a3.toFixed(2) : "--"
+          }</td>
+          <td style="font-weight:800; font-family:'JetBrains Mono', monospace; color:var(--primary);">
+            ${annualSubAvg !== null ? annualSubAvg.toFixed(2) : "--"}
+          </td>
+        </tr>
+      `;
+        });
+
+        if (annualTotalCoef > 0) {
+          const annualGenAvg = annualTotalPoints / annualTotalCoef;
+          document.getElementById("totalTrimesterAverage").innerText =
+            annualGenAvg.toFixed(2) + " / 20";
+          document.getElementById("totalPointsSum").innerText =
+            annualTotalPoints.toFixed(2);
+          document.getElementById("totalCoefSum").innerText = annualTotalCoef;
+        } else {
+          document.getElementById("totalTrimesterAverage").innerText =
+            "-- / 20";
+          document.getElementById("totalPointsSum").innerText = "--";
+          document.getElementById("totalCoefSum").innerText = "--";
+        }
+      }
+
+      // CLÉ API GEMINI
+      window.setApiKey = function () {
+        const current = localStorage.getItem("gemini_api_key") || "";
+        const key = prompt("Colle ta clé API Google AI Studio :", current);
+        if (key !== null && key.trim() !== "") {
+          localStorage.setItem("gemini_api_key", key.trim());
+          alert("Clé enregistrée !");
+        }
+      };
+
+      function getMon(d) {
+        const dt = new Date(d);
+        const day = dt.getDay();
+        const diff = dt.getDate() - day + (day === 0 ? -6 : 1);
+        return new Date(dt.setDate(diff));
+      }
+
+      function formatM(m) {
+        let h = Math.floor(m / 60),
+          min = m % 60;
+        return `${h < 10 ? "0" + h : h}:${min < 10 ? "0" + min : min}`;
+      }
+
+      window.setLayout = function (l) {
+        layout = l;
+        localStorage.setItem("app_layout_final", l);
+        render();
+      };
+
+      function render() {
+        const btnMob = document.getElementById("btnMob");
+        const btnPc = document.getElementById("btnPc");
+        if (btnMob) btnMob.classList.toggle("active", layout === "mobile");
+        if (btnPc) btnPc.classList.toggle("active", layout === "pc");
+
+        const pcView = document.getElementById("pcView");
+        const mobView = document.getElementById("mobView");
+        if (pcView) pcView.style.display = layout === "pc" ? "block" : "none";
+        if (mobView) mobView.style.display = layout === "mobile" ? "flex" : "none";
+
+        const endSun = new Date(currentMonday);
+        endSun.setDate(endSun.getDate() + 6);
+        const dateLabel = document.getElementById("dateLabel");
+
+        if (layout === "pc") {
+          if (dateLabel)
+            dateLabel.innerText = `${currentMonday.getDate()} ${
+              months[currentMonday.getMonth()]
+            } - ${endSun.getDate()} ${months[endSun.getMonth()]}`;
+          renderPc();
+        } else {
+          const activeD = new Date(currentMonday);
+          activeD.setDate(activeD.getDate() + curDayIdx);
+          if (dateLabel)
+            dateLabel.innerText = `${
+              days[curDayIdx]
+            } ${activeD.getDate()} ${months[activeD.getMonth()]}`;
+          renderMob();
+        }
+      }
+
+      function renderPc() {
+        const pHead = document.getElementById("pcHeader");
+        if (!pHead) return;
+        pHead.innerHTML =
+          '<div style="background:var(--dash);border-radius:10px;display:flex;align-items:center;justify-content:center;">🗓️</div>';
+
+        const now = new Date();
+        const isThisWeek =
+          currentMonday.getDate() === getMon(now).getDate() &&
+          currentMonday.getMonth() === getMon(now).getMonth();
+        const realDay = (now.getDay() + 6) % 7;
+
+        for (let i = 0; i < 7; i++) {
+          const d = new Date(currentMonday);
+          d.setDate(d.getDate() + i);
+          const isToday = isThisWeek && i === realDay;
+          pHead.innerHTML += `<div style="background:${
+            isToday ? "#0284c7" : "var(--dash)"
+          };color:${
+            isToday ? "#fff" : "var(--text)"
+          };border-radius:10px;padding:6px;text-align:center;font-weight:700;font-size:12px;cursor:pointer;" onclick="window.curDayIdx=${i};window.render();">${
+            days[i]
+          }<br><span style="font-size:10px;opacity:0.85;">${d.getDate()} ${
+            months[d.getMonth()]
+          }</span></div>`;
+        }
+        const tCol = document.getElementById("timeCol");
+        if (!tCol) return;
+        tCol.innerHTML = "";
+        for (let h = 8; h <= 24; h++)
+          tCol.innerHTML += `<div class="h-slot">${
+            h === 24 ? "00" : h < 10 ? "0" + h : h
+          }:00</div>`;
+
+        const dCol = document.getElementById("daysCol");
+        if (!dCol) return;
+        dCol.innerHTML = "";
+        for (let day = 0; day < 7; day++) {
+          const col = document.createElement("div");
+          col.className = "col-day";
+          for (let h = 8; h <= 24; h++)
+            col.innerHTML += `<div class="h-slot" onclick="${
+              isReadOnly
+                ? ""
+                : `window.openModal('addModal', ${day}, ${
+                    h === 24 ? 23 : h
+                  })`
+            }"></div>`;
+
+          db.filter((e) => e.day === day).forEach((ev) => {
+            const meta = getSubjectMeta(ev.sub);
+            const status = getEventStatus(ev.day, ev.s, ev.e);
+            const top = ((ev.s - 480) / 60) * 46;
+            const hPx = Math.max(30, ((ev.e - ev.s) / 60) * 46);
+
+            const isQuin = ev.freq && ev.freq.includes("quinzaine");
+            const isHome = ev.type && ev.type.includes("maison");
+            const isOnline = ev.type && ev.type.includes("ligne");
+
+            const c = document.createElement("div");
+            c.className = `event-card ${meta.cls} ${status.class}`;
+            c.style.top = `${top}px`;
+            c.style.height = `${hPx}px`;
+            c.innerHTML = `
+          <div>
+            ${status.text}
+            <div style="font-weight:800; font-size:10.5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+              ${meta.ico} ${ev.sub}
+            </div>
+            <div style="margin-top:1px;">
+              ${
+                ev.type
+                  ? `<span class="tag-meta" style="${
+                      isHome
+                        ? "background:#059669; color:white;"
+                        : isOnline
+                        ? "background:#0891b2; color:white;"
+                        : ""
+                    }">${ev.type}</span>`
+                  : ""
+              }
+              ${
+                isQuin
+                  ? `<span class="tag-meta" style="background:#f59e0b; color:white;">1/2</span>`
+                  : ""
+              }
+            </div>
+          </div>
+          <div style="font-size:9px; opacity:0.85; font-weight:700;">${formatM(
+            ev.s
+          )} - ${formatM(ev.e)}</div>
+        `;
+
+            if (!isReadOnly) {
+              c.onclick = (e) => {
+                e.stopPropagation();
+                if (confirm(`Supprimer la séance : "${ev.sub}" ?`)) {
+                  remove(ref(database, getStudentPath("seances/" + ev.id)));
+                }
+              };
+            }
+            col.appendChild(c);
+          });
+          dCol.appendChild(col);
+        }
+      }
+
+      function renderMob() {
+        const sc = document.getElementById("mobScroller");
+        if (!sc) return;
+        sc.innerHTML = "";
+        for (let i = 0; i < 7; i++) {
+          const d = new Date(currentMonday);
+          d.setDate(d.getDate() + i);
+          sc.innerHTML += `<div class="mob-chip ${
+            i === curDayIdx ? "active" : ""
+          }" onclick="window.curDayIdx=${i};window.render();"><div style="font-size:12px;font-weight:700;">${days[
+            i
+          ].substring(0, 3)}</div><div style="font-size:10px;">${d.getDate()} ${
+            months[d.getMonth()]
+          }</div></div>`;
+        }
+        const ml = document.getElementById("mobList");
+        if (!ml) return;
+        ml.innerHTML = "";
+        const dayEvs = db
+          .filter((e) => e.day === curDayIdx)
+          .sort((a, b) => a.s - b.s);
+        if (!dayEvs.length) {
+          ml.innerHTML =
+            '<div style="text-align:center;padding:40px;color:var(--muted);font-size:13px;">☕ Aucune séance prévue ce jour-là.</div>';
+          return;
+        }
+        dayEvs.forEach((ev) => {
+          const meta = getSubjectMeta(ev.sub);
+          const status = getEventStatus(ev.day, ev.s, ev.e);
+          const isQuin = ev.freq && ev.freq.includes("quinzaine");
+          const isHome = ev.type && ev.type.includes("maison");
+          const isOnline = ev.type && ev.type.includes("ligne");
+
+          ml.innerHTML += `
+        <div class="mob-card ${meta.cls} ${status.class}">
+          <div>
+            ${status.text}
+            <div style="font-size:14px;font-weight:800;">${meta.ico} ${
+            ev.sub
+          }</div>
+            <div style="margin:3px 0;">
+              ${
+                ev.type
+                  ? `<span class="tag-meta" style="${
+                      isHome
+                        ? "background:#059669; color:white;"
+                        : isOnline
+                        ? "background:#0891b2; color:white;"
+                        : ""
+                    }">${ev.type}</span>`
+                  : ""
+              }
+              ${
+                isQuin
+                  ? `<span class="tag-meta" style="background:#f59e0b; color:white;">1/2 quinzaine</span>`
+                  : ""
+              }
+            </div>
+            <div style="font-size:12px;opacity:0.85;font-weight:600;">🕒 ${formatM(
+              ev.s
+            )} - ${formatM(ev.e)}</div>
+          </div>
+          ${
+            !isReadOnly
+              ? `<button onclick="window.deleteEvent('${ev.id}')" style="border:none;background:none;font-size:18px;cursor:pointer;">🗑️</button>`
+              : ""
+          }
+        </div>
+      `;
+        });
+      }
+
+      window.deleteEvent = function (id) {
+        if (isReadOnly) return;
+        if (confirm("Supprimer cette séance ?")) {
+          remove(ref(database, getStudentPath("seances/" + id)));
+        }
+      };
+
+      window.shift = function (d) {
+        if (layout === "pc")
+          currentMonday.setDate(currentMonday.getDate() + d * 7);
+        else curDayIdx = (curDayIdx + d + 7) % 7;
+        render();
+      };
+
+      window.goToToday = function () {
+        const n = new Date();
+        currentMonday = getMon(n);
+        curDayIdx = (n.getDay() + 6) % 7;
+        render();
+      };
+
+      window.clearAllData = function () {
+        if (isReadOnly) return;
+        if (confirm("Vider tout le planning personnel de cet élève ?")) {
+          set(ref(database, getStudentPath("seances")), null);
+        }
+      };
+
+      window.render = render;
+      window.curDayIdx = curDayIdx;
+
+      window.openModal = function (id, day = curDayIdx, h = 8) {
+        if (isReadOnly && (id === "addModal" || id === "addExamModal")) return;
+        if (id === "addModal") {
+          document.getElementById("mDay").value = day;
+          document.getElementById("mStart").value = `${
+            h < 10 ? "0" + h : h
+          }:00`;
+          document.getElementById("mEnd").value = `${
+            h + 2 < 10 ? "0" + (h + 2) : h + 2
+          }:00`;
+        }
+        document.getElementById(id).style.display = "flex";
+      };
+      window.closeModal = function (id) {
+        document.getElementById(id).style.display = "none";
+      };
+
+      window.saveEvent = function () {
+        if (isReadOnly) return alert("Accès en lecture seule.");
+        const sub = document.getElementById("mSub").value.trim();
+        if (!sub) return;
+        const type = document.getElementById("mType").value;
+        const freq = document.getElementById("mFreq").value;
+        const [sH, sM] = document
+          .getElementById("mStart")
+          .value.split(":")
+          .map(Number);
+        const [eH, eM] = document
+          .getElementById("mEnd")
+          .value.split(":")
+          .map(Number);
+
+        const newId = Date.now().toString();
+        const newEvent = {
+          id: newId,
+          day: parseInt(document.getElementById("mDay").value),
+          s: sH * 60 + sM,
+          e: eH * 60 + eM,
+          sub,
+          type,
+          freq,
+        };
+
+        set(ref(database, getStudentPath("seances/" + newId)), newEvent);
+        window.closeModal("addModal");
+      };
+
+      window.openOverlay = function (id) {
+        document.getElementById(id).style.display = "flex";
+      };
+      window.closeOverlay = function (id) {
+        document.getElementById(id).style.display = "none";
+      };
+
+      // STATISTIQUES PLEIN ÉCRAN
+      window.renderStatsData = function () {
+        const filter = document.getElementById("statsFilterType")?.value || "Maison";
+        const subjectsMap = {};
+        let totalMinutes = 0;
+
+        db.forEach((ev) => {
+          const isHome = ev.type && ev.type.toLowerCase().includes("maison");
+          const isOnline = ev.type && ev.type.toLowerCase().includes("ligne");
+
+          if (filter === "Maison" && !isHome) return;
+          if (filter === "Autonomie" && !isHome && !isOnline) return;
+
+          const meta = getSubjectMeta(ev.sub);
+          const dur = Math.max(0, ev.e - ev.s);
+          subjectsMap[meta.name] = (subjectsMap[meta.name] || 0) + dur;
+          totalMinutes += dur;
+        });
+
+        const cont = document.getElementById("statsContent");
+        if (!cont) return;
+        const filterTitles = {
+          Maison: "🏠 À la Maison (Autonomie)",
+          Autonomie: "⚡ Maison & En ligne",
+          All: "🌐 Totalité des séances",
+        };
+        cont.innerHTML = `
+      <div style="background:var(--dash); padding:18px; border-radius:14px; font-weight:800; font-size:16px; text-align:center; box-shadow:var(--shadow-sm);">
+        Volume : <span style="color:var(--primary); font-size:18px;">${(
+          totalMinutes / 60
+        ).toFixed(1)} Heures</span> / semaine (${filterTitles[filter]})
+      </div>
+    `;
+
+        if (totalMinutes === 0) {
+          cont.innerHTML += `<div style="text-align:center; padding:50px; color:var(--muted); font-size:14px;">Aucune séance trouvée pour ce filtre.</div>`;
+        } else {
+          for (const [name, mins] of Object.entries(subjectsMap)) {
+            const pct = ((mins / totalMinutes) * 100).toFixed(1);
+            const meta = getSubjectMeta(name);
+            cont.innerHTML += `
+          <div style="background:var(--card); border:1.5px solid var(--dash); padding:16px; border-radius:14px; box-shadow:var(--shadow-sm);">
+            <div style="display:flex; justify-content:space-between; font-weight:800; font-size:14px; margin-bottom:8px;">
+              <span style="display:flex; align-items:center; gap:6px;">${
+                meta.ico
+              } ${name}</span>
+              <span style="font-family:'JetBrains Mono', monospace;">${(
+                mins / 60
+              ).toFixed(
+                1
+              )}h <span style="color:var(--muted); font-size:12px;">(${pct}%)</span></span>
+            </div>
+            <div style="background:var(--dash); height:12px; border-radius:99px; overflow:hidden;">
+              <div style="background:${
+                meta.color
+              }; width:${pct}%; height:100%; border-radius:99px; transition:width 0.6s cubic-bezier(0.4, 0, 0.2, 1);"></div>
+            </div>
+          </div>
+        `;
+          }
+        }
+      };
+
+      window.openStats = function () {
+        window.renderStatsData();
+        openOverlay("statsOverlay");
+      };
+
+      // MINUTEUR PLEIN ÉCRAN
+      let timerSeconds = 5400;
+      let timerInterval = null;
+      let isTimerRunning = false;
+
+      function renderTimer() {
+        const h = Math.floor(timerSeconds / 3600);
+        const m = Math.floor((timerSeconds % 3600) / 60);
+        const s = timerSeconds % 60;
+        const display = document.getElementById("timerDisplay");
+        if (display)
+          display.innerText = `${
+            h < 10 ? "0" + h : h
+          }:${m < 10 ? "0" + m : m}:${s < 10 ? "0" + s : s}`;
+      }
+
+      window.openTimer = function () {
+        renderTimer();
+        openOverlay("timerOverlay");
+      };
+
+      window.setCustomTimer = function () {
+        const h = parseInt(document.getElementById("tHours").value) || 0;
+        const m = parseInt(document.getElementById("tMinutes").value) || 0;
+        timerSeconds = h * 3600 + m * 60;
+        if (timerSeconds <= 0) timerSeconds = 60;
+        if (isTimerRunning) window.toggleTimer();
+        renderTimer();
+      };
+
+      window.toggleTimer = function () {
+        const btn = document.getElementById("btnTimerStart");
+        if (isTimerRunning) {
+          clearInterval(timerInterval);
+          isTimerRunning = false;
+          btn.innerText = "Reprendre";
+          btn.style.background = "#10b981";
+        } else {
+          if (timerSeconds <= 0) return;
+          isTimerRunning = true;
+          btn.innerText = "Pause";
+          btn.style.background = "#f59e0b";
+          timerInterval = setInterval(() => {
+            if (timerSeconds > 0) {
+              timerSeconds--;
+              renderTimer();
+            } else {
+              clearInterval(timerInterval);
+              isTimerRunning = false;
+              btn.innerText = "Lancer";
+              btn.style.background = "#10b981";
+              playBeep();
+              alert(
+                "⏱️ Session de révision terminée ! Prends une pause bien méritée."
+              );
+            }
+          }, 1000);
+        }
+      };
+
+      window.resetTimer = function () {
+        if (isTimerRunning) window.toggleTimer();
+        window.setCustomTimer();
+      };
+
+      function playBeep() {
+        try {
+          const ctx = new (window.AudioContext || window.webkitAudioContext)();
+          const osc = ctx.createOscillator();
+          osc.type = "sine";
+          osc.frequency.setValueAtTime(880, ctx.currentTime);
+          osc.connect(ctx.destination);
+          osc.start();
+          osc.stop(ctx.currentTime + 0.8);
+        } catch (e) {}
+      }
+
+      function showLoading(msg) {
+        document.getElementById("loadingText").innerText = msg;
+        document.getElementById("loadingOverlay").style.display = "flex";
+      }
+      function hideLoading() {
+        document.getElementById("loadingOverlay").style.display = "none";
+      }
+
+      // MOTEUR IA GEMINI
+      async function callGoogleSDK(
+        prompt,
+        base64Image = null,
+        mimeType = "image/jpeg"
+      ) {
+        const apiKey = localStorage.getItem("gemini_api_key");
+        if (!apiKey)
+          throw new Error("Clé API manquante. Clique sur '🔑 Clé IA'.");
+
+        const genAI = new GoogleGenerativeAI(apiKey);
+        const modelsToTest = [
+          "gemini-2.5-flash",
+          "gemini-1.5-flash",
+          "gemini-1.5-pro",
+        ];
+        let lastError = "";
+
+        for (let modelName of modelsToTest) {
+          try {
+            const config = {
+              generationConfig: { responseMimeType: "application/json" },
+            };
+            const model = genAI.getGenerativeModel({
+              model: modelName,
+              ...config,
+            });
+            let contentToSend = [prompt];
+
+            if (base64Image) {
+              contentToSend.push({
+                inlineData: { data: base64Image, mimeType: mimeType },
+              });
+            }
+
+            const result = await model.generateContent(contentToSend);
+            const response = await result.response;
+            let text = response.text();
+
+            const extractMatch =
+              text.match(/\[[\s\S]*\]/) || text.match(/\{[\s\S]*\}/);
+            if (extractMatch) text = extractMatch[0];
+            text = text
+              .replace(/```json/gi, "")
+              .replace(/```/g, "")
+              .trim();
+
+            return JSON.parse(text);
+          } catch (error) {
+            lastError = error.message;
+            if (lastError.includes("404") || lastError.includes("not found"))
+              continue;
+            throw new Error(`Erreur avec ${modelName} : ${lastError}`);
+          }
+        }
+        throw new Error("Erreur IA : " + lastError);
+      }
+
+      // SCAN IMAGE IA
+      window.handleImageUpload = function (e) {
+        if (isReadOnly) return alert("Accès en lecture seule.");
+        const file = e.target.files[0];
+        if (!file) return;
+        if (!localStorage.getItem("gemini_api_key"))
+          return alert("Clique sur 🔑 Clé IA et colle ta clé !");
+
+        showLoading("Analyse complète de l'emploi du temps...");
+        const reader = new FileReader();
+
+        reader.onload = async () => {
+          const base64Data = reader.result.split(",")[1];
+          const mimeType = file.type || "image/jpeg";
+
+          const prompt = `Analyse cet emploi du temps (tunisien/français/arabe). 
+Extrais toutes les séances en séparant chaque matière : Mathématiques, Sciences Physiques, SVT, Informatique, Français, Anglais, Philosophie, Arabe, Sport.
+Précise le type : 'À la maison', 'Lycée', 'Particulier' ou 'En ligne'. Si c'est par quinzaine, note freq: 'Par quinzaine (1/2)'.
+Format JSON strict :
+[
+  { "day": 0, "s": 480, "e": 600, "sub": "Mathématiques", "type": "Lycée", "freq": "Toutes les semaines" }
+]`;
+
+          try {
+            const items = await callGoogleSDK(prompt, base64Data, mimeType);
+            let arr = Array.isArray(items) ? items : [items];
+
+            arr.forEach((it) => {
+              const newId = (Date.now() + Math.random())
+                .toString()
+                .replace(".", "");
+              const newEvent = {
+                id: newId,
+                day: parseInt(it.day) || 0,
+                s: parseInt(it.s) || 480,
+                e: parseInt(it.e) || 600,
+                sub: it.sub || "Matière",
+                type: it.type || "Lycée",
+                freq: it.freq || "Toutes les semaines",
+              };
+              set(ref(database, getStudentPath("seances/" + newId)), newEvent);
+            });
+
+            hideLoading();
+            alert(
+              `✨ ${arr.length} séances ont été ajoutées et synchronisées !`
+            );
+          } catch (err) {
+            hideLoading();
+            alert(err.message);
+          }
+        };
+        reader.readAsDataURL(file);
+      };
+
+      // MICRO IA
+      window.voiceInput = function () {
+        if (isReadOnly) return alert("Accès en lecture seule.");
+        if (!localStorage.getItem("gemini_api_key"))
+          return alert("Clique sur 🔑 Clé IA d'abord !");
+
+        const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SR)
+          return alert(
+            "Reconnaissance vocale non supportée sur ce navigateur."
+          );
+
+        const r = new SR();
+        r.lang = "fr-FR";
+        r.continuous = false;
+        r.interimResults = false;
+
+        const mic = document.getElementById("mainMicBtn");
+        mic.classList.add("listening");
+        mic.innerText = "🔴 Parle...";
+
+        r.onresult = async (ev) => {
+          const phrase = ev.results[0][0].transcript;
+          mic.classList.remove("listening");
+          mic.innerText = "🎙️ Micro IA";
+          showLoading("Compréhension vocale par l'IA...");
+
+          const prompt = `L'utilisateur a dicté : "${phrase}".
+Extrais les données : Mathématiques, Sciences Physiques, SVT, Informatique, Français, Anglais, Philosophie, Arabe, Sport.
+Déduis si c'est 'À la maison', 'Lycée', 'Particulier' ou 'En ligne'.
+Format JSON strict :
+{ "day": 0, "s": 480, "e": 600, "sub": "Mathématiques", "type": "À la maison", "freq": "Toutes les semaines" }`;
+
+          try {
+            const result = await callGoogleSDK(prompt);
+            const it = Array.isArray(result) ? result[0] : result;
+            const newId = Date.now().toString();
+
+            const newEvent = {
+              id: newId,
+              day: parseInt(it.day) || 0,
+              s: parseInt(it.s) || 480,
+              e: parseInt(it.e) || 600,
+              sub: it.sub || "Activité",
+              type: it.type || "À la maison",
+              freq: it.freq || "Toutes les semaines",
+            };
+
+            set(ref(database, getStudentPath("seances/" + newId)), newEvent);
+            hideLoading();
+          } catch (err) {
+            hideLoading();
+            alert(err.message);
+          }
+        };
+
+        r.onerror = () => {
+          mic.classList.remove("listening");
+          mic.innerText = "🎙️ Micro IA";
+        };
+        r.onend = () => {
+          mic.classList.remove("listening");
+          mic.innerText = "🎙️ Micro IA";
+        };
+        r.start();
+      };
+
+      setInterval(() => {
+        window.render();
+      }, 60000);
+    </script>
+  </body>
+</html>

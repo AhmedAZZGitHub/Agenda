@@ -1,0 +1,22 @@
+# Environnements virtuels & Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+
+# IDE & Éditeurs
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# OS & Fichiers temporaires
+Thumbs.db
+Desktop.ini
+.DS_Store
+*.log
