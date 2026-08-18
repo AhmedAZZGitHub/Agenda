@@ -157,7 +157,6 @@
       color: #fbcfe8;
     }
 
-    /* BANNIÈRE DE CONSULTATION (PARENT OU ADMIN EN INSPECTION) */
     .view-context-banner {
       background: linear-gradient(135deg, #f59e0b, #ea580c);
       color: white;
@@ -172,7 +171,6 @@
       animation: fadeIn 0.3s ease;
     }
 
-    /* BANDEAUX TOP STATS */
     .top-stats-row {
       display: grid;
       grid-template-columns: 1fr auto;
@@ -230,7 +228,6 @@
       box-shadow: 0 4px 14px rgba(234, 88, 12, 0.25);
     }
 
-    /* ANNONCES BANNER */
     .announcement-bar {
       background: linear-gradient(135deg, #6366f1, #8b5cf6);
       color: white;
@@ -244,7 +241,6 @@
       box-shadow: var(--shadow-sm);
     }
 
-    /* HEADER & CONTRÔLES */
     .header {
       display: flex;
       justify-content: space-between;
@@ -486,8 +482,7 @@
       z-index: 10;
       border: 1px solid var(--card-border);
       border-left: 5px solid var(--primary);
-      transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1),
-        box-shadow 0.15s ease;
+      transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.15s ease;
       overflow: hidden;
       display: flex;
       flex-direction: column;
@@ -500,7 +495,6 @@
       box-shadow: var(--shadow-md);
     }
 
-    /* PALETTE DES MATIÈRES */
     .sub-math {
       border-left-color: #2563eb !important;
       background: #eff6ff !important;
@@ -631,7 +625,6 @@
       border-color: #334155 !important;
     }
 
-    /* STATUTS */
     .status-done {
       opacity: 0.45 !important;
       border-left-color: #94a3b8 !important;
@@ -702,7 +695,6 @@
       }
     }
 
-    /* VUE MOBILE */
     .mob-scroller {
       display: flex;
       gap: 6px;
@@ -747,7 +739,6 @@
       box-shadow: var(--shadow-sm);
     }
 
-    /* OVERLAYS PLEIN ÉCRAN */
     .fullscreen-overlay {
       display: none;
       position: fixed;
@@ -792,7 +783,6 @@
       transform: scale(1.03);
     }
 
-    /* ONGLETS */
     .custom-tabs {
       display: flex;
       gap: 8px;
@@ -821,7 +811,6 @@
       box-shadow: var(--shadow-sm);
     }
 
-    /* ANNALES BAC (2000-2026) */
     .bac-archive-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -865,7 +854,6 @@
       filter: drop-shadow(0 0 4px #f59e0b);
     }
 
-    /* TABLEAU DES NOTES */
     .grades-table {
       width: 100%;
       border-collapse: collapse;
@@ -912,7 +900,6 @@
       color: var(--muted);
     }
 
-    /* MINUTEUR */
     .timer-container {
       display: flex;
       flex-direction: column;
@@ -954,7 +941,6 @@
       transform: translateY(-2px);
     }
 
-    /* MODALES & FORMULAIRES */
     .loading-overlay {
       display: none;
       position: fixed;
@@ -1010,7 +996,6 @@
       border-color: var(--primary);
     }
 
-    /* AUTH OVERLAY & DESIGN */
     .auth-overlay {
       position: fixed;
       inset: 0;
@@ -1123,7 +1108,6 @@
       color: #fca5a5;
     }
 
-    /* ADMIN CONSOLE DESIGN */
     .admin-kpi-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -1211,33 +1195,19 @@
       <!-- FORMULAIRE CONNEXION -->
       <form id="loginForm" onsubmit="handleLogin(event)" style="display: flex; flex-direction: column; gap: 12px">
         <div>
-          <label style="
-                font-size: 11px;
-                font-weight: 700;
-                color: var(--muted);
-                display: block;
-                margin-bottom: 4px;
-              ">Adresse Email :</label>
+          <label
+            style="font-size: 11px; font-weight: 700; color: var(--muted); display: block; margin-bottom: 4px;">Adresse
+            Email :</label>
           <input type="email" id="loginEmail" class="input" style="width: 100%" placeholder="ex: eleve@planningbac.tn"
             required />
         </div>
         <div>
-          <label style="
-                font-size: 11px;
-                font-weight: 700;
-                color: var(--muted);
-                display: block;
-                margin-bottom: 4px;
-              ">Mot de passe :</label>
+          <label style="font-size: 11px; font-weight: 700; color: var(--muted); display: block; margin-bottom: 4px;">Mot
+            de passe :</label>
           <input type="password" id="loginPassword" class="input" style="width: 100%" placeholder="••••••••" required />
         </div>
-        <button type="submit" class="btn-add" style="
-              width: 100%;
-              padding: 12px;
-              justify-content: center;
-              font-size: 14px;
-              margin-top: 4px;
-            ">
+        <button type="submit" class="btn-add"
+          style="width: 100%; padding: 12px; justify-content: center; font-size: 14px; margin-top: 4px;">
           Se connecter 🚀
         </button>
       </form>
@@ -1245,45 +1215,27 @@
       <!-- FORMULAIRE INSCRIPTION -->
       <form id="registerForm" onsubmit="handleRegister(event)" style="display: none; flex-direction: column; gap: 12px">
         <div>
-          <label style="
-                font-size: 11px;
-                font-weight: 700;
-                color: var(--muted);
-                display: block;
-                margin-bottom: 4px;
-              ">Nom et Prénom :</label>
+          <label style="font-size: 11px; font-weight: 700; color: var(--muted); display: block; margin-bottom: 4px;">Nom
+            et Prénom :</label>
           <input type="text" id="regName" class="input" style="width: 100%" placeholder="ex: Sami Trabelsi" required />
         </div>
         <div>
-          <label style="
-                font-size: 11px;
-                font-weight: 700;
-                color: var(--muted);
-                display: block;
-                margin-bottom: 4px;
-              ">Adresse Email :</label>
+          <label
+            style="font-size: 11px; font-weight: 700; color: var(--muted); display: block; margin-bottom: 4px;">Adresse
+            Email :</label>
           <input type="email" id="regEmail" class="input" style="width: 100%" placeholder="ex: sami@bac.tn" required />
         </div>
         <div>
-          <label style="
-                font-size: 11px;
-                font-weight: 700;
-                color: var(--muted);
-                display: block;
-                margin-bottom: 4px;
-              ">Mot de passe (min 6 caractères) :</label>
+          <label style="font-size: 11px; font-weight: 700; color: var(--muted); display: block; margin-bottom: 4px;">Mot
+            de passe (min 6 caractères) :</label>
           <input type="password" id="regPassword" class="input" style="width: 100%" placeholder="••••••••" minlength="6"
             required />
         </div>
 
         <div>
-          <label style="
-                font-size: 11px;
-                font-weight: 700;
-                color: var(--muted);
-                display: block;
-                margin-bottom: 6px;
-              ">Type de Profil :</label>
+          <label
+            style="font-size: 11px; font-weight: 700; color: var(--muted); display: block; margin-bottom: 6px;">Type de
+            Profil :</label>
           <div class="role-picker">
             <div class="role-option active" id="roleOpt_student" onclick="selectRole('student')">
               <span class="role-icon">🎓</span>
@@ -1300,15 +1252,10 @@
           </div>
         </div>
 
-        <!-- OPTION ÉLÈVE : SECTION BAC -->
         <div id="regSectionGroup">
-          <label style="
-                font-size: 11px;
-                font-weight: 700;
-                color: var(--muted);
-                display: block;
-                margin-bottom: 4px;
-              ">Section / Filière Bac :</label>
+          <label
+            style="font-size: 11px; font-weight: 700; color: var(--muted); display: block; margin-bottom: 4px;">Section
+            / Filière Bac :</label>
           <select id="regSection" class="input" style="width: 100%">
             <option value="Mathematiques">📐 Baccalauréat Mathématiques</option>
             <option value="Sciences">🔬 Baccalauréat Sciences Expérimentales</option>
@@ -1319,26 +1266,15 @@
           </select>
         </div>
 
-        <!-- OPTION ADMIN : CODE SECRET -->
         <div id="regAdminKeyGroup" style="display: none">
-          <label style="
-                font-size: 11px;
-                font-weight: 700;
-                color: var(--muted);
-                display: block;
-                margin-bottom: 4px;
-              ">Clé secrète de sécurité Admin :</label>
+          <label style="font-size: 11px; font-weight: 700; color: var(--muted); display: block; margin-bottom: 4px;">Clé
+            secrète Admin :</label>
           <input type="password" id="regAdminKey" class="input" style="width: 100%"
-            placeholder="Code administrateur requis (ADMIN2026)" />
+            placeholder="Code requis : ADMIN2026" />
         </div>
 
-        <button type="submit" class="btn-add" style="
-              width: 100%;
-              padding: 12px;
-              justify-content: center;
-              font-size: 14px;
-              margin-top: 4px;
-            ">
+        <button type="submit" class="btn-add"
+          style="width: 100%; padding: 12px; justify-content: center; font-size: 14px; margin-top: 4px;">
           Créer mon compte ✨
         </button>
       </form>
@@ -1347,15 +1283,13 @@
 
   <!-- CHARGEMENT IA -->
   <div class="loading-overlay" id="loadingOverlay">
-    <div style="font-size: 44px; animation: pulse 1s infinite alternate">
-      🧠
-    </div>
+    <div style="font-size: 44px; animation: pulse 1s infinite alternate">🧠</div>
     <div style="font-size: 16px; font-weight: 700; letter-spacing: 0.3px" id="loadingText">
       Synchronisation en cours...
     </div>
   </div>
 
-  <!-- OVERLAY CONSOLE D'ADMINISTRATION -->
+  <!-- OVERLAY ADMIN -->
   <div class="fullscreen-overlay" id="adminOverlay">
     <div class="overlay-header">
       <div>
@@ -1364,9 +1298,7 @@
           Gestion globale des utilisateurs, des annonces et supervision système
         </div>
       </div>
-      <button class="btn-close" onclick="closeOverlay('adminOverlay')">
-        Fermer ✕
-      </button>
+      <button class="btn-close" onclick="closeOverlay('adminOverlay')">Fermer ✕</button>
     </div>
 
     <div style="max-width: 1150px; margin: 0 auto; width: 100%; display: flex; flex-direction: column; gap: 16px">
@@ -1399,7 +1331,7 @@
       <div id="adminViewUsers">
         <div
           style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 10px">
-          <input type="text" id="adminSearchInput" class="input" placeholder="🔍 Rechercher un nom, email ou code..."
+          <input type="text" id="adminSearchInput" class="input" placeholder="🔍 Rechercher..."
             oninput="renderAdminUsersTable()" style="max-width: 320px; width: 100%" />
           <div style="font-size: 12px; color: var(--muted); font-weight: 700">Cliquez sur « 👁️ Inspecter » pour
             consulter le planning d'un élève.</div>
@@ -1423,8 +1355,8 @@
       <div id="adminViewAnnouncements" style="display: none; flex-direction: column; gap: 14px">
         <div
           style="background: var(--card); border: 1.5px solid var(--dash); border-radius: 16px; padding: 18px; display: flex; flex-direction: column; gap: 10px">
-          <div style="font-weight: 800; font-size: 15px">Publier une nouvelle annonce pour tous les utilisateurs</div>
-          <input type="text" id="annTitle" class="input" placeholder="Titre de l'annonce..." />
+          <div style="font-weight: 800; font-size: 15px">Publier une annonce générale</div>
+          <input type="text" id="annTitle" class="input" placeholder="Titre..." />
           <textarea id="annContent" class="input" style="height: 70px; resize: none"
             placeholder="Message détaillé..."></textarea>
           <div style="display: flex; justify-content: flex-end">
@@ -1437,7 +1369,7 @@
     </div>
   </div>
 
-  <!-- MODALE CODE PARENT POUR L'ÉLÈVE -->
+  <!-- MODALE CODE PARENT -->
   <div class="modal" id="studentCodeModal">
     <div class="modal-box" style="text-align: center; gap: 14px">
       <div style="display: flex; justify-content: space-between; align-items: center">
@@ -1446,8 +1378,7 @@
           style="cursor: pointer; color: #ef4444; font-size: 18px">✕</span>
       </div>
       <div style="font-size: 13px; color: var(--muted)">
-        Transmettez ce code unique à vos parents pour qu'ils puissent suivre votre emploi du temps, vos devoirs et vos
-        notes en temps réel :
+        Transmettez ce code unique à vos parents pour qu'ils puissent suivre votre travail :
       </div>
       <div
         style="background: var(--dash); border: 2px dashed var(--primary); border-radius: 14px; padding: 16px; font-family: 'JetBrains Mono', monospace; font-size: 26px; font-weight: 900; letter-spacing: 2px; color: var(--primary)"
@@ -1460,7 +1391,7 @@
     </div>
   </div>
 
-  <!-- MODALE LIER UN ENFANT POUR LE PARENT -->
+  <!-- MODALE LIER UN ENFANT -->
   <div class="modal" id="linkChildModal">
     <div class="modal-box" style="gap: 14px">
       <div style="display: flex; justify-content: space-between; align-items: center">
@@ -1469,7 +1400,7 @@
           style="cursor: pointer; color: #ef4444; font-size: 18px">✕</span>
       </div>
       <div style="font-size: 13px; color: var(--muted)">
-        Saisissez le code de liaison à 8 caractères fourni par votre enfant (ex: <code>BAC-8492</code>) :
+        Saisissez le code fourni par votre enfant (ex: <code>BAC-8492</code>) :
       </div>
       <input type="text" id="childLinkInput" class="input" placeholder="ex: BAC-9182"
         style="font-family: 'JetBrains Mono', monospace; text-transform: uppercase; font-weight: 800; font-size: 16px; text-align: center" />
@@ -1479,72 +1410,38 @@
     </div>
   </div>
 
-  <!-- OVERLAY ANNALES DU BAC 2000-2026 -->
+  <!-- OVERLAY ANNALES BAC -->
   <div class="fullscreen-overlay" id="bacArchiveOverlay">
     <div class="overlay-header">
       <div>
-        <div class="overlay-title">
-          📚 Annales Officielles du Baccalauréat (2000 → 2026)
-        </div>
+        <div class="overlay-title">📚 Annales Officielles du Baccalauréat (2000 → 2026)</div>
         <div style="font-size: 13px; color: var(--muted); margin-top: 3px">
           Section Mathématiques : 27 Sujets complets par matière
         </div>
       </div>
-      <button class="btn-close" onclick="closeOverlay('bacArchiveOverlay')">
-        Fermer ✕
-      </button>
+      <button class="btn-close" onclick="closeOverlay('bacArchiveOverlay')">Fermer ✕</button>
     </div>
 
-    <div style="
-          max-width: 1150px;
-          margin: 0 auto;
-          width: 100%;
-          display: flex;
-          flex-direction: column;
-          gap: 14px;
-        ">
+    <div style="max-width: 1150px; margin: 0 auto; width: 100%; display: flex; flex-direction: column; gap: 14px">
       <div class="custom-tabs" id="bacArchiveSubjectTabs"></div>
 
-      <div style="
-            background: linear-gradient(135deg, #0284c7, #4f46e5);
-            color: white;
-            border-radius: 16px;
-            padding: 18px 22px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 12px;
-            box-shadow: var(--shadow-md);
-          ">
+      <div
+        style="background: linear-gradient(135deg, #0284c7, #4f46e5); color: white; border-radius: 16px; padding: 18px 22px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; box-shadow: var(--shadow-md);">
         <div>
-          <div style="font-size: 13px; opacity: 0.9; font-weight: 700" id="bacCurrentSubjectName">
-            Mathématiques
-          </div>
-          <div style="
-                font-family: 'JetBrains Mono', monospace;
-                font-size: 30px;
-                font-weight: 900;
-              " id="bacSubjectProgressCount">
-            0 / 27 Sujets Réalisés
-          </div>
+          <div style="font-size: 13px; opacity: 0.9; font-weight: 700" id="bacCurrentSubjectName">Mathématiques</div>
+          <div style="font-family: 'JetBrains Mono', monospace; font-size: 30px; font-weight: 900;"
+            id="bacSubjectProgressCount">0 / 27 Sujets Réalisés</div>
         </div>
-        <div style="
-              background: rgba(255, 255, 255, 0.2);
-              padding: 8px 16px;
-              border-radius: 99px;
-              font-weight: 800;
-              font-size: 14px;
-            " id="bacSubjectProgressPct">
-          0% Complété
-        </div>
+        <div
+          style="background: rgba(255, 255, 255, 0.2); padding: 8px 16px; border-radius: 99px; font-weight: 800; font-size: 14px;"
+          id="bacSubjectProgressPct">0% Complété</div>
       </div>
 
       <div class="bac-archive-grid" id="bacExamsGrid"></div>
     </div>
   </div>
 
-  <!-- OVERLAY GESTIONNAIRE D'EXAMENS & DS -->
+  <!-- OVERLAY EXAMENS & DS -->
   <div class="fullscreen-overlay" id="examsOverlay">
     <div class="overlay-header">
       <div>
@@ -1554,115 +1451,59 @@
         </div>
       </div>
       <div style="display: flex; gap: 10px">
-        <button class="btn-add student-action-btn" onclick="window.openModal('addExamModal')">
-          + Ajouter un Examen
-        </button>
-        <button class="btn-close" onclick="closeOverlay('examsOverlay')">
-          Fermer ✕
-        </button>
+        <button class="btn-add student-action-btn" onclick="window.openModal('addExamModal')">+ Ajouter un
+          Examen</button>
+        <button class="btn-close" onclick="closeOverlay('examsOverlay')">Fermer ✕</button>
       </div>
     </div>
-    <div style="
-          display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-          gap: 14px;
-          max-width: 1100px;
-          margin: 0 auto;
-          width: 100%;
-        " id="examsList"></div>
+    <div
+      style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 14px; max-width: 1100px; margin: 0 auto; width: 100%;"
+      id="examsList"></div>
   </div>
 
-  <!-- OVERLAY CARNET DE NOTES & CALCULATEUR TRIMESTRIEL -->
+  <!-- OVERLAY CARNET TRIMESTRIEL -->
   <div class="fullscreen-overlay" id="gradesOverlay">
     <div class="overlay-header">
       <div>
-        <div class="overlay-title">
-          🎯 Calculateur de Moyenne & Carnet Trimestriel
-        </div>
+        <div class="overlay-title">🎯 Calculateur de Moyenne & Carnet Trimestriel</div>
         <div style="font-size: 13px; color: var(--muted); margin-top: 3px">
           Section Mathématiques (Formules officielles avec Oral/TP modulable)
         </div>
       </div>
       <div style="display: flex; gap: 10px; align-items: center">
         <select id="gradeCalcMode" class="input" onchange="calculateTrimesterAverages()" style="font-weight: 700">
-          <option value="Trimestre">
-            🏫 Mode Trimestres (Option = Coef 1)
-          </option>
-          <option value="Bac">
-            🎓 Mode Examen Bac (Option = Bonus > 10)
-          </option>
+          <option value="Trimestre">🏫 Mode Trimestres (Option = Coef 1)</option>
+          <option value="Bac">🎓 Mode Examen Bac (Option = Bonus > 10)</option>
         </select>
-        <button class="btn-close" onclick="closeOverlay('gradesOverlay')">
-          Fermer ✕
-        </button>
+        <button class="btn-close" onclick="closeOverlay('gradesOverlay')">Fermer ✕</button>
       </div>
     </div>
 
-    <div style="
-          max-width: 1100px;
-          margin: 0 auto;
-          width: 100%;
-          display: flex;
-          flex-direction: column;
-          gap: 14px;
-        ">
+    <div style="max-width: 1100px; margin: 0 auto; width: 100%; display: flex; flex-direction: column; gap: 14px">
       <div class="custom-tabs">
-        <button class="btn-tab-item active" id="tabTrim1" onclick="switchTrimester('trim1')">
-          1er Trimestre
-        </button>
-        <button class="btn-tab-item" id="tabTrim2" onclick="switchTrimester('trim2')">
-          2ème Trimestre
-        </button>
-        <button class="btn-tab-item" id="tabTrim3" onclick="switchTrimester('trim3')">
-          3ème Trimestre
-        </button>
-        <button class="btn-tab-item" id="tabTrimYear" onclick="switchTrimester('year')">
-          🏆 Bilan Annuel
-        </button>
+        <button class="btn-tab-item active" id="tabTrim1" onclick="switchTrimester('trim1')">1er Trimestre</button>
+        <button class="btn-tab-item" id="tabTrim2" onclick="switchTrimester('trim2')">2ème Trimestre</button>
+        <button class="btn-tab-item" id="tabTrim3" onclick="switchTrimester('trim3')">3ème Trimestre</button>
+        <button class="btn-tab-item" id="tabTrimYear" onclick="switchTrimester('year')">🏆 Bilan Annuel</button>
       </div>
 
-      <div style="
-            background: linear-gradient(135deg, #0284c7, #4f46e5);
-            color: white;
-            border-radius: 16px;
-            padding: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 14px;
-            box-shadow: var(--shadow-md);
-          ">
+      <div
+        style="background: linear-gradient(135deg, #0284c7, #4f46e5); color: white; border-radius: 16px; padding: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px; box-shadow: var(--shadow-md);">
         <div>
-          <div style="font-size: 13px; opacity: 0.9; font-weight: 700" id="avgCardTitle">
-            MOYENNE DU 1ER TRIMESTRE
-          </div>
-          <div style="
-                font-family: 'JetBrains Mono', monospace;
-                font-size: 38px;
-                font-weight: 900;
-              " id="totalTrimesterAverage">
-            -- / 20
-          </div>
+          <div style="font-size: 13px; opacity: 0.9; font-weight: 700" id="avgCardTitle">MOYENNE DU 1ER TRIMESTRE</div>
+          <div style="font-family: 'JetBrains Mono', monospace; font-size: 38px; font-weight: 900;"
+            id="totalTrimesterAverage">-- / 20</div>
         </div>
         <div style="text-align: right">
-          <div style="font-size: 13px; opacity: 0.9; font-weight: 700">
-            TOTAL DES POINTS : <span id="totalPointsSum">--</span>
-          </div>
-          <div style="font-size: 13px; opacity: 0.9; font-weight: 700">
-            TOTAL COEFFICIENTS : <span id="totalCoefSum">--</span>
-          </div>
+          <div style="font-size: 13px; opacity: 0.9; font-weight: 700">TOTAL DES POINTS : <span
+              id="totalPointsSum">--</span></div>
+          <div style="font-size: 13px; opacity: 0.9; font-weight: 700">TOTAL COEFFICIENTS : <span
+              id="totalCoefSum">--</span></div>
         </div>
       </div>
 
-      <div id="trimesterTableView" style="
-            overflow-x: auto;
-            background: var(--card);
-            border: 1.5px solid var(--dash);
-            border-radius: 16px;
-            padding: 14px;
-            box-shadow: var(--shadow-sm);
-          ">
+      <div id="trimesterTableView"
+        style="overflow-x: auto; background: var(--card); border: 1.5px solid var(--dash); border-radius: 16px; padding: 14px; box-shadow: var(--shadow-sm);">
         <table class="grades-table">
           <thead>
             <tr>
@@ -1678,15 +1519,8 @@
         </table>
       </div>
 
-      <div id="annualSummaryView" style="
-            display: none;
-            overflow-x: auto;
-            background: var(--card);
-            border: 1.5px solid var(--dash);
-            border-radius: 16px;
-            padding: 14px;
-            box-shadow: var(--shadow-sm);
-          ">
+      <div id="annualSummaryView"
+        style="display: none; overflow-x: auto; background: var(--card); border: 1.5px solid var(--dash); border-radius: 16px; padding: 14px; box-shadow: var(--shadow-sm);">
         <table class="grades-table">
           <thead>
             <tr>
@@ -1709,9 +1543,7 @@
     <div class="overlay-header">
       <div>
         <div class="overlay-title">📊 Répartition des Heures d'Étude</div>
-        <div style="font-size: 13px; color: var(--muted); margin-top: 3px">
-          Suivi du volume de travail personnel
-        </div>
+        <div style="font-size: 13px; color: var(--muted); margin-top: 3px">Suivi du volume de travail personnel</div>
       </div>
       <div style="display: flex; gap: 10px; align-items: center">
         <select id="statsFilterType" class="input" onchange="renderStatsData()"
@@ -1720,19 +1552,11 @@
           <option value="Autonomie">⚡ Maison & En ligne</option>
           <option value="All">🌐 Toutes les séances</option>
         </select>
-        <button class="btn-close" onclick="closeOverlay('statsOverlay')">
-          Fermer ✕
-        </button>
+        <button class="btn-close" onclick="closeOverlay('statsOverlay')">Fermer ✕</button>
       </div>
     </div>
-    <div style="
-          display: flex;
-          flex-direction: column;
-          gap: 14px;
-          max-width: 850px;
-          margin: 0 auto;
-          width: 100%;
-        " id="statsContent"></div>
+    <div style="display: flex; flex-direction: column; gap: 14px; max-width: 850px; margin: 0 auto; width: 100%;"
+      id="statsContent"></div>
   </div>
 
   <!-- OVERLAY MINUTEUR -->
@@ -1740,53 +1564,37 @@
     <div class="overlay-header">
       <div>
         <div class="overlay-title">⏱️ Minuteur de Concentration</div>
-        <div style="font-size: 13px; color: var(--muted); margin-top: 3px">
-          Mode d'étude immersif sans distractions
-        </div>
+        <div style="font-size: 13px; color: var(--muted); margin-top: 3px">Mode d'étude immersif sans distractions</div>
       </div>
-      <button class="btn-close" onclick="closeOverlay('timerOverlay')">
-        Fermer ✕
-      </button>
+      <button class="btn-close" onclick="closeOverlay('timerOverlay')">Fermer ✕</button>
     </div>
     <div class="timer-container">
       <div class="timer-display" id="timerDisplay">00:00:00</div>
       <div class="timer-controls">
-        <div style="
-              display: flex;
-              align-items: center;
-              gap: 8px;
-              background: var(--dash);
-              padding: 6px 12px;
-              border-radius: 99px;
-            ">
+        <div
+          style="display: flex; align-items: center; gap: 8px; background: var(--dash); padding: 6px 12px; border-radius: 99px;">
           <input type="number" id="tHours" class="input" style="width: 60px; text-align: center; padding: 6px" min="0"
-            max="23" value="1" />
-          h
+            max="23" value="1" /> h
           <input type="number" id="tMinutes" class="input" style="width: 60px; text-align: center; padding: 6px" min="0"
-            max="59" value="30" />
-          m
-          <button class="btn-action" style="padding: 6px 12px" onclick="setCustomTimer()">
-            Définir
-          </button>
+            max="59" value="30" /> m
+          <button class="btn-action" style="padding: 6px 12px" onclick="setCustomTimer()">Définir</button>
         </div>
-        <button class="btn-timer" id="btnTimerStart" style="background: #10b981; color: white" onclick="toggleTimer()">
-          Lancer
-        </button>
-        <button class="btn-timer" style="background: #ef4444; color: white" onclick="resetTimer()">
-          Réinitialiser
-        </button>
+        <button class="btn-timer" id="btnTimerStart" style="background: #10b981; color: white"
+          onclick="toggleTimer()">Lancer</button>
+        <button class="btn-timer" style="background: #ef4444; color: white"
+          onclick="resetTimer()">Réinitialiser</button>
       </div>
     </div>
   </div>
 
   <!-- INTERFACE PRINCIPALE -->
   <div class="main-wrap">
-    <!-- BARRE UTILISATEUR EN HAUT -->
+    <!-- BARRE UTILISATEUR TOP -->
     <div class="user-top-bar" id="userTopBar">
       <div class="user-info-group">
         <div class="user-avatar" id="userAvatarIco">👤</div>
         <div class="user-name-role">
-          <span class="user-name" id="userNameLabel">Chargement...</span>
+          <span class="user-name" id="userNameLabel">Visiteur</span>
           <span class="role-badge role-student" id="userRoleBadge">ÉLÈVE</span>
         </div>
 
@@ -1801,9 +1609,7 @@
             onchange="onParentSelectChild(this.value)">
             <option value="">Aucun enfant associé</option>
           </select>
-          <button class="btn-action" onclick="window.openModal('linkChildModal')">
-            + Lier un élève
-          </button>
+          <button class="btn-action" onclick="window.openModal('linkChildModal')">+ Lier un élève</button>
         </div>
 
         <button class="btn-action btn-accent" id="btnAdminConsole" onclick="openOverlay('adminOverlay')"
@@ -1813,72 +1619,53 @@
       </div>
 
       <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap">
-        <button class="btn-action" onclick="toggleDarkMode()">
-          🌙 Mode Sombre
-        </button>
-        <button class="btn-action" style="color: #ef4444; border-color: #fca5a5" onclick="handleLogout()">
-          🚪 Déconnexion
+        <button class="btn-action" onclick="toggleDarkMode()">🌙 Mode Sombre</button>
+        <button class="btn-action" id="authActionBtn" style="color: var(--primary);" onclick="window.showAuthModal()">
+          🔑 Connexion
         </button>
       </div>
     </div>
 
-    <!-- BANNIÈRE DE CONSULTATION CONTEXTUELLE -->
     <div class="view-context-banner" id="viewContextBanner" style="display: none">
       <span id="viewContextText">👁️ Mode Consultation en Direct</span>
       <span style="font-size: 11px; opacity: 0.9">Lecture seule</span>
     </div>
 
-    <!-- BANDEAU D'ANNONCE GLOBALE -->
     <div class="announcement-bar" id="activeAnnouncementBar" style="display: none">
       <span id="activeAnnouncementText">📢 Bienvenue sur l'application Planning Baccalauréat !</span>
       <span style="cursor: pointer; opacity: 0.8"
         onclick="document.getElementById('activeAnnouncementBar').style.display='none'">✕</span>
     </div>
 
-    <!-- BANDEAU TOP : BAC + STREAK -->
+    <!-- BANDEAU BAC & STREAK -->
     <div class="top-stats-row">
       <div class="bac-countdown-bar">
         <div class="bac-countdown-title">
           <span>🎓</span>
           <span>Épreuves Nationales du Baccalauréat :</span>
         </div>
-        <div class="bac-countdown-digits" id="bacCountdownText">
-          Calcul en cours...
-        </div>
+        <div class="bac-countdown-digits" id="bacCountdownText">Calcul en cours...</div>
       </div>
       <div class="streak-badge" id="streakBadgeDisplay">
         <span>🔥</span>
-        <span>Série d'étude (Maison/Ligne) :
-          <b id="streakDaysCount">1</b> j</span>
+        <span>Série d'étude (Maison/Ligne) : <b id="streakDaysCount">1</b> j</span>
       </div>
     </div>
 
     <div class="header">
       <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap">
         <div class="switch-mode">
-          <button class="btn-toggle" id="btnMob" onclick="window.setLayout('mobile')">
-            📱 Mobile
-          </button>
-          <button class="btn-toggle" id="btnPc" onclick="window.setLayout('pc')">
-            💻 PC
-          </button>
+          <button class="btn-toggle" id="btnMob" onclick="window.setLayout('mobile')">📱 Mobile</button>
+          <button class="btn-toggle" id="btnPc" onclick="window.setLayout('pc')">💻 PC</button>
         </div>
-        <button class="btn-action" onclick="window.goToToday()">
-          Aujourd'hui
-        </button>
+        <button class="btn-action" onclick="window.goToToday()">Aujourd'hui</button>
         <button class="btn-action" style="border-color: #0284c7; color: #0284c7"
           onclick="openOverlay('bacArchiveOverlay')">
           📚 Annales Bac (2000-2026)
         </button>
-        <button class="btn-action" onclick="openOverlay('examsOverlay')">
-          📝 Examens & DS
-        </button>
-        <button class="btn-action" onclick="openOverlay('gradesOverlay')">
-          🎯 Carnet Trimestriel
-        </button>
-        <button class="btn-action" onclick="openStats()">
-          📊 Répartition
-        </button>
+        <button class="btn-action" onclick="openOverlay('examsOverlay')">📝 Examens & DS</button>
+        <button class="btn-action" onclick="openOverlay('gradesOverlay')">🎯 Carnet Trimestriel</button>
+        <button class="btn-action" onclick="openStats()">📊 Répartition</button>
         <button class="btn-action" onclick="openTimer()">⏱️ Minuteur</button>
       </div>
 
@@ -1889,20 +1676,13 @@
       </div>
 
       <div style="display: flex; gap: 6px; flex-wrap: wrap; align-items: center">
-        <button class="btn-api student-action-btn" onclick="window.setApiKey()">
-          🔑 Clé IA
-        </button>
+        <button class="btn-api student-action-btn" onclick="window.setApiKey()">🔑 Clé IA</button>
         <input type="file" id="photoInput" accept="image/*" style="display: none"
           onchange="window.handleImageUpload(event)" />
-        <button class="btn-vision student-action-btn" onclick="document.getElementById('photoInput').click()">
-          📸 Scanner
-        </button>
-        <button class="btn-mic student-action-btn" id="mainMicBtn" onclick="window.voiceInput()">
-          🎙️ Micro IA
-        </button>
-        <button class="btn-add student-action-btn" onclick="window.openModal('addModal')">
-          + Séance
-        </button>
+        <button class="btn-vision student-action-btn" onclick="document.getElementById('photoInput').click()">📸
+          Scanner</button>
+        <button class="btn-mic student-action-btn" id="mainMicBtn" onclick="window.voiceInput()">🎙️ Micro IA</button>
+        <button class="btn-add student-action-btn" onclick="window.openModal('addModal')">+ Séance</button>
         <button class="btn-action student-action-btn" onclick="window.clearAllData()"
           style="color: #ef4444; border-color: #fca5a5">
           🗑️ Vider
@@ -1911,12 +1691,8 @@
     </div>
 
     <div id="pcView">
-      <div style="
-            display: grid;
-            grid-template-columns: 55px repeat(7, 1fr);
-            gap: 6px;
-            margin-bottom: 6px;
-          " id="pcHeader"></div>
+      <div style="display: grid; grid-template-columns: 55px repeat(7, 1fr); gap: 6px; margin-bottom: 6px;"
+        id="pcHeader"></div>
       <div class="pc-grid">
         <div class="grid-table">
           <div class="col-time" id="timeCol"></div>
@@ -1934,52 +1710,35 @@
   <!-- MODALE CRÉATION SÉANCE -->
   <div class="modal" id="addModal">
     <div class="modal-box">
-      <div style="
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-weight: 800;
-            font-size: 16px;
-          ">
+      <div
+        style="display: flex; justify-content: space-between; align-items: center; font-weight: 800; font-size: 16px;">
         Ajouter une Séance
         <span onclick="window.closeModal('addModal')" style="cursor: pointer; color: #ef4444; font-size: 18px">✕</span>
       </div>
 
       <div>
-        <label style="
-              font-size: 11px;
-              font-weight: 700;
-              color: var(--muted);
-              display: block;
-              margin-bottom: 4px;
-            ">Matière :</label>
+        <label
+          style="font-size: 11px; font-weight: 700; color: var(--muted); display: block; margin-bottom: 4px;">Matière
+          :</label>
         <select id="mSub" class="input" style="width: 100%">
           <option value="Mathématiques">📐 Mathématiques (Coef 4)</option>
-          <option value="Physique-Chimie">
-            🔬 Sciences Physiques (Coef 4)
-          </option>
+          <option value="Physique-Chimie">🔬 Sciences Physiques (Coef 4)</option>
           <option value="Sciences SVT">🧬 SVT (Coef 1)</option>
           <option value="Informatique">💻 Informatique (Coef 1)</option>
           <option value="Français">🇫🇷 Français (Coef 1)</option>
           <option value="Anglais">🇬🇧 Anglais (Coef 1)</option>
           <option value="Philosophie">🧠 Philosophie (Coef 1)</option>
           <option value="Arabe">📖 Arabe (Coef 1)</option>
-          <option value="Sport">
-            🏃 Éducation physique (Sport - Coef 1)
-          </option>
+          <option value="Sport">🏃 Éducation physique (Sport - Coef 1)</option>
           <option value="Option">📌 Matière Optionnelle</option>
         </select>
       </div>
 
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px">
         <div>
-          <label style="
-                font-size: 11px;
-                font-weight: 700;
-                color: var(--muted);
-                display: block;
-                margin-bottom: 4px;
-              ">Lieu / Type :</label>
+          <label
+            style="font-size: 11px; font-weight: 700; color: var(--muted); display: block; margin-bottom: 4px;">Lieu /
+            Type :</label>
           <select id="mType" class="input" style="width: 100%">
             <option value="À la maison">🏠 À la maison (Autonomie)</option>
             <option value="En ligne">💻 En ligne</option>
@@ -1988,31 +1747,21 @@
           </select>
         </div>
         <div>
-          <label style="
-                font-size: 11px;
-                font-weight: 700;
-                color: var(--muted);
-                display: block;
-                margin-bottom: 4px;
-              ">Fréquence :</label>
+          <label
+            style="font-size: 11px; font-weight: 700; color: var(--muted); display: block; margin-bottom: 4px;">Fréquence
+            :</label>
           <select id="mFreq" class="input" style="width: 100%">
             <option value="Toutes les semaines">Chaque semaine</option>
-            <option value="Par quinzaine (1/2)">
-              1 semaine sur 2 (Quinzaine)
-            </option>
+            <option value="Par quinzaine (1/2)">1 semaine sur 2 (Quinzaine)</option>
           </select>
         </div>
       </div>
 
       <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px">
         <div>
-          <label style="
-                font-size: 11px;
-                font-weight: 700;
-                color: var(--muted);
-                display: block;
-                margin-bottom: 4px;
-              ">Jour :</label>
+          <label
+            style="font-size: 11px; font-weight: 700; color: var(--muted); display: block; margin-bottom: 4px;">Jour
+            :</label>
           <select id="mDay" class="input" style="width: 100%">
             <option value="0">Lundi</option>
             <option value="1">Mardi</option>
@@ -2024,23 +1773,14 @@
           </select>
         </div>
         <div>
-          <label style="
-                font-size: 11px;
-                font-weight: 700;
-                color: var(--muted);
-                display: block;
-                margin-bottom: 4px;
-              ">Début :</label>
+          <label
+            style="font-size: 11px; font-weight: 700; color: var(--muted); display: block; margin-bottom: 4px;">Début
+            :</label>
           <input type="time" id="mStart" class="input" style="width: 100%" value="08:00" />
         </div>
         <div>
-          <label style="
-                font-size: 11px;
-                font-weight: 700;
-                color: var(--muted);
-                display: block;
-                margin-bottom: 4px;
-              ">Fin :</label>
+          <label style="font-size: 11px; font-weight: 700; color: var(--muted); display: block; margin-bottom: 4px;">Fin
+            :</label>
           <input type="time" id="mEnd" class="input" style="width: 100%" value="10:00" />
         </div>
       </div>
@@ -2052,29 +1792,20 @@
     </div>
   </div>
 
-  <!-- MODALE CRÉATION EXAMEN / DS -->
+  <!-- MODALE CRÉATION EXAMEN -->
   <div class="modal" id="addExamModal">
     <div class="modal-box">
-      <div style="
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-weight: 800;
-            font-size: 16px;
-          ">
+      <div
+        style="display: flex; justify-content: space-between; align-items: center; font-weight: 800; font-size: 16px;">
         Planifier un Devoir / Examen
         <span onclick="window.closeModal('addExamModal')"
           style="cursor: pointer; color: #ef4444; font-size: 18px">✕</span>
       </div>
 
       <div>
-        <label style="
-              font-size: 11px;
-              font-weight: 700;
-              color: var(--muted);
-              display: block;
-              margin-bottom: 4px;
-            ">Matière :</label>
+        <label
+          style="font-size: 11px; font-weight: 700; color: var(--muted); display: block; margin-bottom: 4px;">Matière
+          :</label>
         <select id="exSub" class="input" style="width: 100%">
           <option value="Mathématiques">📐 Mathématiques</option>
           <option value="Physique-Chimie">🔬 Sciences Physiques</option>
@@ -2091,32 +1822,20 @@
 
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px">
         <div>
-          <label style="
-                font-size: 11px;
-                font-weight: 700;
-                color: var(--muted);
-                display: block;
-                margin-bottom: 4px;
-              ">Type d'examen :</label>
+          <label
+            style="font-size: 11px; font-weight: 700; color: var(--muted); display: block; margin-bottom: 4px;">Type
+            d'examen :</label>
           <select id="exType" class="input" style="width: 100%">
-            <option value="Devoir Surveillé (DS)">
-              📝 Devoir Surveillé (DS - Coef 2)
-            </option>
-            <option value="Devoir de Contrôle (DC)">
-              📋 Devoir de Contrôle (DC - Coef 1)
-            </option>
+            <option value="Devoir Surveillé (DS)">📝 Devoir Surveillé (DS - Coef 2)</option>
+            <option value="Devoir de Contrôle (DC)">📋 Devoir de Contrôle (DC - Coef 1)</option>
             <option value="Devoir de Synthèse">📑 Devoir de Synthèse</option>
             <option value="Examen Blanc / Bac Blanc">🎓 Bac Blanc</option>
           </select>
         </div>
         <div>
-          <label style="
-                font-size: 11px;
-                font-weight: 700;
-                color: var(--muted);
-                display: block;
-                margin-bottom: 4px;
-              ">Date de l'épreuve :</label>
+          <label
+            style="font-size: 11px; font-weight: 700; color: var(--muted); display: block; margin-bottom: 4px;">Date de
+            l'épreuve :</label>
           <input type="date" id="exDate" class="input" style="width: 100%" />
         </div>
       </div>
@@ -2154,7 +1873,6 @@
       off,
     } from "https://esm.run/firebase/database";
 
-    // CONFIGURATION EXACTE DU PROJET AGENDA-TOKEN
     const firebaseConfig = {
       apiKey: "AIzaSyBsc9bjxuhysJ6AyouCS1kcyHNg0Dpic1c",
       authDomain: "agenda-token.firebaseapp.com",
@@ -2170,7 +1888,6 @@
     const auth = getAuth(app);
     const database = getDatabase(app);
 
-    // ÉTAT GLOBAL
     let currentUser = null;
     let currentUserProfile = null;
     let activeStudentUid = null;
@@ -2180,32 +1897,9 @@
     let activeDataListeners = [];
     let allUsersCache = [];
 
-    const days = [
-      "Lundi",
-      "Mardi",
-      "Mercredi",
-      "Jeudi",
-      "Vendredi",
-      "Samedi",
-      "Dimanche",
-    ];
-    const months = [
-      "Janv",
-      "Févr",
-      "Mars",
-      "Avr",
-      "Mai",
-      "Juin",
-      "Juil",
-      "Août",
-      "Sept",
-      "Oct",
-      "Nov",
-      "Déc",
-    ];
-    let layout =
-      localStorage.getItem("app_layout_final") ||
-      (window.innerWidth < 768 ? "mobile" : "pc");
+    const days = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"];
+    const months = ["Janv", "Févr", "Mars", "Avr", "Mai", "Juin", "Juil", "Août", "Sept", "Oct", "Nov", "Déc"];
+    let layout = localStorage.getItem("app_layout_final") || (window.innerWidth < 768 ? "mobile" : "pc");
     let currentMonday = getMon(new Date());
     let curDayIdx = (new Date().getDay() + 6) % 7;
     let db = [];
@@ -2215,40 +1909,29 @@
     let currentTrimester = "trim1";
     let currentBacSubjectId = "math";
 
-    // HELPER CHEMIN BASE DE DONNÉES
     function getStudentPath(subPath = "") {
-      const uid = activeStudentUid || currentUser?.uid || "default_user";
+      const uid = activeStudentUid || currentUser?.uid || "guest_demo";
       return `student_data/${uid}/${subPath}`.replace(/\/+$/, "");
     }
 
-    // ==========================================
-    // AUTHENTIFICATION & PROFILS
-    // ==========================================
+    window.showAuthModal = function () {
+      document.getElementById("authOverlay").style.display = "flex";
+    };
+
     window.switchAuthTab = function (tab) {
       document.getElementById("authErrorMsg").style.display = "none";
-      document
-        .getElementById("tabLoginBtn")
-        .classList.toggle("active", tab === "login");
-      document
-        .getElementById("tabRegisterBtn")
-        .classList.toggle("active", tab === "register");
-      document.getElementById("loginForm").style.display =
-        tab === "login" ? "flex" : "none";
-      document.getElementById("registerForm").style.display =
-        tab === "register" ? "flex" : "none";
+      document.getElementById("tabLoginBtn").classList.toggle("active", tab === "login");
+      document.getElementById("tabRegisterBtn").classList.toggle("active", tab === "register");
+      document.getElementById("loginForm").style.display = tab === "login" ? "flex" : "none";
+      document.getElementById("registerForm").style.display = tab === "register" ? "flex" : "none";
     };
 
     window.selectRole = function (role) {
       selectedRegRole = role;
-      document
-        .querySelectorAll(".role-option")
-        .forEach((el) => el.classList.remove("active"));
+      document.querySelectorAll(".role-option").forEach((el) => el.classList.remove("active"));
       document.getElementById(`roleOpt_${role}`).classList.add("active");
-
-      document.getElementById("regSectionGroup").style.display =
-        role === "student" ? "block" : "none";
-      document.getElementById("regAdminKeyGroup").style.display =
-        role === "admin" ? "block" : "none";
+      document.getElementById("regSectionGroup").style.display = role === "student" ? "block" : "none";
+      document.getElementById("regAdminKeyGroup").style.display = role === "admin" ? "block" : "none";
     };
 
     window.handleLogin = async function (e) {
@@ -2259,7 +1942,7 @@
       errDiv.style.display = "none";
 
       try {
-        showLoading("Connexion à votre espace...");
+        showLoading("Connexion en cours...");
         await signInWithEmailAndPassword(auth, email, pass);
         hideLoading();
       } catch (err) {
@@ -2280,27 +1963,20 @@
       errDiv.style.display = "none";
 
       if (selectedRegRole === "admin" && adminKey !== "ADMIN2026") {
-        errDiv.innerText =
-          "Clé secrète Administrateur invalide. (Clé requise : ADMIN2026)";
+        errDiv.innerText = "Clé secrète Administrateur invalide (ADMIN2026).";
         errDiv.style.display = "block";
         return;
       }
 
       try {
-        showLoading("Création de votre profil...");
-        const userCred = await createUserWithEmailAndPassword(
-          auth,
-          email,
-          pass
-        );
+        showLoading("Création du profil...");
+        const userCred = await createUserWithEmailAndPassword(auth, email, pass);
         const uid = userCred.user.uid;
         await updateProfile(userCred.user, { displayName: name });
 
         let parentCode = "";
         if (selectedRegRole === "student") {
-          parentCode =
-            "BAC-" +
-            Math.random().toString(36).substring(2, 6).toUpperCase();
+          parentCode = "BAC-" + Math.random().toString(36).substring(2, 6).toUpperCase();
           await set(ref(database, `parent_codes/${parentCode}`), uid);
         }
 
@@ -2325,85 +2001,87 @@
     };
 
     window.handleLogout = async function () {
-      if (confirm("Êtes-vous sûr de vouloir vous déconnecter ?")) {
+      if (confirm("Se déconnecter ?")) {
         detachAllDataListeners();
         await signOut(auth);
       }
     };
 
     function formatAuthError(code) {
-      if (
-        code.includes("user-not-found") ||
-        code.includes("wrong-password") ||
-        code.includes("invalid-credential")
-      )
-        return "Identifiants invalides. Vérifiez votre email et mot de passe.";
+      if (code.includes("user-not-found") || code.includes("wrong-password") || code.includes("invalid-credential"))
+        return "Identifiants invalides.";
       if (code.includes("email-already-in-use"))
-        return "Cette adresse email est déjà enregistrée. Veuillez vous connecter.";
+        return "Email déjà enregistré. Connectez-vous.";
       if (code.includes("weak-password"))
         return "Le mot de passe doit contenir au moins 6 caractères.";
-      return "Erreur d'authentification : " + code;
+      return "Erreur : " + code;
     }
 
     onAuthStateChanged(auth, async (user) => {
       if (user) {
         currentUser = user;
         document.getElementById("authOverlay").style.display = "none";
+        document.getElementById("authActionBtn").innerText = "🚪 Déconnexion";
+        document.getElementById("authActionBtn").style.color = "#ef4444";
+        document.getElementById("authActionBtn").onclick = handleLogout;
         await loadUserProfile(user.uid);
       } else {
         currentUser = null;
         currentUserProfile = null;
         activeStudentUid = null;
         activeStudentProfile = null;
-        document.getElementById("authOverlay").style.display = "flex";
+        document.getElementById("authActionBtn").innerText = "🔑 Connexion";
+        document.getElementById("authActionBtn").style.color = "var(--primary)";
+        document.getElementById("authActionBtn").onclick = window.showAuthModal;
+        document.getElementById("userNameLabel").innerText = "Visiteur";
+        document.getElementById("authOverlay").style.display = "none";
+        window.render();
       }
     });
 
     async function loadUserProfile(uid) {
-      showLoading("Chargement de vos données...");
-      const userSnap = await get(ref(database, `users/${uid}`));
-      if (!userSnap.exists()) {
-        currentUserProfile = {
-          uid: uid,
-          email: currentUser.email,
-          displayName: currentUser.displayName || "Utilisateur",
-          role: "student",
-          parentLinkCode:
-            "BAC-" + Math.random().toString(36).substring(2, 6).toUpperCase(),
-          createdAt: Date.now(),
-        };
-        await set(ref(database, `users/${uid}`), currentUserProfile);
-        await set(
-          ref(database, `parent_codes/${currentUserProfile.parentLinkCode}`),
-          uid
-        );
-      } else {
-        currentUserProfile = userSnap.val();
+      try {
+        const userSnap = await get(ref(database, `users/${uid}`));
+        if (!userSnap.exists()) {
+          currentUserProfile = {
+            uid: uid,
+            email: currentUser.email,
+            displayName: currentUser.displayName || "Élève",
+            role: "student",
+            parentLinkCode: "BAC-" + Math.random().toString(36).substring(2, 6).toUpperCase(),
+            createdAt: Date.now(),
+          };
+          await set(ref(database, `users/${uid}`), currentUserProfile);
+          await set(ref(database, `parent_codes/${currentUserProfile.parentLinkCode}`), uid);
+        } else {
+          currentUserProfile = userSnap.val();
+        }
+
+        renderUserProfileBar();
+
+        if (currentUserProfile.role === "student") {
+          activeStudentUid = uid;
+          activeStudentProfile = currentUserProfile;
+          isReadOnly = false;
+          updateReadOnlyUI();
+          attachStudentDataListeners(uid);
+        } else if (currentUserProfile.role === "parent") {
+          isReadOnly = true;
+          updateReadOnlyUI();
+          await setupParentDashboard();
+        } else if (currentUserProfile.role === "admin") {
+          activeStudentUid = uid;
+          activeStudentProfile = currentUserProfile;
+          isReadOnly = false;
+          updateReadOnlyUI();
+          attachStudentDataListeners(uid);
+          loadAdminKPIs();
+        }
+
+        listenToAnnouncements();
+      } catch (e) {
+        console.error(e);
       }
-
-      renderUserProfileBar();
-
-      if (currentUserProfile.role === "student") {
-        activeStudentUid = uid;
-        activeStudentProfile = currentUserProfile;
-        isReadOnly = false;
-        updateReadOnlyUI();
-        attachStudentDataListeners(uid);
-      } else if (currentUserProfile.role === "parent") {
-        isReadOnly = true;
-        updateReadOnlyUI();
-        await setupParentDashboard();
-      } else if (currentUserProfile.role === "admin") {
-        activeStudentUid = uid;
-        activeStudentProfile = currentUserProfile;
-        isReadOnly = false;
-        updateReadOnlyUI();
-        attachStudentDataListeners(uid);
-        loadAdminKPIs();
-      }
-
-      listenToAnnouncements();
-      hideLoading();
     }
 
     function renderUserProfileBar() {
@@ -2411,8 +2089,7 @@
       const roleBadge = document.getElementById("userRoleBadge");
       const avatarEl = document.getElementById("userAvatarIco");
 
-      nameEl.innerText =
-        currentUserProfile.displayName || currentUserProfile.email;
+      nameEl.innerText = currentUserProfile.displayName || currentUserProfile.email;
       roleBadge.className = `role-badge role-${currentUserProfile.role}`;
 
       const roleLabels = {
@@ -2420,27 +2097,17 @@
         parent: "👨‍👩‍👧 Parent d'élève",
         admin: "🛡️ Administrateur",
       };
-      roleBadge.innerText =
-        roleLabels[currentUserProfile.role] || "UTILISATEUR";
+      roleBadge.innerText = roleLabels[currentUserProfile.role] || "UTILISATEUR";
 
-      const firstLetter = (
-        currentUserProfile.displayName || "U"
-      )[0].toUpperCase();
+      const firstLetter = (currentUserProfile.displayName || "U")[0].toUpperCase();
       avatarEl.innerText = firstLetter;
 
-      document.getElementById("btnMyParentCode").style.display =
-        currentUserProfile.role === "student" ? "inline-flex" : "none";
-      document.getElementById("parentChildControls").style.display =
-        currentUserProfile.role === "parent" ? "inline-flex" : "none";
-      document.getElementById("btnAdminConsole").style.display =
-        currentUserProfile.role === "admin" ? "inline-flex" : "none";
+      document.getElementById("btnMyParentCode").style.display = currentUserProfile.role === "student" ? "inline-flex" : "none";
+      document.getElementById("parentChildControls").style.display = currentUserProfile.role === "parent" ? "inline-flex" : "none";
+      document.getElementById("btnAdminConsole").style.display = currentUserProfile.role === "admin" ? "inline-flex" : "none";
 
-      if (
-        currentUserProfile.role === "student" &&
-        currentUserProfile.parentLinkCode
-      ) {
-        document.getElementById("myParentCodeDisplay").innerText =
-          currentUserProfile.parentLinkCode;
+      if (currentUserProfile.role === "student" && currentUserProfile.parentLinkCode) {
+        document.getElementById("myParentCodeDisplay").innerText = currentUserProfile.parentLinkCode;
       }
     }
 
@@ -2452,14 +2119,10 @@
       if (currentUserProfile?.role === "parent") {
         banner.style.display = "flex";
         const name = activeStudentProfile?.displayName || "votre enfant";
-        text.innerText = `👁️ Consultation en direct du planning et des notes de : ${name}`;
-      } else if (
-        currentUserProfile?.role === "admin" &&
-        activeStudentUid !== currentUser.uid
-      ) {
+        text.innerText = `👁️ Consultation en direct de : ${name}`;
+      } else if (currentUserProfile?.role === "admin" && activeStudentUid !== currentUser.uid) {
         banner.style.display = "flex";
-        text.innerText = `🛡️ Supervision Admin sur l'élève : ${activeStudentProfile?.displayName || activeStudentUid
-          }`;
+        text.innerText = `🛡️ Supervision Admin : ${activeStudentProfile?.displayName || activeStudentUid}`;
       } else {
         banner.style.display = "none";
       }
@@ -2469,9 +2132,6 @@
       });
     }
 
-    // ==========================================
-    // GESTION PARENT
-    // ==========================================
     window.openStudentCodeModal = function () {
       document.getElementById("studentCodeModal").style.display = "flex";
     };
@@ -2479,45 +2139,36 @@
     window.copyParentCode = function () {
       const code = document.getElementById("myParentCodeDisplay").innerText;
       navigator.clipboard.writeText(code);
-      alert(
-        "✨ Code copié dans le presse-papier ! Transmettez-le à vos parents."
-      );
+      alert("✨ Code copié dans le presse-papier !");
     };
 
     window.linkChildWithCode = async function () {
-      const code = document
-        .getElementById("childLinkInput")
-        .value.trim()
-        .toUpperCase();
+      const code = document.getElementById("childLinkInput").value.trim().toUpperCase();
       if (!code) return alert("Veuillez saisir un code.");
 
-      showLoading("Vérification du code de l'élève...");
+      showLoading("Vérification...");
       try {
         const codeSnap = await get(ref(database, `parent_codes/${code}`));
         if (!codeSnap.exists()) {
           hideLoading();
-          return alert(
-            "Code introuvable. Veuillez vérifier le code fourni par l'élève."
-          );
+          return alert("Code introuvable.");
         }
 
         const studentUid = codeSnap.val();
         const currentLinked = currentUserProfile.linkedStudents || [];
         if (!currentLinked.includes(studentUid)) {
           currentLinked.push(studentUid);
-          await update(ref(database, `users/${currentUser.uid}`), {
-            linkedStudents: currentLinked,
-          });
+          await update(ref(database, `users/${currentUser.uid}`), { linkedStudents: currentLinked });
           currentUserProfile.linkedStudents = currentLinked;
         }
 
         hideLoading();
         window.closeModal("linkChildModal");
-        alert("🎉 Élève lié avec succès à votre compte parent !");
+        alert("🎉 Élève lié avec succès !");
         await setupParentDashboard(studentUid);
       } catch (e) {
         hideLoading();
-        alert("Erreur lors de la liaison : " + e.message);
+        alert("Erreur : " + e.message);
       }
     };
 
@@ -2527,8 +2178,7 @@
       const linked = currentUserProfile.linkedStudents || [];
 
       if (!linked.length) {
-        select.innerHTML =
-          '<option value="">Aucun élève lié (+ Lier)</option>';
+        select.innerHTML = '<option value="">Aucun élève lié (+ Lier)</option>';
         activeStudentUid = null;
         activeStudentProfile = null;
         db = [];
@@ -2541,13 +2191,10 @@
 
       for (let sUid of linked) {
         const sSnap = await get(ref(database, `users/${sUid}`));
-        const sData = sSnap.val() || {
-          displayName: "Élève (" + sUid.substring(0, 4) + ")",
-        };
+        const sData = sSnap.val() || { displayName: "Élève (" + sUid.substring(0, 4) + ")" };
         const opt = document.createElement("option");
         opt.value = sUid;
-        opt.innerText = `🎓 ${sData.displayName || sData.email} (${sData.section || "Maths"
-          })`;
+        opt.innerText = `🎓 ${sData.displayName || sData.email} (${sData.section || "Maths"})`;
         select.appendChild(opt);
       }
 
@@ -2565,9 +2212,6 @@
       attachStudentDataListeners(sUid);
     };
 
-    // ==========================================
-    // SYNCHRONISATION MULTI-TENANT
-    // ==========================================
     function detachAllDataListeners() {
       activeDataListeners.forEach((r) => off(r));
       activeDataListeners = [];
@@ -2578,36 +2222,21 @@
 
       const seancesRef = ref(database, `student_data/${sUid}/seances`);
       const examsRef = ref(database, `student_data/${sUid}/examens`);
-      const gradesRef = ref(
-        database,
-        `student_data/${sUid}/notes_trimestrielles`
-      );
-      const bacArchiveRef = ref(
-        database,
-        `student_data/${sUid}/bac_archive_2000_2026`
-      );
+      const gradesRef = ref(database, `student_data/${sUid}/notes_trimestrielles`);
+      const bacArchiveRef = ref(database, `student_data/${sUid}/bac_archive_2000_2026`);
 
-      activeDataListeners.push(
-        seancesRef,
-        examsRef,
-        gradesRef,
-        bacArchiveRef
-      );
+      activeDataListeners.push(seancesRef, examsRef, gradesRef, bacArchiveRef);
 
       onValue(seancesRef, (snapshot) => {
         db = [];
-        snapshot.forEach((childSnapshot) => {
-          db.push(childSnapshot.val());
-        });
+        snapshot.forEach((childSnapshot) => { db.push(childSnapshot.val()); });
         window.render();
         updateHomeStreak();
       });
 
       onValue(examsRef, (snapshot) => {
         examsDb = [];
-        snapshot.forEach((childSnapshot) => {
-          examsDb.push(childSnapshot.val());
-        });
+        snapshot.forEach((childSnapshot) => { examsDb.push(childSnapshot.val()); });
         renderExams();
       });
 
@@ -2623,20 +2252,11 @@
       });
     }
 
-    // ==========================================
-    // ADMIN CONSOLE
-    // ==========================================
     window.switchAdminTab = function (tab) {
-      document
-        .getElementById("adminTabUsers")
-        .classList.toggle("active", tab === "users");
-      document
-        .getElementById("adminTabAnnouncements")
-        .classList.toggle("active", tab === "announcements");
-      document.getElementById("adminViewUsers").style.display =
-        tab === "users" ? "block" : "none";
-      document.getElementById("adminViewAnnouncements").style.display =
-        tab === "announcements" ? "flex" : "none";
+      document.getElementById("adminTabUsers").classList.toggle("active", tab === "users");
+      document.getElementById("adminTabAnnouncements").classList.toggle("active", tab === "announcements");
+      document.getElementById("adminViewUsers").style.display = tab === "users" ? "block" : "none";
+      document.getElementById("adminViewAnnouncements").style.display = tab === "announcements" ? "flex" : "none";
     };
 
     async function loadAdminKPIs() {
@@ -2652,12 +2272,9 @@
           if (u.role === "parent") parentsCount++;
         });
 
-        document.getElementById("kpiTotalUsers").innerText =
-          allUsersCache.length;
-        document.getElementById("kpiTotalStudents").innerText =
-          studentsCount;
-        document.getElementById("kpiTotalParents").innerText =
-          parentsCount;
+        document.getElementById("kpiTotalUsers").innerText = allUsersCache.length;
+        document.getElementById("kpiTotalStudents").innerText = studentsCount;
+        document.getElementById("kpiTotalParents").innerText = parentsCount;
         renderAdminUsersTable();
       });
 
@@ -2665,11 +2282,9 @@
         let totalSessions = 0;
         snapshot.forEach((childSnap) => {
           const data = childSnap.val();
-          if (data?.seances)
-            totalSessions += Object.keys(data.seances).length;
+          if (data?.seances) totalSessions += Object.keys(data.seances).length;
         });
-        document.getElementById("kpiTotalSessions").innerText =
-          totalSessions;
+        document.getElementById("kpiTotalSessions").innerText = totalSessions;
       });
     }
 
@@ -2678,16 +2293,11 @@
       if (!tbody) return;
       tbody.innerHTML = "";
 
-      const query = (
-        document.getElementById("adminSearchInput")?.value || ""
-      ).toLowerCase();
-
+      const query = (document.getElementById("adminSearchInput")?.value || "").toLowerCase();
       const filtered = allUsersCache.filter((u) => {
         const matchName = (u.displayName || "").toLowerCase().includes(query);
         const matchEmail = (u.email || "").toLowerCase().includes(query);
-        const matchCode = (u.parentLinkCode || "")
-          .toLowerCase()
-          .includes(query);
+        const matchCode = (u.parentLinkCode || "").toLowerCase().includes(query);
         return matchName || matchEmail || matchCode;
       });
 
@@ -2698,36 +2308,24 @@
 
       filtered.forEach((u) => {
         const tr = document.createElement("tr");
-        const dateStr = u.createdAt
-          ? new Date(u.createdAt).toLocaleDateString("fr-FR")
-          : "N/A";
+        const dateStr = u.createdAt ? new Date(u.createdAt).toLocaleDateString("fr-FR") : "N/A";
         const roleBadgeClass = `role-${u.role || "student"}`;
 
         let details = "-";
-        if (u.role === "student")
-          details = `Section: <b>${u.section || "Maths"
-            }</b> | Code: <code>${u.parentLinkCode || "N/A"}</code>`;
-        else if (u.role === "parent")
-          details = `${(u.linkedStudents || []).length} élève(s) associé(s)`;
+        if (u.role === "student") details = `Section: <b>${u.section || "Maths"}</b> | Code: <code>${u.parentLinkCode || "N/A"}</code>`;
+        else if (u.role === "parent") details = `${(u.linkedStudents || []).length} élève(s) associé(s)`;
 
         tr.innerHTML = `
             <td>
               <div style="font-weight:800;">${u.displayName || "Sans nom"}</div>
-              <div style="font-size:11px; color:var(--muted);">${u.email || ""
-          }</div>
+              <div style="font-size:11px; color:var(--muted);">${u.email || ""}</div>
             </td>
-            <td><span class="role-badge ${roleBadgeClass}">${(
-            u.role || "student"
-          ).toUpperCase()}</span></td>
+            <td><span class="role-badge ${roleBadgeClass}">${(u.role || "student").toUpperCase()}</span></td>
             <td><span style="font-size:12px;">${details}</span></td>
             <td style="font-size:12px; color:var(--muted);">${dateStr}</td>
             <td>
-              ${u.role === "student"
-            ? `<button class="btn-action" style="padding:4px 8px; font-size:11px;" onclick="inspectStudentByAdmin('${u.uid}')">👁️ Inspecter</button>`
-            : ""
-          }
-              <button class="btn-action" style="padding:4px 8px; font-size:11px; color:#ef4444;" onclick="deleteUserByAdmin('${u.uid
-          }', '${u.parentLinkCode || ""}')">🗑️</button>
+              ${u.role === "student" ? `<button class="btn-action" style="padding:4px 8px; font-size:11px;" onclick="inspectStudentByAdmin('${u.uid}')">👁️ Inspecter</button>` : ""}
+              <button class="btn-action" style="padding:4px 8px; font-size:11px; color:#ef4444;" onclick="deleteUserByAdmin('${u.uid}', '${u.parentLinkCode || ""}')">🗑️</button>
             </td>
           `;
         tbody.appendChild(tr);
@@ -2742,22 +2340,14 @@
       updateReadOnlyUI();
       attachStudentDataListeners(studentUid);
       window.closeOverlay("adminOverlay");
-      alert(
-        `Vous supervisez maintenant le tableau de bord de : ${activeStudentProfile?.displayName || studentUid
-        }`
-      );
+      alert(`Vous supervisez le tableau de bord de : ${activeStudentProfile?.displayName || studentUid}`);
     };
 
     window.deleteUserByAdmin = async function (uid, parentCode) {
-      if (
-        confirm(
-          "Supprimer définitivement ce compte et toutes ses données associées ?"
-        )
-      ) {
+      if (confirm("Supprimer définitivement cet utilisateur ?")) {
         await remove(ref(database, `users/${uid}`));
         await remove(ref(database, `student_data/${uid}`));
-        if (parentCode)
-          await remove(ref(database, `parent_codes/${parentCode}`));
+        if (parentCode) await remove(ref(database, `parent_codes/${parentCode}`));
         alert("Utilisateur supprimé.");
       }
     };
@@ -2765,8 +2355,7 @@
     window.publishAdminAnnouncement = async function () {
       const title = document.getElementById("annTitle").value.trim();
       const content = document.getElementById("annContent").value.trim();
-      if (!title || !content)
-        return alert("Veuillez renseigner un titre et un message.");
+      if (!title || !content) return alert("Veuillez remplir le titre et le message.");
 
       const newId = Date.now().toString();
       await set(ref(database, `system_config/announcements/${newId}`), {
@@ -2779,7 +2368,7 @@
 
       document.getElementById("annTitle").value = "";
       document.getElementById("annContent").value = "";
-      alert("✨ Annonce publiée pour tous les élèves et parents !");
+      alert("✨ Annonce publiée !");
     };
 
     function listenToAnnouncements() {
@@ -2822,17 +2411,13 @@
       }
     };
 
-    // ==========================================
-    // COMPTE À REBOURS DU BACCALAURÉAT
-    // ==========================================
     function updateBacCountdown() {
       const bacDate = new Date("2027-06-09T08:00:00");
       const now = new Date();
       const diff = bacDate - now;
 
       if (diff <= 0) {
-        document.getElementById("bacCountdownText").innerText =
-          "Bonne chance pour les épreuves !";
+        document.getElementById("bacCountdownText").innerText = "Bonne chance pour les épreuves !";
         return;
       }
 
@@ -2840,37 +2425,28 @@
       const h = Math.floor((diff / (1000 * 60 * 60)) % 24);
       const m = Math.floor((diff / 1000 / 60) % 60);
       const s = Math.floor((diff / 1000) % 60);
-      document.getElementById(
-        "bacCountdownText"
-      ).innerText = `J-${d} | ${h}h ${m}m ${s}s`;
+      document.getElementById("bacCountdownText").innerText = `J-${d} | ${h}h ${m}m ${s}s`;
     }
     setInterval(updateBacCountdown, 1000);
     updateBacCountdown();
 
-    // STREAK SUR LES HEURES À LA MAISON & EN LIGNE
     function updateHomeStreak() {
       const today = new Date();
       const todayDay = (today.getDay() + 6) % 7;
 
       const hasSelfStudyToday = db.some((ev) => {
-        const isHomeOrOnline =
-          ev.type &&
-          (ev.type.includes("maison") || ev.type.includes("ligne"));
+        const isHomeOrOnline = ev.type && (ev.type.includes("maison") || ev.type.includes("ligne"));
         return ev.day === todayDay && isHomeOrOnline;
       });
 
       const todayStr = today.toDateString();
       const lastActive = localStorage.getItem("bac_last_self_study_date");
-      let streak = parseInt(
-        localStorage.getItem("bac_self_study_streak") || "1"
-      );
+      let streak = parseInt(localStorage.getItem("bac_self_study_streak") || "1");
 
       if (hasSelfStudyToday && lastActive !== todayStr) {
         if (lastActive) {
           const lastDate = new Date(lastActive);
-          const diffDays = Math.floor(
-            (new Date(todayStr) - lastDate) / (1000 * 60 * 60 * 24)
-          );
+          const diffDays = Math.floor((new Date(todayStr) - lastDate) / (1000 * 60 * 60 * 24));
           if (diffDays === 1) streak++;
           else if (diffDays > 1) streak = 1;
         }
@@ -2880,111 +2456,33 @@
       document.getElementById("streakDaysCount").innerText = streak;
     }
 
-    // DARK MODE
     window.toggleDarkMode = function () {
       document.body.classList.toggle("dark-mode");
-      localStorage.setItem(
-        "bac_dark_mode",
-        document.body.classList.contains("dark-mode") ? "1" : "0"
-      );
+      localStorage.setItem("bac_dark_mode", document.body.classList.contains("dark-mode") ? "1" : "0");
     };
     if (localStorage.getItem("bac_dark_mode") === "1") {
       document.body.classList.add("dark-mode");
     }
 
-    // STRUCTURE DES MATIÈRES BAC
     const BAC_SUBJECTS = [
-      {
-        id: "math",
-        name: "Mathématiques",
-        coef: 4,
-        ico: "📐",
-        cls: "sub-math",
-        color: "#2563eb",
-      },
-      {
-        id: "phys",
-        name: "Sciences Physiques",
-        coef: 4,
-        ico: "🔬",
-        cls: "sub-phys",
-        color: "#7c3aed",
-      },
-      {
-        id: "svt",
-        name: "SVT",
-        coef: 1,
-        ico: "🧬",
-        cls: "sub-svt",
-        color: "#059669",
-      },
-      {
-        id: "info",
-        name: "Informatique",
-        coef: 1,
-        ico: "💻",
-        cls: "sub-info",
-        color: "#0891b2",
-      },
-      {
-        id: "franc",
-        name: "Français",
-        coef: 1,
-        ico: "🇫🇷",
-        cls: "sub-franc",
-        color: "#e11d48",
-      },
-      {
-        id: "angl",
-        name: "Anglais",
-        coef: 1,
-        ico: "🇬🇧",
-        cls: "sub-angl",
-        color: "#4f46e5",
-      },
-      {
-        id: "philo",
-        name: "Philosophie",
-        coef: 1,
-        ico: "🧠",
-        cls: "sub-philo",
-        color: "#9333ea",
-      },
-      {
-        id: "arab",
-        name: "Arabe",
-        coef: 1,
-        ico: "📖",
-        cls: "sub-arab",
-        color: "#d97706",
-      },
-      {
-        id: "sport",
-        name: "Sport",
-        coef: 1,
-        ico: "🏃",
-        cls: "sub-sport",
-        color: "#ea580c",
-      },
-      {
-        id: "option",
-        name: "Option (Allemand/Espagnol/Musique...)",
-        coef: 1,
-        isOption: true,
-        ico: "📌",
-        cls: "sub-opt",
-        color: "#0284c7",
-      },
+      { id: "math", name: "Mathématiques", coef: 4, ico: "📐", cls: "sub-math", color: "#2563eb" },
+      { id: "phys", name: "Sciences Physiques", coef: 4, ico: "🔬", cls: "sub-phys", color: "#7c3aed" },
+      { id: "svt", name: "SVT", coef: 1, ico: "🧬", cls: "sub-svt", color: "#059669" },
+      { id: "info", name: "Informatique", coef: 1, ico: "💻", cls: "sub-info", color: "#0891b2" },
+      { id: "franc", name: "Français", coef: 1, ico: "🇫🇷", cls: "sub-franc", color: "#e11d48" },
+      { id: "angl", name: "Anglais", coef: 1, ico: "🇬🇧", cls: "sub-angl", color: "#4f46e5" },
+      { id: "philo", name: "Philosophie", coef: 1, ico: "🧠", cls: "sub-philo", color: "#9333ea" },
+      { id: "arab", name: "Arabe", coef: 1, ico: "📖", cls: "sub-arab", color: "#d97706" },
+      { id: "sport", name: "Sport", coef: 1, ico: "🏃", cls: "sub-sport", color: "#ea580c" },
+      { id: "option", name: "Option (Allemand/Espagnol/Musique...)", coef: 1, isOption: true, ico: "📌", cls: "sub-opt", color: "#0284c7" },
     ];
 
     function getSubjectMeta(sub = "") {
       const s = sub.toLowerCase();
       if (s.includes("math")) return BAC_SUBJECTS[0];
       if (s.includes("phys") || s.includes("chim")) return BAC_SUBJECTS[1];
-      if (s.includes("svt") || s.includes("scien") || s.includes("bio"))
-        return BAC_SUBJECTS[2];
-      if (s.includes("info") || s.includes("algo") || s.includes("tic"))
-        return BAC_SUBJECTS[3];
+      if (s.includes("svt") || s.includes("scien") || s.includes("bio")) return BAC_SUBJECTS[2];
+      if (s.includes("info") || s.includes("algo") || s.includes("tic")) return BAC_SUBJECTS[3];
       if (s.includes("franc")) return BAC_SUBJECTS[4];
       if (s.includes("angl")) return BAC_SUBJECTS[5];
       if (s.includes("philo")) return BAC_SUBJECTS[6];
@@ -2996,51 +2494,31 @@
     function getEventStatus(eventDay, startMins, endMins) {
       const now = new Date();
       const realMonday = getMon(now);
-      const isThisWeek =
-        currentMonday.getDate() === realMonday.getDate() &&
-        currentMonday.getMonth() === realMonday.getMonth();
-
+      const isThisWeek = currentMonday.getDate() === realMonday.getDate() && currentMonday.getMonth() === realMonday.getMonth();
       if (!isThisWeek) return { class: "", text: "" };
 
       const currentRealDay = (now.getDay() + 6) % 7;
       const currentMins = now.getHours() * 60 + now.getMinutes();
 
-      if (
-        eventDay < currentRealDay ||
-        (eventDay === currentRealDay && endMins <= currentMins)
-      ) {
-        return {
-          class: "status-done",
-          text: "<span class='badge-status badge-done'>✓ Fait</span>",
-        };
-      } else if (
-        eventDay === currentRealDay &&
-        startMins <= currentMins &&
-        endMins > currentMins
-      ) {
-        return {
-          class: "status-now",
-          text: "<span class='badge-status badge-now'>▶ En cours</span>",
-        };
+      if (eventDay < currentRealDay || (eventDay === currentRealDay && endMins <= currentMins)) {
+        return { class: "status-done", text: "<span class='badge-status badge-done'>✓ Fait</span>" };
+      } else if (eventDay === currentRealDay && startMins <= currentMins && endMins > currentMins) {
+        return { class: "status-now", text: "<span class='badge-status badge-now'>▶ En cours</span>" };
       }
       return { class: "", text: "" };
     }
 
-    // ANNALES DU BAC
     function initBacArchiveTabs() {
       const cont = document.getElementById("bacArchiveSubjectTabs");
       if (!cont) return;
       cont.innerHTML = "";
       BAC_SUBJECTS.forEach((sub) => {
         const btn = document.createElement("button");
-        btn.className = `btn-tab-item ${sub.id === currentBacSubjectId ? "active" : ""
-          }`;
+        btn.className = `btn-tab-item ${sub.id === currentBacSubjectId ? "active" : ""}`;
         btn.innerText = `${sub.ico} ${sub.name}`;
         btn.onclick = () => {
           currentBacSubjectId = sub.id;
-          document
-            .querySelectorAll("#bacArchiveSubjectTabs .btn-tab-item")
-            .forEach((b) => b.classList.remove("active"));
+          document.querySelectorAll("#bacArchiveSubjectTabs .btn-tab-item").forEach((b) => b.classList.remove("active"));
           btn.classList.add("active");
           renderBacArchiveGrid();
         };
@@ -3050,19 +2528,14 @@
     initBacArchiveTabs();
 
     window.searchBacOnline = function (subjectName, year) {
-      const query = encodeURIComponent(
-        `bac tunisie ${year} ${subjectName} section mathematiques pdf`
-      );
+      const query = encodeURIComponent(`bac tunisie ${year} ${subjectName} section mathematiques pdf`);
       window.open(`https://www.google.com/search?q=${query}`, "_blank");
     };
 
     function renderBacArchiveGrid() {
-      const subObj =
-        BAC_SUBJECTS.find((s) => s.id === currentBacSubjectId) ||
-        BAC_SUBJECTS[0];
+      const subObj = BAC_SUBJECTS.find((s) => s.id === currentBacSubjectId) || BAC_SUBJECTS[0];
       const titleEl = document.getElementById("bacCurrentSubjectName");
-      if (titleEl)
-        titleEl.innerText = `${subObj.ico} Annales : ${subObj.name} (Section Math)`;
+      if (titleEl) titleEl.innerText = `${subObj.ico} Annales : ${subObj.name} (Section Math)`;
 
       const subData = bacArchiveData[currentBacSubjectId] || {};
       let doneCount = 0;
@@ -3074,102 +2547,59 @@
 
       for (let year = 2026; year >= 2000; year--) {
         const yKey = `bac_${year}`;
-        const examItem = subData[yKey] || {
-          done: false,
-          starred: false,
-          comment: "",
-          pdfUrl: "",
-        };
+        const examItem = subData[yKey] || { done: false, starred: false, comment: "", pdfUrl: "" };
         if (examItem.done) doneCount++;
 
         const box = document.createElement("div");
-        box.className = `bac-exam-box ${examItem.done ? "is-done" : ""} ${examItem.starred ? "is-starred" : ""
-          }`;
+        box.className = `bac-exam-box ${examItem.done ? "is-done" : ""} ${examItem.starred ? "is-starred" : ""}`;
 
         box.innerHTML = `
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-          <div style="display:flex; align-items:center; gap:8px;">
-            <input type="checkbox" style="width:18px; height:18px; cursor:pointer;" ${examItem.done ? "checked" : ""
-          } ${isReadOnly ? "disabled" : ""} onchange="toggleBacDone('${currentBacSubjectId}', '${yKey}', this.checked)">
-            <span style="font-weight:800; font-size:16px;">Baccalauréat ${year}</span>
-          </div>
-          <div style="display:flex; align-items:center; gap:6px;">
-            <button class="btn-action" style="padding:4px 8px; font-size:11px;" onclick="searchBacOnline('${subObj.name
-          }', ${year})">🔍 Chercher Sujet</button>
-            <button class="star-btn ${examItem.starred ? "starred" : ""
-          }" ${isReadOnly ? "disabled" : ""} onclick="toggleBacStar('${currentBacSubjectId}', '${yKey}', ${!examItem.starred})">🌟</button>
-          </div>
-        </div>
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <div style="display:flex; align-items:center; gap:8px;">
+                <input type="checkbox" style="width:18px; height:18px; cursor:pointer;" ${examItem.done ? "checked" : ""} ${isReadOnly ? "disabled" : ""} onchange="toggleBacDone('${currentBacSubjectId}', '${yKey}', this.checked)">
+                <span style="font-weight:800; font-size:16px;">Baccalauréat ${year}</span>
+              </div>
+              <div style="display:flex; align-items:center; gap:6px;">
+                <button class="btn-action" style="padding:4px 8px; font-size:11px;" onclick="searchBacOnline('${subObj.name}', ${year})">🔍 Chercher Sujet</button>
+                <button class="star-btn ${examItem.starred ? "starred" : ""}" ${isReadOnly ? "disabled" : ""} onclick="toggleBacStar('${currentBacSubjectId}', '${yKey}', ${!examItem.starred})">🌟</button>
+              </div>
+            </div>
 
-        <div style="display:flex; gap:6px; align-items:center; margin-top:2px;">
-          <input type="url" class="input" style="padding:6px 10px; font-size:12px; flex-grow:1;" placeholder="Colle ton lien PDF ici (Drive / Web)..." value="${examItem.pdfUrl || ""
-          }" ${isReadOnly ? "readonly" : ""} onchange="saveBacPdf('${currentBacSubjectId}', '${yKey}', this.value)">
-          ${examItem.pdfUrl
-            ? `<a href="${examItem.pdfUrl}" target="_blank" class="btn-action" style="padding:6px 10px; text-decoration:none; font-size:11px; background:var(--primary); color:white; border-color:var(--primary);">📖 Ouvrir</a>`
-            : ""
-          }
-        </div>
+            <div style="display:flex; gap:6px; align-items:center; margin-top:2px;">
+              <input type="url" class="input" style="padding:6px 10px; font-size:12px; flex-grow:1;" placeholder="Colle ton lien PDF ici..." value="${examItem.pdfUrl || ""}" ${isReadOnly ? "readonly" : ""} onchange="saveBacPdf('${currentBacSubjectId}', '${yKey}', this.value)">
+              ${examItem.pdfUrl ? `<a href="${examItem.pdfUrl}" target="_blank" class="btn-action" style="padding:6px 10px; text-decoration:none; font-size:11px; background:var(--primary); color:white; border-color:var(--primary);">📖 Ouvrir</a>` : ""}
+            </div>
 
-        <textarea class="input" style="padding:6px 10px; font-size:12px; height:50px; resize:none;" placeholder="Notes d'analyse (difficulté, fautes commises, astuces du corrigé...)" ${isReadOnly ? "readonly" : ""} onchange="saveBacComment('${currentBacSubjectId}', '${yKey}', this.value)">${examItem.comment || ""
-          }</textarea>
-      `;
+            <textarea class="input" style="padding:6px 10px; font-size:12px; height:50px; resize:none;" placeholder="Notes d'analyse..." ${isReadOnly ? "readonly" : ""} onchange="saveBacComment('${currentBacSubjectId}', '${yKey}', this.value)">${examItem.comment || ""}</textarea>
+          `;
         grid.appendChild(box);
       }
 
       const pct = ((doneCount / totalYears) * 100).toFixed(1);
-      document.getElementById(
-        "bacSubjectProgressCount"
-      ).innerText = `${doneCount} / ${totalYears} Sujets Réalisés`;
-      document.getElementById(
-        "bacSubjectProgressPct"
-      ).innerText = `${pct}% Complété`;
+      document.getElementById("bacSubjectProgressCount").innerText = `${doneCount} / ${totalYears} Sujets Réalisés`;
+      document.getElementById("bacSubjectProgressPct").innerText = `${pct}% Complété`;
     }
 
     window.toggleBacDone = function (subId, yKey, isDone) {
-      if (isReadOnly) return;
-      set(
-        ref(
-          database,
-          getStudentPath(`bac_archive_2000_2026/${subId}/${yKey}/done`)
-        ),
-        isDone
-      );
+      if (isReadOnly || !currentUser) return;
+      set(ref(database, getStudentPath(`bac_archive_2000_2026/${subId}/${yKey}/done`)), isDone);
     };
 
     window.toggleBacStar = function (subId, yKey, isStarred) {
-      if (isReadOnly) return;
-      set(
-        ref(
-          database,
-          getStudentPath(`bac_archive_2000_2026/${subId}/${yKey}/starred`)
-        ),
-        isStarred
-      );
+      if (isReadOnly || !currentUser) return;
+      set(ref(database, getStudentPath(`bac_archive_2000_2026/${subId}/${yKey}/starred`)), isStarred);
     };
 
     window.saveBacPdf = function (subId, yKey, url) {
-      if (isReadOnly) return;
-      set(
-        ref(
-          database,
-          getStudentPath(`bac_archive_2000_2026/${subId}/${yKey}/pdfUrl`)
-        ),
-        url.trim()
-      );
+      if (isReadOnly || !currentUser) return;
+      set(ref(database, getStudentPath(`bac_archive_2000_2026/${subId}/${yKey}/pdfUrl`)), url.trim());
     };
 
     window.saveBacComment = function (subId, yKey, comment) {
-      if (isReadOnly) return;
-      set(
-        ref(
-          database,
-          getStudentPath(`bac_archive_2000_2026/${subId}/${yKey}/comment`)
-        ),
-        comment.trim()
-      );
+      if (isReadOnly || !currentUser) return;
+      set(ref(database, getStudentPath(`bac_archive_2000_2026/${subId}/${yKey}/comment`)), comment.trim());
     };
 
-    // GESTION DES EXAMENS
     window.saveExam = function () {
       if (isReadOnly) return alert("Accès en lecture seule.");
       const sub = document.getElementById("exSub").value;
@@ -3191,107 +2621,63 @@
       list.innerHTML = "";
 
       if (!examsDb.length) {
-        list.innerHTML =
-          '<div style="text-align:center; grid-column:1/-1; padding:50px; color:var(--muted);">Aucun examen planifié.</div>';
+        list.innerHTML = '<div style="text-align:center; grid-column:1/-1; padding:50px; color:var(--muted);">Aucun examen planifié.</div>';
         return;
       }
 
-      examsDb
-        .sort((a, b) => new Date(a.date) - new Date(b.date))
-        .forEach((ex) => {
-          const meta = getSubjectMeta(ex.sub);
-          const exDate = new Date(ex.date);
-          const today = new Date();
-          today.setHours(0, 0, 0, 0);
-          const diffDays = Math.ceil(
-            (exDate - today) / (1000 * 60 * 60 * 24)
-          );
+      examsDb.sort((a, b) => new Date(a.date) - new Date(b.date)).forEach((ex) => {
+        const meta = getSubjectMeta(ex.sub);
+        const exDate = new Date(ex.date);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const diffDays = Math.ceil((exDate - today) / (1000 * 60 * 60 * 24));
 
-          let countdownBadge = "";
-          if (diffDays < 0)
-            countdownBadge =
-              '<span class="badge-status badge-done">Terminé</span>';
-          else if (diffDays === 0)
-            countdownBadge =
-              '<span class="badge-status badge-now" style="background:#ef4444;">Aujourd\'hui !</span>';
-          else
-            countdownBadge = `<span class="badge-status badge-now">Dans ${diffDays} jour${diffDays > 1 ? "s" : ""
-              }</span>`;
+        let countdownBadge = "";
+        if (diffDays < 0) countdownBadge = '<span class="badge-status badge-done">Terminé</span>';
+        else if (diffDays === 0) countdownBadge = '<span class="badge-status badge-now" style="background:#ef4444;">Aujourd\'hui !</span>';
+        else countdownBadge = `<span class="badge-status badge-now">Dans ${diffDays} jour${diffDays > 1 ? "s" : ""}</span>`;
 
-          list.innerHTML += `
-        <div style="background:var(--card); border:1.5px solid var(--dash); border-left:6px solid ${meta.color
-            }; border-radius:14px; padding:16px; box-shadow:var(--shadow-sm); display:flex; flex-direction:column; justify-content:space-between; gap:10px;">
-          <div>
-            <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+        list.innerHTML += `
+            <div style="background:var(--card); border:1.5px solid var(--dash); border-left:6px solid ${meta.color}; border-radius:14px; padding:16px; box-shadow:var(--shadow-sm); display:flex; flex-direction:column; justify-content:space-between; gap:10px;">
               <div>
-                <div style="font-weight:800; font-size:15px;">${meta.ico} ${ex.sub
-            }</div>
-                <div style="font-size:12px; font-weight:700; color:var(--primary); margin-top:2px;">${ex.type
-            }</div>
+                <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                  <div>
+                    <div style="font-weight:800; font-size:15px;">${meta.ico} ${ex.sub}</div>
+                    <div style="font-size:12px; font-weight:700; color:var(--primary); margin-top:2px;">${ex.type}</div>
+                  </div>
+                  <div>${countdownBadge}</div>
+                </div>
+                <div style="font-size:12px; color:var(--muted); margin-top:8px; font-weight:600;">📅 Date : ${exDate.toLocaleDateString("fr-FR", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}</div>
+                ${ex.desc ? `<div style="font-size:12px; margin-top:6px; background:var(--dash); padding:8px 10px; border-radius:8px;">📌 <b>Programme :</b> ${ex.desc}</div>` : ""}
               </div>
-              <div>${countdownBadge}</div>
+              ${!isReadOnly ? `<div style="display:flex; justify-content:flex-end;"><button onclick="window.deleteExam('${ex.id}')" style="background:none; border:none; color:#ef4444; font-weight:700; font-size:12px; cursor:pointer;">Supprimer 🗑️</button></div>` : ""}
             </div>
-            <div style="font-size:12px; color:var(--muted); margin-top:8px; font-weight:600;">📅 Date : ${exDate.toLocaleDateString(
-              "fr-FR",
-              {
-                weekday: "long",
-                year: "numeric",
-                month: "long",
-                day: "numeric",
-              }
-            )}</div>
-            ${ex.desc
-              ? `<div style="font-size:12px; margin-top:6px; background:var(--dash); padding:8px 10px; border-radius:8px;">📌 <b>Programme :</b> ${ex.desc}</div>`
-              : ""
-            }
-          </div>
-          ${!isReadOnly
-              ? `<div style="display:flex; justify-content:flex-end;">
-                  <button onclick="window.deleteExam('${ex.id}')" style="background:none; border:none; color:#ef4444; font-weight:700; font-size:12px; cursor:pointer;">Supprimer 🗑️</button>
-                </div>`
-              : ""
-            }
-        </div>
-      `;
-        });
+          `;
+      });
     }
 
     window.deleteExam = function (id) {
       if (isReadOnly) return;
-      if (confirm("Supprimer cet examen ?"))
-        remove(ref(database, getStudentPath("examens/" + id)));
+      if (confirm("Supprimer cet examen ?")) remove(ref(database, getStudentPath("examens/" + id)));
     };
 
-    // CALCULATEUR TRIMESTRIEL
     window.switchTrimester = function (trim) {
       currentTrimester = trim;
-      document
-        .querySelectorAll(".btn-tab-item")
-        .forEach((b) => b.classList.remove("active"));
-
-      if (trim === "trim1")
-        document.getElementById("tabTrim1")?.classList.add("active");
-      if (trim === "trim2")
-        document.getElementById("tabTrim2")?.classList.add("active");
-      if (trim === "trim3")
-        document.getElementById("tabTrim3")?.classList.add("active");
-      if (trim === "year")
-        document.getElementById("tabTrimYear")?.classList.add("active");
+      document.querySelectorAll(".btn-tab-item").forEach((b) => b.classList.remove("active"));
+      if (trim === "trim1") document.getElementById("tabTrim1")?.classList.add("active");
+      if (trim === "trim2") document.getElementById("tabTrim2")?.classList.add("active");
+      if (trim === "trim3") document.getElementById("tabTrim3")?.classList.add("active");
+      if (trim === "year") document.getElementById("tabTrimYear")?.classList.add("active");
 
       if (trim === "year") {
         document.getElementById("trimesterTableView").style.display = "none";
         document.getElementById("annualSummaryView").style.display = "block";
-        document.getElementById("avgCardTitle").innerText =
-          "MOYENNE ANNUELLE GÉNÉRALE";
+        document.getElementById("avgCardTitle").innerText = "MOYENNE ANNUELLE GÉNÉRALE";
         buildAnnualSummaryTable();
       } else {
         document.getElementById("trimesterTableView").style.display = "block";
         document.getElementById("annualSummaryView").style.display = "none";
-        const titles = {
-          trim1: "MOYENNE DU 1ER TRIMESTRE",
-          trim2: "MOYENNE DU 2ÈME TRIMESTRE",
-          trim3: "MOYENNE DU 3ÈME TRIMESTRE",
-        };
+        const titles = { trim1: "MOYENNE DU 1ER TRIMESTRE", trim2: "MOYENNE DU 2ÈME TRIMESTRE", trim3: "MOYENNE DU 3ÈME TRIMESTRE" };
         document.getElementById("avgCardTitle").innerText = titles[trim];
         buildTrimesterTable();
       }
@@ -3304,46 +2690,27 @@
       const currentData = userGrades[currentTrimester] || {};
 
       BAC_SUBJECTS.forEach((sub) => {
-        const g = currentData[sub.id] || {
-          oral: "",
-          dc: "",
-          ds: "",
-          hasOral: false,
-        };
+        const g = currentData[sub.id] || { oral: "", dc: "", ds: "", hasOral: false };
         const isOralChecked = g.hasOral === true;
 
         tbody.innerHTML += `
-        <tr>
-          <td style="text-align:left; font-weight:700;">
-            ${sub.ico} ${sub.name}
-            <div style="margin-top:3px;">
-              <label class="oral-toggle-label">
-                <input type="checkbox" id="oral_chk_${sub.id}" ${isOralChecked ? "checked" : ""
-          } ${isReadOnly ? "disabled" : ""} onchange="toggleOralOption('${sub.id}')">
-                <span>+ Oral / TP</span>
-              </label>
-            </div>
-          </td>
-          <td style="font-weight:800;">${sub.coef}</td>
-          <td>
-            <input type="number" step="0.25" min="0" max="20" class="grade-input" id="g_oral_${sub.id
-          }" value="${g.oral || ""}" ${isOralChecked && !isReadOnly ? "" : 'disabled placeholder="Non"'
-          } onchange="saveTrimesterGradeInput('${sub.id}')">
-          </td>
-          <td>
-            <input type="number" step="0.25" min="0" max="20" class="grade-input" id="g_dc_${sub.id
-          }" value="${g.dc || ""}" ${isReadOnly ? "disabled" : ""} onchange="saveTrimesterGradeInput('${sub.id
-          }')">
-          </td>
-          <td>
-            <input type="number" step="0.25" min="0" max="20" class="grade-input" id="g_ds_${sub.id
-          }" value="${g.ds || ""}" ${isReadOnly ? "disabled" : ""} onchange="saveTrimesterGradeInput('${sub.id
-          }')">
-          </td>
-          <td style="font-weight:800; font-family:'JetBrains Mono', monospace; color:var(--primary);" id="sub_avg_${sub.id
-          }">--</td>
-        </tr>
-      `;
+            <tr>
+              <td style="text-align:left; font-weight:700;">
+                ${sub.ico} ${sub.name}
+                <div style="margin-top:3px;">
+                  <label class="oral-toggle-label">
+                    <input type="checkbox" id="oral_chk_${sub.id}" ${isOralChecked ? "checked" : ""} ${isReadOnly ? "disabled" : ""} onchange="toggleOralOption('${sub.id}')">
+                    <span>+ Oral / TP</span>
+                  </label>
+                </div>
+              </td>
+              <td style="font-weight:800;">${sub.coef}</td>
+              <td><input type="number" step="0.25" min="0" max="20" class="grade-input" id="g_oral_${sub.id}" value="${g.oral || ""}" ${isOralChecked && !isReadOnly ? "" : 'disabled placeholder="Non"'} onchange="saveTrimesterGradeInput('${sub.id}')"></td>
+              <td><input type="number" step="0.25" min="0" max="20" class="grade-input" id="g_dc_${sub.id}" value="${g.dc || ""}" ${isReadOnly ? "disabled" : ""} onchange="saveTrimesterGradeInput('${sub.id}')"></td>
+              <td><input type="number" step="0.25" min="0" max="20" class="grade-input" id="g_ds_${sub.id}" value="${g.ds || ""}" ${isReadOnly ? "disabled" : ""} onchange="saveTrimesterGradeInput('${sub.id}')"></td>
+              <td style="font-weight:800; font-family:'JetBrains Mono', monospace; color:var(--primary);" id="sub_avg_${sub.id}">--</td>
+            </tr>
+          `;
       });
       calculateTrimesterAverages();
     }
@@ -3358,20 +2725,14 @@
     };
 
     window.saveTrimesterGradeInput = function (subId) {
-      if (isReadOnly) return;
+      if (isReadOnly || !currentUser) return;
       const hasOral = document.getElementById(`oral_chk_${subId}`).checked;
       const oral = document.getElementById(`g_oral_${subId}`).value;
       const dc = document.getElementById(`g_dc_${subId}`).value;
       const ds = document.getElementById(`g_ds_${subId}`).value;
 
       const data = { hasOral, oral, dc, ds };
-      set(
-        ref(
-          database,
-          getStudentPath(`notes_trimestrielles/${currentTrimester}/${subId}`)
-        ),
-        data
-      );
+      set(ref(database, getStudentPath(`notes_trimestrielles/${currentTrimester}/${subId}`)), data);
     };
 
     function computeSubjectAverage(g) {
@@ -3381,20 +2742,10 @@
       const ds = parseFloat(g.ds);
       const hasOral = g.hasOral === true;
 
-      let sum = 0,
-        div = 0;
-      if (!isNaN(ds)) {
-        sum += ds * 2;
-        div += 2;
-      }
-      if (!isNaN(dc)) {
-        sum += dc * 1;
-        div += 1;
-      }
-      if (hasOral && !isNaN(o)) {
-        sum += o * 1;
-        div += 1;
-      }
+      let sum = 0, div = 0;
+      if (!isNaN(ds)) { sum += ds * 2; div += 2; }
+      if (!isNaN(dc)) { sum += dc * 1; div += 1; }
+      if (hasOral && !isNaN(o)) { sum += o * 1; div += 1; }
 
       return div > 0 ? sum / div : null;
     }
@@ -3402,8 +2753,7 @@
     window.calculateTrimesterAverages = function () {
       const mode = document.getElementById("gradeCalcMode")?.value || "Trimestre";
       const currentData = userGrades[currentTrimester] || {};
-      let totalPoints = 0,
-        totalCoef = 0;
+      let totalPoints = 0, totalCoef = 0;
 
       BAC_SUBJECTS.forEach((sub) => {
         const g = currentData[sub.id];
@@ -3425,14 +2775,11 @@
 
       if (totalCoef > 0) {
         const genAvg = totalPoints / totalCoef;
-        document.getElementById("totalTrimesterAverage").innerText =
-          genAvg.toFixed(2) + " / 20";
-        document.getElementById("totalPointsSum").innerText =
-          totalPoints.toFixed(2);
+        document.getElementById("totalTrimesterAverage").innerText = genAvg.toFixed(2) + " / 20";
+        document.getElementById("totalPointsSum").innerText = totalPoints.toFixed(2);
         document.getElementById("totalCoefSum").innerText = totalCoef;
       } else {
-        document.getElementById("totalTrimesterAverage").innerText =
-          "-- / 20";
+        document.getElementById("totalTrimesterAverage").innerText = "-- / 20";
         document.getElementById("totalPointsSum").innerText = "--";
         document.getElementById("totalCoefSum").innerText = "--";
       }
@@ -3443,34 +2790,17 @@
       if (!tbody) return;
       tbody.innerHTML = "";
       const mode = document.getElementById("gradeCalcMode")?.value || "Trimestre";
-      let annualTotalPoints = 0,
-        annualTotalCoef = 0;
+      let annualTotalPoints = 0, annualTotalCoef = 0;
 
       BAC_SUBJECTS.forEach((sub) => {
-        const a1 = computeSubjectAverage(
-          userGrades.trim1 ? userGrades.trim1[sub.id] : null
-        );
-        const a2 = computeSubjectAverage(
-          userGrades.trim2 ? userGrades.trim2[sub.id] : null
-        );
-        const a3 = computeSubjectAverage(
-          userGrades.trim3 ? userGrades.trim3[sub.id] : null
-        );
+        const a1 = computeSubjectAverage(userGrades.trim1 ? userGrades.trim1[sub.id] : null);
+        const a2 = computeSubjectAverage(userGrades.trim2 ? userGrades.trim2[sub.id] : null);
+        const a3 = computeSubjectAverage(userGrades.trim3 ? userGrades.trim3[sub.id] : null);
 
-        let validSums = 0,
-          validCounts = 0;
-        if (a1 !== null) {
-          validSums += a1;
-          validCounts++;
-        }
-        if (a2 !== null) {
-          validSums += a2;
-          validCounts++;
-        }
-        if (a3 !== null) {
-          validSums += a3;
-          validCounts++;
-        }
+        let validSums = 0, validCounts = 0;
+        if (a1 !== null) { validSums += a1; validCounts++; }
+        if (a2 !== null) { validSums += a2; validCounts++; }
+        if (a3 !== null) { validSums += a3; validCounts++; }
 
         const annualSubAvg = validCounts > 0 ? validSums / validCounts : null;
 
@@ -3484,39 +2814,29 @@
         }
 
         tbody.innerHTML += `
-        <tr>
-          <td style="text-align:left; font-weight:700;">${sub.ico} ${sub.name
-          }</td>
-          <td style="font-weight:800;">${sub.coef}</td>
-          <td style="font-family:'JetBrains Mono', monospace;">${a1 !== null ? a1.toFixed(2) : "--"
-          }</td>
-          <td style="font-family:'JetBrains Mono', monospace;">${a2 !== null ? a2.toFixed(2) : "--"
-          }</td>
-          <td style="font-family:'JetBrains Mono', monospace;">${a3 !== null ? a3.toFixed(2) : "--"
-          }</td>
-          <td style="font-weight:800; font-family:'JetBrains Mono', monospace; color:var(--primary);">
-            ${annualSubAvg !== null ? annualSubAvg.toFixed(2) : "--"}
-          </td>
-        </tr>
-      `;
+            <tr>
+              <td style="text-align:left; font-weight:700;">${sub.ico} ${sub.name}</td>
+              <td style="font-weight:800;">${sub.coef}</td>
+              <td style="font-family:'JetBrains Mono', monospace;">${a1 !== null ? a1.toFixed(2) : "--"}</td>
+              <td style="font-family:'JetBrains Mono', monospace;">${a2 !== null ? a2.toFixed(2) : "--"}</td>
+              <td style="font-family:'JetBrains Mono', monospace;">${a3 !== null ? a3.toFixed(2) : "--"}</td>
+              <td style="font-weight:800; font-family:'JetBrains Mono', monospace; color:var(--primary);">${annualSubAvg !== null ? annualSubAvg.toFixed(2) : "--"}</td>
+            </tr>
+          `;
       });
 
       if (annualTotalCoef > 0) {
         const annualGenAvg = annualTotalPoints / annualTotalCoef;
-        document.getElementById("totalTrimesterAverage").innerText =
-          annualGenAvg.toFixed(2) + " / 20";
-        document.getElementById("totalPointsSum").innerText =
-          annualTotalPoints.toFixed(2);
+        document.getElementById("totalTrimesterAverage").innerText = annualGenAvg.toFixed(2) + " / 20";
+        document.getElementById("totalPointsSum").innerText = annualTotalPoints.toFixed(2);
         document.getElementById("totalCoefSum").innerText = annualTotalCoef;
       } else {
-        document.getElementById("totalTrimesterAverage").innerText =
-          "-- / 20";
+        document.getElementById("totalTrimesterAverage").innerText = "-- / 20";
         document.getElementById("totalPointsSum").innerText = "--";
         document.getElementById("totalCoefSum").innerText = "--";
       }
     }
 
-    // CLÉ API GEMINI
     window.setApiKey = function () {
       const current = localStorage.getItem("gemini_api_key") || "";
       const key = prompt("Colle ta clé API Google AI Studio :", current);
@@ -3534,8 +2854,7 @@
     }
 
     function formatM(m) {
-      let h = Math.floor(m / 60),
-        min = m % 60;
+      let h = Math.floor(m / 60), min = m % 60;
       return `${h < 10 ? "0" + h : h}:${min < 10 ? "0" + min : min}`;
     }
 
@@ -3561,16 +2880,12 @@
       const dateLabel = document.getElementById("dateLabel");
 
       if (layout === "pc") {
-        if (dateLabel)
-          dateLabel.innerText = `${currentMonday.getDate()} ${months[currentMonday.getMonth()]
-            } - ${endSun.getDate()} ${months[endSun.getMonth()]}`;
+        if (dateLabel) dateLabel.innerText = `${currentMonday.getDate()} ${months[currentMonday.getMonth()]} - ${endSun.getDate()} ${months[endSun.getMonth()]}`;
         renderPc();
       } else {
         const activeD = new Date(currentMonday);
         activeD.setDate(activeD.getDate() + curDayIdx);
-        if (dateLabel)
-          dateLabel.innerText = `${days[curDayIdx]
-            } ${activeD.getDate()} ${months[activeD.getMonth()]}`;
+        if (dateLabel) dateLabel.innerText = `${days[curDayIdx]} ${activeD.getDate()} ${months[activeD.getMonth()]}`;
         renderMob();
       }
     }
@@ -3578,31 +2893,22 @@
     function renderPc() {
       const pHead = document.getElementById("pcHeader");
       if (!pHead) return;
-      pHead.innerHTML =
-        '<div style="background:var(--dash);border-radius:10px;display:flex;align-items:center;justify-content:center;">🗓️</div>';
+      pHead.innerHTML = '<div style="background:var(--dash);border-radius:10px;display:flex;align-items:center;justify-content:center;">🗓️</div>';
 
       const now = new Date();
-      const isThisWeek =
-        currentMonday.getDate() === getMon(now).getDate() &&
-        currentMonday.getMonth() === getMon(now).getMonth();
+      const isThisWeek = currentMonday.getDate() === getMon(now).getDate() && currentMonday.getMonth() === getMon(now).getMonth();
       const realDay = (now.getDay() + 6) % 7;
 
       for (let i = 0; i < 7; i++) {
         const d = new Date(currentMonday);
         d.setDate(d.getDate() + i);
         const isToday = isThisWeek && i === realDay;
-        pHead.innerHTML += `<div style="background:${isToday ? "#0284c7" : "var(--dash)"
-          };color:${isToday ? "#fff" : "var(--text)"
-          };border-radius:10px;padding:6px;text-align:center;font-weight:700;font-size:12px;cursor:pointer;" onclick="window.curDayIdx=${i};window.render();">${days[i]
-          }<br><span style="font-size:10px;opacity:0.85;">${d.getDate()} ${months[d.getMonth()]
-          }</span></div>`;
+        pHead.innerHTML += `<div style="background:${isToday ? "#0284c7" : "var(--dash)"};color:${isToday ? "#fff" : "var(--text)"};border-radius:10px;padding:6px;text-align:center;font-weight:700;font-size:12px;cursor:pointer;" onclick="window.curDayIdx=${i};window.render();">${days[i]}<br><span style="font-size:10px;opacity:0.85;">${d.getDate()} ${months[d.getMonth()]}</span></div>`;
       }
       const tCol = document.getElementById("timeCol");
       if (!tCol) return;
       tCol.innerHTML = "";
-      for (let h = 8; h <= 24; h++)
-        tCol.innerHTML += `<div class="h-slot">${h === 24 ? "00" : h < 10 ? "0" + h : h
-          }:00</div>`;
+      for (let h = 8; h <= 24; h++) tCol.innerHTML += `<div class="h-slot">${h === 24 ? "00" : h < 10 ? "0" + h : h}:00</div>`;
 
       const dCol = document.getElementById("daysCol");
       if (!dCol) return;
@@ -3611,11 +2917,7 @@
         const col = document.createElement("div");
         col.className = "col-day";
         for (let h = 8; h <= 24; h++)
-          col.innerHTML += `<div class="h-slot" onclick="${isReadOnly
-              ? ""
-              : `window.openModal('addModal', ${day}, ${h === 24 ? 23 : h
-              })`
-            }"></div>`;
+          col.innerHTML += `<div class="h-slot" onclick="${isReadOnly ? "" : `window.openModal('addModal', ${day}, ${h === 24 ? 23 : h})`}"></div>`;
 
         db.filter((e) => e.day === day).forEach((ev) => {
           const meta = getSubjectMeta(ev.sub);
@@ -3632,31 +2934,18 @@
           c.style.top = `${top}px`;
           c.style.height = `${hPx}px`;
           c.innerHTML = `
-          <div>
-            ${status.text}
-            <div style="font-weight:800; font-size:10.5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
-              ${meta.ico} ${ev.sub}
-            </div>
-            <div style="margin-top:1px;">
-              ${ev.type
-              ? `<span class="tag-meta" style="${isHome
-                ? "background:#059669; color:white;"
-                : isOnline
-                  ? "background:#0891b2; color:white;"
-                  : ""
-              }">${ev.type}</span>`
-              : ""
-            }
-              ${isQuin
-              ? `<span class="tag-meta" style="background:#f59e0b; color:white;">1/2</span>`
-              : ""
-            }
-            </div>
-          </div>
-          <div style="font-size:9px; opacity:0.85; font-weight:700;">${formatM(
-              ev.s
-            )} - ${formatM(ev.e)}</div>
-        `;
+              <div>
+                ${status.text}
+                <div style="font-weight:800; font-size:10.5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                  ${meta.ico} ${ev.sub}
+                </div>
+                <div style="margin-top:1px;">
+                  ${ev.type ? `<span class="tag-meta" style="${isHome ? "background:#059669; color:white;" : isOnline ? "background:#0891b2; color:white;" : ""}">${ev.type}</span>` : ""}
+                  ${isQuin ? `<span class="tag-meta" style="background:#f59e0b; color:white;">1/2</span>` : ""}
+                </div>
+              </div>
+              <div style="font-size:9px; opacity:0.85; font-weight:700;">${formatM(ev.s)} - ${formatM(ev.e)}</div>
+            `;
 
           if (!isReadOnly) {
             c.onclick = (e) => {
@@ -3679,21 +2968,14 @@
       for (let i = 0; i < 7; i++) {
         const d = new Date(currentMonday);
         d.setDate(d.getDate() + i);
-        sc.innerHTML += `<div class="mob-chip ${i === curDayIdx ? "active" : ""
-          }" onclick="window.curDayIdx=${i};window.render();"><div style="font-size:12px;font-weight:700;">${days[
-            i
-          ].substring(0, 3)}</div><div style="font-size:10px;">${d.getDate()} ${months[d.getMonth()]
-          }</div></div>`;
+        sc.innerHTML += `<div class="mob-chip ${i === curDayIdx ? "active" : ""}" onclick="window.curDayIdx=${i};window.render();"><div style="font-size:12px;font-weight:700;">${days[i].substring(0, 3)}</div><div style="font-size:10px;">${d.getDate()} ${months[d.getMonth()]}</div></div>`;
       }
       const ml = document.getElementById("mobList");
       if (!ml) return;
       ml.innerHTML = "";
-      const dayEvs = db
-        .filter((e) => e.day === curDayIdx)
-        .sort((a, b) => a.s - b.s);
+      const dayEvs = db.filter((e) => e.day === curDayIdx).sort((a, b) => a.s - b.s);
       if (!dayEvs.length) {
-        ml.innerHTML =
-          '<div style="text-align:center;padding:40px;color:var(--muted);font-size:13px;">☕ Aucune séance prévue ce jour-là.</div>';
+        ml.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted);font-size:13px;">☕ Aucune séance prévue ce jour-là.</div>';
         return;
       }
       dayEvs.forEach((ev) => {
@@ -3704,36 +2986,19 @@
         const isOnline = ev.type && ev.type.includes("ligne");
 
         ml.innerHTML += `
-        <div class="mob-card ${meta.cls} ${status.class}">
-          <div>
-            ${status.text}
-            <div style="font-size:14px;font-weight:800;">${meta.ico} ${ev.sub
-          }</div>
-            <div style="margin:3px 0;">
-              ${ev.type
-            ? `<span class="tag-meta" style="${isHome
-              ? "background:#059669; color:white;"
-              : isOnline
-                ? "background:#0891b2; color:white;"
-                : ""
-            }">${ev.type}</span>`
-            : ""
-          }
-              ${isQuin
-            ? `<span class="tag-meta" style="background:#f59e0b; color:white;">1/2 quinzaine</span>`
-            : ""
-          }
+            <div class="mob-card ${meta.cls} ${status.class}">
+              <div>
+                ${status.text}
+                <div style="font-size:14px;font-weight:800;">${meta.ico} ${ev.sub}</div>
+                <div style="margin:3px 0;">
+                  ${ev.type ? `<span class="tag-meta" style="${isHome ? "background:#059669; color:white;" : isOnline ? "background:#0891b2; color:white;" : ""}">${ev.type}</span>` : ""}
+                  ${isQuin ? `<span class="tag-meta" style="background:#f59e0b; color:white;">1/2 quinzaine</span>` : ""}
+                </div>
+                <div style="font-size:12px;opacity:0.85;font-weight:600;">🕒 ${formatM(ev.s)} - ${formatM(ev.e)}</div>
+              </div>
+              ${!isReadOnly ? `<button onclick="window.deleteEvent('${ev.id}')" style="border:none;background:none;font-size:18px;cursor:pointer;">🗑️</button>` : ""}
             </div>
-            <div style="font-size:12px;opacity:0.85;font-weight:600;">🕒 ${formatM(
-            ev.s
-          )} - ${formatM(ev.e)}</div>
-          </div>
-          ${!isReadOnly
-            ? `<button onclick="window.deleteEvent('${ev.id}')" style="border:none;background:none;font-size:18px;cursor:pointer;">🗑️</button>`
-            : ""
-          }
-        </div>
-      `;
+          `;
       });
     }
 
@@ -3745,8 +3010,7 @@
     };
 
     window.shift = function (d) {
-      if (layout === "pc")
-        currentMonday.setDate(currentMonday.getDate() + d * 7);
+      if (layout === "pc") currentMonday.setDate(currentMonday.getDate() + d * 7);
       else curDayIdx = (curDayIdx + d + 7) % 7;
       render();
     };
@@ -3760,7 +3024,7 @@
 
     window.clearAllData = function () {
       if (isReadOnly) return;
-      if (confirm("Vider tout le planning personnel de cet élève ?")) {
+      if (confirm("Vider tout le planning personnel ?")) {
         set(ref(database, getStudentPath("seances")), null);
       }
     };
@@ -3772,10 +3036,8 @@
       if (isReadOnly && (id === "addModal" || id === "addExamModal")) return;
       if (id === "addModal") {
         document.getElementById("mDay").value = day;
-        document.getElementById("mStart").value = `${h < 10 ? "0" + h : h
-          }:00`;
-        document.getElementById("mEnd").value = `${h + 2 < 10 ? "0" + (h + 2) : h + 2
-          }:00`;
+        document.getElementById("mStart").value = `${h < 10 ? "0" + h : h}:00`;
+        document.getElementById("mEnd").value = `${h + 2 < 10 ? "0" + (h + 2) : h + 2}:00`;
       }
       document.getElementById(id).style.display = "flex";
     };
@@ -3789,14 +3051,8 @@
       if (!sub) return;
       const type = document.getElementById("mType").value;
       const freq = document.getElementById("mFreq").value;
-      const [sH, sM] = document
-        .getElementById("mStart")
-        .value.split(":")
-        .map(Number);
-      const [eH, eM] = document
-        .getElementById("mEnd")
-        .value.split(":")
-        .map(Number);
+      const [sH, sM] = document.getElementById("mStart").value.split(":").map(Number);
+      const [eH, eM] = document.getElementById("mEnd").value.split(":").map(Number);
 
       const newId = Date.now().toString();
       const newEvent = {
@@ -3820,7 +3076,6 @@
       document.getElementById(id).style.display = "none";
     };
 
-    // STATISTIQUES PLEIN ÉCRAN
     window.renderStatsData = function () {
       const filter = document.getElementById("statsFilterType")?.value || "Maison";
       const subjectsMap = {};
@@ -3847,12 +3102,10 @@
         All: "🌐 Totalité des séances",
       };
       cont.innerHTML = `
-      <div style="background:var(--dash); padding:18px; border-radius:14px; font-weight:800; font-size:16px; text-align:center; box-shadow:var(--shadow-sm);">
-        Volume : <span style="color:var(--primary); font-size:18px;">${(
-          totalMinutes / 60
-        ).toFixed(1)} Heures</span> / semaine (${filterTitles[filter]})
-      </div>
-    `;
+          <div style="background:var(--dash); padding:18px; border-radius:14px; font-weight:800; font-size:16px; text-align:center; box-shadow:var(--shadow-sm);">
+            Volume : <span style="color:var(--primary); font-size:18px;">${(totalMinutes / 60).toFixed(1)} Heures</span> / semaine (${filterTitles[filter]})
+          </div>
+        `;
 
       if (totalMinutes === 0) {
         cont.innerHTML += `<div style="text-align:center; padding:50px; color:var(--muted); font-size:14px;">Aucune séance trouvée pour ce filtre.</div>`;
@@ -3861,22 +3114,16 @@
           const pct = ((mins / totalMinutes) * 100).toFixed(1);
           const meta = getSubjectMeta(name);
           cont.innerHTML += `
-          <div style="background:var(--card); border:1.5px solid var(--dash); padding:16px; border-radius:14px; box-shadow:var(--shadow-sm);">
-            <div style="display:flex; justify-content:space-between; font-weight:800; font-size:14px; margin-bottom:8px;">
-              <span style="display:flex; align-items:center; gap:6px;">${meta.ico
-            } ${name}</span>
-              <span style="font-family:'JetBrains Mono', monospace;">${(
-              mins / 60
-            ).toFixed(
-              1
-            )}h <span style="color:var(--muted); font-size:12px;">(${pct}%)</span></span>
-            </div>
-            <div style="background:var(--dash); height:12px; border-radius:99px; overflow:hidden;">
-              <div style="background:${meta.color
-            }; width:${pct}%; height:100%; border-radius:99px; transition:width 0.6s cubic-bezier(0.4, 0, 0.2, 1);"></div>
-            </div>
-          </div>
-        `;
+              <div style="background:var(--card); border:1.5px solid var(--dash); padding:16px; border-radius:14px; box-shadow:var(--shadow-sm);">
+                <div style="display:flex; justify-content:space-between; font-weight:800; font-size:14px; margin-bottom:8px;">
+                  <span style="display:flex; align-items:center; gap:6px;">${meta.ico} ${name}</span>
+                  <span style="font-family:'JetBrains Mono', monospace;">${(mins / 60).toFixed(1)}h <span style="color:var(--muted); font-size:12px;">(${pct}%)</span></span>
+                </div>
+                <div style="background:var(--dash); height:12px; border-radius:99px; overflow:hidden;">
+                  <div style="background:${meta.color}; width:${pct}%; height:100%; border-radius:99px; transition:width 0.6s cubic-bezier(0.4, 0, 0.2, 1);"></div>
+                </div>
+              </div>
+            `;
         }
       }
     };
@@ -3886,7 +3133,6 @@
       openOverlay("statsOverlay");
     };
 
-    // MINUTEUR PLEIN ÉCRAN
     let timerSeconds = 5400;
     let timerInterval = null;
     let isTimerRunning = false;
@@ -3896,9 +3142,7 @@
       const m = Math.floor((timerSeconds % 3600) / 60);
       const s = timerSeconds % 60;
       const display = document.getElementById("timerDisplay");
-      if (display)
-        display.innerText = `${h < 10 ? "0" + h : h
-          }:${m < 10 ? "0" + m : m}:${s < 10 ? "0" + s : s}`;
+      if (display) display.innerText = `${h < 10 ? "0" + h : h}:${m < 10 ? "0" + m : m}:${s < 10 ? "0" + s : s}`;
     }
 
     window.openTimer = function () {
@@ -3937,9 +3181,7 @@
             btn.innerText = "Lancer";
             btn.style.background = "#10b981";
             playBeep();
-            alert(
-              "⏱️ Session de révision terminée ! Prends une pause bien méritée."
-            );
+            alert("⏱️ Session de révision terminée ! Prends une pause bien méritée.");
           }
         }, 1000);
       }
@@ -3970,71 +3212,47 @@
       document.getElementById("loadingOverlay").style.display = "none";
     }
 
-    // MOTEUR IA GEMINI
-    async function callGoogleSDK(
-      prompt,
-      base64Image = null,
-      mimeType = "image/jpeg"
-    ) {
+    async function callGoogleSDK(prompt, base64Image = null, mimeType = "image/jpeg") {
       const apiKey = localStorage.getItem("gemini_api_key");
-      if (!apiKey)
-        throw new Error("Clé API manquante. Clique sur '🔑 Clé IA'.");
+      if (!apiKey) throw new Error("Clé API manquante. Clique sur '🔑 Clé IA'.");
 
       const genAI = new GoogleGenerativeAI(apiKey);
-      const modelsToTest = [
-        "gemini-2.5-flash",
-        "gemini-1.5-flash",
-        "gemini-1.5-pro",
-      ];
+      const modelsToTest = ["gemini-2.5-flash", "gemini-1.5-flash", "gemini-1.5-pro"];
       let lastError = "";
 
       for (let modelName of modelsToTest) {
         try {
-          const config = {
-            generationConfig: { responseMimeType: "application/json" },
-          };
-          const model = genAI.getGenerativeModel({
-            model: modelName,
-            ...config,
-          });
+          const config = { generationConfig: { responseMimeType: "application/json" } };
+          const model = genAI.getGenerativeModel({ model: modelName, ...config });
           let contentToSend = [prompt];
 
           if (base64Image) {
-            contentToSend.push({
-              inlineData: { data: base64Image, mimeType: mimeType },
-            });
+            contentToSend.push({ inlineData: { data: base64Image, mimeType: mimeType } });
           }
 
           const result = await model.generateContent(contentToSend);
           const response = await result.response;
           let text = response.text();
 
-          const extractMatch =
-            text.match(/\[[\s\S]*\]/) || text.match(/\{[\s\S]*\}/);
+          const extractMatch = text.match(/\[[\s\S]*\]/) || text.match(/\{[\s\S]*\}/);
           if (extractMatch) text = extractMatch[0];
-          text = text
-            .replace(/```json/gi, "")
-            .replace(/```/g, "")
-            .trim();
+          text = text.replace(/```json/gi, "").replace(/```/g, "").trim();
 
           return JSON.parse(text);
         } catch (error) {
           lastError = error.message;
-          if (lastError.includes("404") || lastError.includes("not found"))
-            continue;
+          if (lastError.includes("404") || lastError.includes("not found")) continue;
           throw new Error(`Erreur avec ${modelName} : ${lastError}`);
         }
       }
       throw new Error("Erreur IA : " + lastError);
     }
 
-    // SCAN IMAGE IA
     window.handleImageUpload = function (e) {
       if (isReadOnly) return alert("Accès en lecture seule.");
       const file = e.target.files[0];
       if (!file) return;
-      if (!localStorage.getItem("gemini_api_key"))
-        return alert("Clique sur 🔑 Clé IA et colle ta clé !");
+      if (!localStorage.getItem("gemini_api_key")) return alert("Clique sur 🔑 Clé IA et colle ta clé !");
 
       showLoading("Analyse complète de l'emploi du temps...");
       const reader = new FileReader();
@@ -4056,9 +3274,7 @@ Format JSON strict :
           let arr = Array.isArray(items) ? items : [items];
 
           arr.forEach((it) => {
-            const newId = (Date.now() + Math.random())
-              .toString()
-              .replace(".", "");
+            const newId = (Date.now() + Math.random()).toString().replace(".", "");
             const newEvent = {
               id: newId,
               day: parseInt(it.day) || 0,
@@ -4072,9 +3288,7 @@ Format JSON strict :
           });
 
           hideLoading();
-          alert(
-            `✨ ${arr.length} séances ont été ajoutées et synchronisées !`
-          );
+          alert(`✨ ${arr.length} séances ont été ajoutées et synchronisées !`);
         } catch (err) {
           hideLoading();
           alert(err.message);
@@ -4083,17 +3297,12 @@ Format JSON strict :
       reader.readAsDataURL(file);
     };
 
-    // MICRO IA
     window.voiceInput = function () {
       if (isReadOnly) return alert("Accès en lecture seule.");
-      if (!localStorage.getItem("gemini_api_key"))
-        return alert("Clique sur 🔑 Clé IA d'abord !");
+      if (!localStorage.getItem("gemini_api_key")) return alert("Clique sur 🔑 Clé IA d'abord !");
 
       const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-      if (!SR)
-        return alert(
-          "Reconnaissance vocale non supportée sur ce navigateur."
-        );
+      if (!SR) return alert("Reconnaissance vocale non supportée sur ce navigateur.");
 
       const r = new SR();
       r.lang = "fr-FR";
@@ -4139,16 +3348,13 @@ Format JSON strict :
         }
       };
 
-      r.onerror = () => {
-        mic.classList.remove("listening");
-        mic.innerText = "🎙️ Micro IA";
-      };
-      r.onend = () => {
-        mic.classList.remove("listening");
-        mic.innerText = "🎙️ Micro IA";
-      };
+      r.onerror = () => { mic.classList.remove("listening"); mic.innerText = "🎙️ Micro IA"; };
+      r.onend = () => { mic.classList.remove("listening"); mic.innerText = "🎙️ Micro IA"; };
       r.start();
     };
+
+    // Premier affichage immédiat
+    window.render();
 
     setInterval(() => {
       window.render();
