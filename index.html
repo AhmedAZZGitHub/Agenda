@@ -322,11 +322,6 @@
       transform: translateY(-1px);
     }
 
-    .btn-mic.listening {
-      background: #b91c1c;
-      animation: pulse 1s infinite alternate;
-    }
-
     .btn-vision {
       background: #059669;
       color: white;
@@ -681,20 +676,6 @@
       background: rgba(255, 255, 255, 0.12);
     }
 
-    @keyframes live-pulse {
-      0% {
-        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4);
-      }
-
-      70% {
-        box-shadow: 0 0 0 6px rgba(16, 185, 129, 0);
-      }
-
-      100% {
-        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
-      }
-    }
-
     .mob-scroller {
       display: flex;
       gap: 6px;
@@ -813,7 +794,7 @@
 
     .bac-archive-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
       gap: 12px;
       margin-top: 10px;
     }
@@ -826,7 +807,7 @@
       box-shadow: var(--shadow-sm);
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 10px;
       transition: transform 0.15s ease;
     }
 
@@ -852,6 +833,39 @@
       opacity: 1;
       transform: scale(1.15);
       filter: drop-shadow(0 0 4px #f59e0b);
+    }
+
+    .btn-pdf-action {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 5px 10px;
+      border-radius: 8px;
+      font-size: 11.5px;
+      font-weight: 800;
+      text-decoration: none;
+      border: 1px solid var(--dash);
+      background: var(--bg);
+      color: var(--text);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-pdf-action:hover {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+
+    .btn-pdf-action.btn-corr {
+      background: rgba(16, 185, 129, 0.1);
+      border-color: rgba(16, 185, 129, 0.3);
+      color: #059669;
+    }
+
+    .btn-pdf-action.btn-corr:hover {
+      background: #059669;
+      color: white;
     }
 
     .grades-table {
@@ -1271,8 +1285,7 @@
         <div id="regAdminKeyGroup" style="display: none">
           <label style="font-size: 11px; font-weight: 700; color: var(--muted); display: block; margin-bottom: 4px;">Clé
             secrète Admin :</label>
-          <input type="password" id="regAdminKey" class="input" style="width: 100%"
-            placeholder="Code requis : ADMIN2026" />
+          <input type="password" id="regAdminKey" class="input" placeholder="Code requis : ADMIN2026" />
         </div>
 
         <button type="submit" class="btn-add"
@@ -1412,13 +1425,13 @@
     </div>
   </div>
 
-  <!-- OVERLAY ANNALES BAC -->
+  <!-- OVERLAY ANNALES BAC (AVEC LIENS DIRECTS SUJET & CORRECTION) -->
   <div class="fullscreen-overlay" id="bacArchiveOverlay">
     <div class="overlay-header">
       <div>
         <div class="overlay-title">📚 Annales Officielles du Baccalauréat (2000 → 2026)</div>
         <div style="font-size: 13px; color: var(--muted); margin-top: 3px">
-          Section Mathématiques : 27 Sujets complets par matière
+          Section Mathématiques : Épreuves et Corrigés Session Principale
         </div>
       </div>
       <button class="btn-close" onclick="window.closeOverlay('bacArchiveOverlay')">Fermer ✕</button>
@@ -2489,16 +2502,16 @@
     }
 
     const BAC_SUBJECTS = [
-      { id: "math", name: "Mathématiques", coef: 4, ico: "📐", cls: "sub-math", color: "#2563eb" },
-      { id: "phys", name: "Sciences Physiques", coef: 4, ico: "🔬", cls: "sub-phys", color: "#7c3aed" },
-      { id: "svt", name: "SVT", coef: 1, ico: "🧬", cls: "sub-svt", color: "#059669" },
-      { id: "info", name: "Informatique", coef: 1, ico: "💻", cls: "sub-info", color: "#0891b2" },
-      { id: "franc", name: "Français", coef: 1, ico: "🇫🇷", cls: "sub-franc", color: "#e11d48" },
-      { id: "angl", name: "Anglais", coef: 1, ico: "🇬🇧", cls: "sub-angl", color: "#4f46e5" },
-      { id: "philo", name: "Philosophie", coef: 1, ico: "🧠", cls: "sub-philo", color: "#9333ea" },
-      { id: "arab", name: "Arabe", coef: 1, ico: "📖", cls: "sub-arab", color: "#d97706" },
-      { id: "sport", name: "Sport", coef: 1, ico: "🏃", cls: "sub-sport", color: "#ea580c" },
-      { id: "option", name: "Option (Allemand/Espagnol/Musique...)", coef: 1, isOption: true, ico: "📌", cls: "sub-opt", color: "#0284c7" },
+      { id: "math", name: "Mathématiques", folder: "01_Mathematiques", coef: 4, ico: "📐", cls: "sub-math", color: "#2563eb" },
+      { id: "phys", name: "Sciences Physiques", folder: "02_Sciences_Physiques", coef: 4, ico: "🔬", cls: "sub-phys", color: "#7c3aed" },
+      { id: "svt", name: "SVT", folder: "04_SVT", coef: 1, ico: "🧬", cls: "sub-svt", color: "#059669" },
+      { id: "info", name: "Informatique", folder: "05_Informatique", coef: 1, ico: "💻", cls: "sub-info", color: "#0891b2" },
+      { id: "franc", name: "Français", folder: "06_Francais", coef: 1, ico: "🇫🇷", cls: "sub-franc", color: "#e11d48" },
+      { id: "angl", name: "Anglais", folder: "07_Anglais", coef: 1, ico: "🇬🇧", cls: "sub-angl", color: "#4f46e5" },
+      { id: "philo", name: "Philosophie", folder: "08_Philosophie", coef: 1, ico: "🧠", cls: "sub-philo", color: "#9333ea" },
+      { id: "arab", name: "Arabe", folder: "09_Arabe", coef: 1, ico: "📖", cls: "sub-arab", color: "#d97706" },
+      { id: "sport", name: "Sport", folder: "sport", coef: 1, ico: "🏃", cls: "sub-sport", color: "#ea580c" },
+      { id: "option", name: "Option Espagnol", folder: "03_Option_Espagnol", coef: 1, isOption: true, ico: "🇪🇸", cls: "sub-opt", color: "#0284c7" },
     ];
 
     function getSubjectMeta(sub = "") {
@@ -2552,14 +2565,14 @@
     initBacArchiveTabs();
 
     window.searchBacOnline = function (subjectName, year) {
-      const query = encodeURIComponent(`bac tunisie ${year} ${subjectName} section mathematiques pdf`);
+      const query = encodeURIComponent(`bac tunisie ${year} ${subjectName} section mathematiques principale sujet corrige pdf`);
       window.open(`https://www.google.com/search?q=${query}`, "_blank");
     };
 
     function renderBacArchiveGrid() {
       const subObj = BAC_SUBJECTS.find((s) => s.id === currentBacSubjectId) || BAC_SUBJECTS[0];
       const titleEl = document.getElementById("bacCurrentSubjectName");
-      if (titleEl) titleEl.innerText = `${subObj.ico} Annales : ${subObj.name} (Section Math)`;
+      if (titleEl) titleEl.innerText = `${subObj.ico} Annales : ${subObj.name} (Section Math - Session Principale)`;
 
       const subData = bacArchiveData[currentBacSubjectId] || {};
       let doneCount = 0;
@@ -2574,6 +2587,9 @@
         const examItem = subData[yKey] || { done: false, starred: false, comment: "", pdfUrl: "" };
         if (examItem.done) doneCount++;
 
+        const defaultSujetPath = `Bac_Math_2009_2026_Principale/${subObj.folder}/Bac_${year}_Sujet.pdf`;
+        const defaultCorrPath = `Bac_Math_2009_2026_Principale/${subObj.folder}/Bac_${year}_Correction.pdf`;
+
         const box = document.createElement("div");
         box.className = `bac-exam-box ${examItem.done ? "is-done" : ""} ${examItem.starred ? "is-starred" : ""}`;
 
@@ -2584,17 +2600,26 @@
                 <span style="font-weight:800; font-size:16px;">Baccalauréat ${year}</span>
               </div>
               <div style="display:flex; align-items:center; gap:6px;">
-                <button class="btn-action" style="padding:4px 8px; font-size:11px;" onclick="window.searchBacOnline('${subObj.name}', ${year})">🔍 Chercher Sujet</button>
+                <button class="btn-action" style="padding:4px 8px; font-size:11px;" onclick="window.searchBacOnline('${subObj.name}', ${year})">🔍 En ligne</button>
                 <button class="star-btn ${examItem.starred ? "starred" : ""}" ${isReadOnly ? "disabled" : ""} onclick="window.toggleBacStar('${currentBacSubjectId}', '${yKey}', ${!examItem.starred})">🌟</button>
               </div>
             </div>
 
-            <div style="display:flex; gap:6px; align-items:center; margin-top:2px;">
-              <input type="url" class="input" style="padding:6px 10px; font-size:12px; flex-grow:1;" placeholder="Colle ton lien PDF ici..." value="${examItem.pdfUrl || ""}" ${isReadOnly ? "readonly" : ""} onchange="window.saveBacPdf('${currentBacSubjectId}', '${yKey}', this.value)">
-              ${examItem.pdfUrl ? `<a href="${examItem.pdfUrl}" target="_blank" class="btn-action" style="padding:6px 10px; text-decoration:none; font-size:11px; background:var(--primary); color:white; border-color:var(--primary);">📖 Ouvrir</a>` : ""}
+            <!-- BOUTONS DIRECTS VERS LES DOSSIERS RANGÉS -->
+            <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:2px;">
+              <a href="${defaultSujetPath}" target="_blank" class="btn-pdf-action">
+                📄 Sujet ${year}
+              </a>
+              <a href="${defaultCorrPath}" target="_blank" class="btn-pdf-action btn-corr">
+                📑 Corrigé ${year}
+              </a>
+              ${examItem.pdfUrl ? `<a href="${examItem.pdfUrl}" target="_blank" class="btn-pdf-action" style="background:var(--primary); color:white;">🔗 Lien Web</a>` : ""}
             </div>
 
-            <textarea class="input" style="padding:6px 10px; font-size:12px; height:50px; resize:none;" placeholder="Notes d'analyse..." ${isReadOnly ? "readonly" : ""} onchange="window.saveBacComment('${currentBacSubjectId}', '${yKey}', this.value)">${examItem.comment || ""}</textarea>
+            <!-- LIEN PERSONNEL OPTIONNEL -->
+            <input type="url" class="input" style="padding:6px 10px; font-size:11.5px;" placeholder="Ajouter un lien Google Drive ou Web personnalisé..." value="${examItem.pdfUrl || ""}" ${isReadOnly ? "readonly" : ""} onchange="window.saveBacPdf('${currentBacSubjectId}', '${yKey}', this.value)">
+
+            <textarea class="input" style="padding:6px 10px; font-size:12px; height:45px; resize:none;" placeholder="Notes & remarques de correction..." ${isReadOnly ? "readonly" : ""} onchange="window.saveBacComment('${currentBacSubjectId}', '${yKey}', this.value)">${examItem.comment || ""}</textarea>
           `;
         grid.appendChild(box);
       }
