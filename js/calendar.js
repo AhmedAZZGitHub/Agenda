@@ -118,6 +118,7 @@ export function renderPc() {
             <div style="margin-top:1px; display:flex; gap:2px; flex-wrap:wrap;">
               ${isPart ? `<span class="tag-meta" style="background:#7c3aed; color:white; cursor:pointer;" onclick="event.stopPropagation(); window.openMapViewer('${ev.id}')" title="Voir l'emplacement sur la carte">📍 ${ev.location?.address ? (ev.location.address.length > 12 ? ev.location.address.substring(0, 12) + "..." : ev.location.address) : "Particulier"}</span>` : ev.type ? `<span class="tag-meta" style="${isHome ? "background:#059669; color:white;" : isOnline ? "background:#0891b2; color:white;" : ""}">${ev.type}</span>` : ""}
               ${isQuin ? `<span class="tag-meta" style="background:#f59e0b; color:white;">1/2</span>` : ""}
+              ${ev.todo ? `<span class="tag-meta" style="${ev.todoDone === true ? "background:#059669; color:white; font-weight:800;" : "background:#ea580c; color:white; font-weight:800;"}" onclick="event.stopPropagation(); window.toggleSessionTodoDone('${ev.id}', event)" title="Exercices : ${ev.todo.replace(/"/g, '&quot;')} (Cliquer pour basculer Fait/Non fait)">${ev.todoDone === true ? "✅ Ex. Fait" : "⏳ Ex. À faire"}</span>` : ""}
             </div>
           </div>
           <div style="font-size:9px; opacity:0.85; font-weight:700;">${formatM(ev.s)} - ${formatM(ev.e)}</div>
@@ -167,7 +168,7 @@ export function renderMob() {
           <div style="margin:3px 0; display:flex; gap:3px; flex-wrap:wrap;">
             ${isPart ? `<span class="tag-meta" style="background:#7c3aed; color:white; font-weight:800;">📍 ${ev.location?.address || "Cours Particulier"}</span>` : ev.type ? `<span class="tag-meta" style="${isHome ? "background:#059669; color:white;" : isOnline ? "background:#0891b2; color:white;" : ""}">${ev.type}</span>` : ""}
             ${isQuin ? `<span class="tag-meta" style="background:#f59e0b; color:white;">1/2 quinzaine</span>` : ""}
-            ${ev.todo ? `<span class="tag-meta" style="background:#0284c7; color:white;">📝 Devoirs</span>` : ""}
+            ${ev.todo ? `<span class="tag-meta" style="${ev.todoDone === true ? "background:#059669; color:white; font-weight:800;" : "background:#ea580c; color:white; font-weight:800;"}" onclick="event.stopPropagation(); window.toggleSessionTodoDone('${ev.id}', event)" title="Cliquer pour basculer Fait/Non fait">${ev.todoDone === true ? "✅ Exercices Faits" : "⏳ Exercices À faire"}</span>` : ""}
           </div>
           <div style="font-size:12px;opacity:0.85;font-weight:600;">🕒 ${formatM(ev.s)} - ${formatM(ev.e)}</div>
         </div>
@@ -272,6 +273,7 @@ export function openSessionDetails(sessionId) {
   if (freqEl) freqEl.innerText = ev.freq || "Chaque semaine";
   if (todoInp) todoInp.value = ev.todo || "";
   if (todoDoneInp) todoDoneInp.checked = ev.todoDone === true;
+  updateSdTodoStatusButton(ev.todoDone === true);
 
   const isPart = ev.type && ev.type.includes("Particulier");
   const mapSec = document.getElementById("sdParticularMapSection");
@@ -359,15 +361,79 @@ export function onEditSessionTypeChange(val) {
   }
 }
 
-export async function saveQuickSessionTodo() {
+export async function saveQuickSessionTodo(explicitDoneStatus = null) {
   if (state.isReadOnly || !activeDetailSessionId) return;
-  const todo = document.getElementById("sdTodoText")?.value.trim() || "";
-  const todoDone = document.getElementById("sdTodoDone")?.checked === true;
+  const textEl = document.getElementById("sdTodoText");
+  const todo = textEl ? textEl.value.trim() : "";
+  const checkbox = document.getElementById("sdTodoDone");
+
+  let todoDone = checkbox ? checkbox.checked : false;
+  if (explicitDoneStatus !== null) {
+    todoDone = explicitDoneStatus;
+    if (checkbox) checkbox.checked = todoDone;
+  }
+
+  updateSdTodoStatusButton(todoDone);
+
+  const ev = state.db.find((s) => s.id === activeDetailSessionId);
+  if (ev) {
+    ev.todo = todo;
+    ev.todoDone = todoDone;
+  }
 
   await update(ref(database, getStudentPath("seances/" + activeDetailSessionId)), {
     todo: todo,
     todoDone: todoDone,
   });
+
+  render();
+}
+
+export function updateSdTodoStatusButton(isDone) {
+  const btn = document.getElementById("sdTodoStatusToggleBtn");
+  if (btn) {
+    if (isDone) {
+      btn.innerHTML = "✅ Exercices Faits";
+      btn.style.background = "#dcfce7";
+      btn.style.color = "#15803d";
+      btn.style.borderColor = "#86efac";
+    } else {
+      btn.innerHTML = "⏳ Non fait (À faire)";
+      btn.style.background = "#fee2e2";
+      btn.style.color = "#b91c1c";
+      btn.style.borderColor = "#fca5a5";
+    }
+  }
+}
+
+export function toggleSdTodoStatus() {
+  const checkbox = document.getElementById("sdTodoDone");
+  const current = checkbox ? checkbox.checked : false;
+  saveQuickSessionTodo(!current);
+}
+
+export function askTutorAboutSessionTodo() {
+  const todo = document.getElementById("sdTodoText")?.value.trim();
+  const sub = document.getElementById("sdSubTitle")?.innerText || "";
+  window.closeModal("sessionDetailModal");
+  window.openTutorChat();
+  const prompt = todo
+    ? `Bonjour ! Dans mon cours de ${sub}, j'ai ces exercices à faire :\n"${todo}"\nPeux-tu m'expliquer la méthode et me donner des conseils pour les résoudre ?`
+    : `Bonjour ! Peux-tu me donner des exercices d'entraînement types Bac pour mon cours de ${sub} ?`;
+  window.useTutorQuickPrompt(prompt);
+}
+
+export async function toggleSessionTodoDone(sessionId, e) {
+  if (e) e.stopPropagation();
+  if (state.isReadOnly) return;
+  const ev = state.db.find((s) => s.id === sessionId);
+  if (!ev) return;
+  const newDone = !ev.todoDone;
+  ev.todoDone = newDone;
+  await update(ref(database, getStudentPath("seances/" + sessionId)), {
+    todoDone: newDone,
+  });
+  render();
 }
 
 export async function handleSaveEditedSession(e) {
@@ -662,6 +728,10 @@ window.openSessionDetails = openSessionDetails;
 window.switchSdTab = switchSdTab;
 window.onEditSessionTypeChange = onEditSessionTypeChange;
 window.saveQuickSessionTodo = saveQuickSessionTodo;
+window.updateSdTodoStatusButton = updateSdTodoStatusButton;
+window.toggleSdTodoStatus = toggleSdTodoStatus;
+window.askTutorAboutSessionTodo = askTutorAboutSessionTodo;
+window.toggleSessionTodoDone = toggleSessionTodoDone;
 window.handleSaveEditedSession = handleSaveEditedSession;
 window.handleDeleteActiveSession = handleDeleteActiveSession;
 window.saveExam = saveExam;

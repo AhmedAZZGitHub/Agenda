@@ -37,7 +37,7 @@
       }
     } catch (e) {}
   </script>
-  <link rel="stylesheet" href="css/styles.css?v=7.1" />
+  <link rel="stylesheet" href="css/styles.css?v=7.2" />
 </head>
 
 <body>
@@ -820,23 +820,27 @@
           </div>
         </div>
 
-        <!-- SECTION TRAVAIL À FAIRE / DEVOIRS / NOTES -->
-        <div style="background: var(--card); border: 1.5px solid var(--dash); border-radius: 12px; padding: 14px; display: flex; flex-direction: column; gap: 8px;">
-          <div style="display: flex; justify-content: space-between; align-items: center;">
-            <span style="font-weight: 800; font-size: 13px; display: flex; align-items: center; gap: 6px;">
-              📝 Travail à faire / Devoirs :
+        <!-- SECTION EXERCICES DONNÉS & DEVOIRS POUR CETTE SÉANCE -->
+        <div style="background: var(--card); border: 1.5px solid var(--dash); border-radius: 12px; padding: 14px; display: flex; flex-direction: column; gap: 10px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
+            <span style="font-weight: 800; font-size: 13.5px; display: flex; align-items: center; gap: 6px; color: var(--text);">
+              📝 Exercices & Devoirs Donnés :
             </span>
-            <label style="display: flex; align-items: center; gap: 4px; font-size: 11.5px; font-weight: 800; color: #15803d; cursor: pointer;">
-              <input type="checkbox" id="sdTodoDone" onchange="window.saveQuickSessionTodo()" />
-              Fait ✅
-            </label>
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <input type="checkbox" id="sdTodoDone" style="display: none;" onchange="window.saveQuickSessionTodo()" />
+              <button type="button" id="sdTodoStatusToggleBtn" class="btn-action" style="padding: 4px 10px; font-size: 11.5px; font-weight: 800; border-radius: 8px;" onclick="window.toggleSdTodoStatus()">
+                ⏳ Non fait (À faire)
+              </button>
+            </div>
           </div>
-          <textarea id="sdTodoText" class="input" style="width: 100%; height: 75px; resize: none; font-size: 12.5px;"
-            placeholder="Ex: Exercices 3 et 4 p.112 sur les nombres complexes / Préparer le TP..."
-            onchange="window.saveQuickSessionTodo()"></textarea>
-          <div style="display: flex; justify-content: space-between; align-items: center;">
-            <span style="font-size: 11px; color: var(--muted);">💡 Note enregistrée en direct</span>
-            <button type="button" class="btn-action" style="padding: 4px 12px; font-size: 11.5px; font-weight: 700;" onclick="window.saveQuickSessionTodo()">
+          <textarea id="sdTodoText" class="input" style="width: 100%; height: 80px; resize: vertical; font-size: 12.5px;"
+            placeholder="Ex: Exercices 1, 2 et 4 p.85 (Série Continuité et Limites) / Apprendre le cours..."
+            oninput="window.saveQuickSessionTodo()"></textarea>
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
+            <button type="button" class="btn-action" style="padding: 5px 12px; font-size: 11.5px; font-weight: 700; color: #7c3aed; border-color: #ddd6fe; background: #f5f3ff;" onclick="window.askTutorAboutSessionTodo()">
+              🤖 Demander de l'aide au Tuteur IA
+            </button>
+            <button type="button" class="btn-add" style="padding: 5px 14px; font-size: 11.5px; font-weight: 800;" onclick="window.saveQuickSessionTodo()">
               💾 Enregistrer
             </button>
           </div>
@@ -1289,7 +1293,7 @@
   </div>
 
   <!-- SCRIPT APPLICATION -->
-  <script type="module" src="js/app.js?v=7.1"></script>
+  <script type="module" src="js/app.js?v=7.2"></script>
 </body>
 
 </html>
