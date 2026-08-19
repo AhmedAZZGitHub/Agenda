@@ -1,8 +1,8 @@
 // js/ai-assistant.js
 // Assistant Vocal Multilingue (Tounsi / Arabe / Français), Gemini Pro 3.1 & Vision Scanner
 
-import { database, ref, set } from "./firebase-config.js?v=15.5";
-import { state, getStudentPath, showLoading, hideLoading, playBeep } from "./state.js?v=15.5";
+import { database, ref, set } from "./firebase-config.js?v=15.6";
+import { state, getStudentPath, showLoading, hideLoading, playBeep } from "./state.js?v=15.6";
 
 let selectedAiSpeechLang = "ar-TN";
 let aiSpeechRecognition = null;
@@ -506,68 +506,132 @@ export async function handleImageUpload(e) {
   if (!file) return;
 
   const apiKey = getAiApiKey();
-  showLoading("Analyse de l'image par Vision IA...");
+  showLoading("🧠 Analyse de l'emploi du temps par Vision IA...");
 
   try {
     const reader = new FileReader();
+    reader.onerror = function () {
+      hideLoading();
+      alert("Erreur de lecture du fichier image.");
+      if (e.target) e.target.value = "";
+    };
+
     reader.onload = async function () {
-      const base64Data = reader.result.split(",")[1];
-      const modelName = getAiModelName();
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
+      try {
+        const base64Data = reader.result.split(",")[1];
+        const primaryModel = getAiModelName();
+        const fallbackModels = [
+          primaryModel,
+          "gemini-1.5-flash",
+          "gemini-2.0-flash",
+          "gemini-1.5-pro",
+          "gemini-2.5-flash",
+        ].filter((m, i, arr) => arr.indexOf(m) === i);
 
-      const res = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contents: [
-            {
-              parts: [
-                {
-                  text: 'Analyse cet emploi du temps ou cette liste de séances tunisienne et extrait la liste des séances en JSON : [{"sub": "Mathématiques", "day": 0, "s": 480, "e": 600, "type": "Lycée"}]. Réponds STRICTEMENT en JSON sans markdown.',
-                },
-                {
-                  inlineData: {
-                    mimeType: file.type || "image/jpeg",
-                    data: base64Data,
+        let responseData = null;
+        let lastError = null;
+
+        const promptText = `Tu es un assistant expert pour les élèves de lycée en Tunisie.
+Analyse cet emploi du temps (ou photo de séances de cours/lycée) et extrait TOUTES les séances de cours trouvées.
+Réponds STRICTEMENT avec un tableau JSON valide au format suivant, sans aucun texte autour :
+[
+  {
+    "sub": "Mathématiques",
+    "day": 0,
+    "s": 480,
+    "e": 600,
+    "type": "Lycée"
+  }
+]
+Règles :
+- "sub" : Le nom officiel de la matière (ex: Mathématiques, Sciences Physiques, Sciences SVT, Informatique, Philosophie, Arabe, Français, Anglais, Sport, Option, Histoire-Géo).
+- "day" : Indice du jour de la semaine (0 pour Lundi, 1 pour Mardi, 2 pour Mercredi, 3 pour Jeudi, 4 pour Vendredi, 5 pour Samedi, 6 pour Dimanche).
+- "s" : Heure de début en minutes depuis minuit (ex: 8h00 = 480, 8h30 = 510, 9h00 = 540, 10h00 = 600, 14h00 = 840, 15h00 = 900, 16h00 = 960).
+- "e" : Heure de fin en minutes depuis minuit (ex: 10h00 = 600, 11h00 = 660, 12h00 = 720, 16h00 = 960, 18h00 = 1080).
+- "type" : "Lycée", "À la maison" ou "Cours Particulier".`;
+
+        for (const model of fallbackModels) {
+          try {
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+            const res = await fetch(url, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                contents: [
+                  {
+                    parts: [
+                      { text: promptText },
+                      {
+                        inlineData: {
+                          mimeType: file.type || "image/jpeg",
+                          data: base64Data,
+                        },
+                      },
+                    ],
                   },
+                ],
+                generationConfig: {
+                  temperature: 0.1,
                 },
-              ],
-            },
-          ],
-        }),
-      });
+              }),
+            });
 
-      if (!res.ok) throw new Error("Erreur Gemini Vision " + res.status);
-      const data = await res.json();
-      const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || "[]";
-      const cleanJson = rawText.replace(/```json/g, "").replace(/```/g, "").trim();
-      const sessions = JSON.parse(cleanJson);
-
-      if (Array.isArray(sessions) && sessions.length > 0) {
-        for (const s of sessions) {
-          const newId = Date.now().toString() + Math.floor(Math.random() * 1000);
-          await set(ref(database, getStudentPath("seances/" + newId)), {
-            id: newId,
-            sub: s.sub || "Mathématiques",
-            day: s.day ?? 0,
-            s: s.s ?? 480,
-            e: s.e ?? 600,
-            type: s.type || "Lycée",
-            freq: "Chaque semaine",
-          });
+            if (res.ok) {
+              responseData = await res.json();
+              break;
+            } else {
+              const errBody = await res.json().catch(() => ({}));
+              lastError = errBody.error?.message || `HTTP ${res.status}`;
+            }
+          } catch (fetchErr) {
+            lastError = fetchErr.message;
+          }
         }
+
+        if (!responseData) {
+          throw new Error(lastError || "Impossible de contacter les serveurs Google Vision IA.");
+        }
+
+        const rawText = responseData.candidates?.[0]?.content?.parts?.[0]?.text || "[]";
+        const jsonMatch = rawText.match(/\[[\s\S]*\]/);
+        let cleanJson = jsonMatch ? jsonMatch[0] : rawText.replace(/```json/g, "").replace(/```/g, "").trim();
+        const sessions = JSON.parse(cleanJson);
+
+        if (Array.isArray(sessions) && sessions.length > 0) {
+          for (const s of sessions) {
+            const newId = Date.now().toString() + Math.floor(Math.random() * 10000);
+            await set(ref(database, getStudentPath("seances/" + newId)), {
+              id: newId,
+              sub: s.sub || "Mathématiques",
+              day: typeof s.day === "number" ? Math.max(0, Math.min(6, s.day)) : 0,
+              s: typeof s.s === "number" ? s.s : 480,
+              e: typeof s.e === "number" ? s.e : 600,
+              type: s.type || "Lycée",
+              freq: "Chaque semaine",
+            });
+          }
+          hideLoading();
+          playBeep();
+          alert(`🎉 ${sessions.length} séances ont été extraites et ajoutées à votre planning avec succès !`);
+        } else {
+          hideLoading();
+          alert("⚠️ Aucune séance n'a été détectée sur cette photo. Assurez-vous que l'image est bien nette et éclairée.");
+        }
+      } catch (innerErr) {
         hideLoading();
-        playBeep();
-        alert(`🎉 ${sessions.length} séances importées avec succès dans votre planning !`);
-      } else {
+        console.error("Erreur Vision IA:", innerErr);
+        alert("⚠️ Erreur lors de l'analyse par l'IA :\n" + innerErr.message + "\n\n💡 Vérifiez votre clé API Google Gemini dans les paramètres ou réessayez avec une photo plus nette.");
+      } finally {
         hideLoading();
-        alert("⚠️ Aucune séance n'a pu être détectée sur cette photo. Assurez-vous que l'image est bien nette.");
+        if (e.target) e.target.value = "";
       }
     };
+
     reader.readAsDataURL(file);
   } catch (err) {
     hideLoading();
-    alert("Erreur lors de l'analyse : " + err.message);
+    if (e.target) e.target.value = "";
+    alert("Erreur : " + err.message);
   }
 }
 
