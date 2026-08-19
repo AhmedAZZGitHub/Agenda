@@ -28,7 +28,7 @@ export function getSessionDateKey(dayIdx, refMonday = state.currentMonday) {
 }
 
 let timerInterval = null;
-let timerSeconds = 25 * 60;
+let timerSeconds = 90 * 60; // 1h 30m par défaut
 let timerRunning = false;
 
 export function setLayout(l) {
@@ -44,14 +44,14 @@ export function render() {
   const pcV = document.getElementById("pcView");
 
   if (state.layout === "mobile") {
-    if (btnMob) btnMob.className = "btn-view active";
-    if (btnPc) btnPc.className = "btn-view";
-    if (mobV) mobV.style.display = "block";
+    if (btnMob) btnMob.className = "btn-toggle active";
+    if (btnPc) btnPc.className = "btn-toggle";
+    if (mobV) mobV.style.display = "flex";
     if (pcV) pcV.style.display = "none";
     renderMob();
   } else {
-    if (btnPc) btnPc.className = "btn-view active";
-    if (btnMob) btnMob.className = "btn-view";
+    if (btnPc) btnPc.className = "btn-toggle active";
+    if (btnMob) btnMob.className = "btn-toggle";
     if (mobV) mobV.style.display = "none";
     if (pcV) pcV.style.display = "block";
     renderPc();
@@ -69,6 +69,7 @@ export function render() {
 
   renderExams();
   updateHomeStreak();
+  updateBacCountdown();
 }
 
 export function renderPc() {
@@ -282,7 +283,9 @@ export function deleteEvent(id) {
       remove(ref(database, getStudentPath("seances/" + id)));
     }
   );
-}export function openSessionDetails(id, explicitDateKey = null) {
+}
+
+export function openSessionDetails(id, explicitDateKey = null) {
   const ev = state.db.find((e) => e.id === id);
   if (!ev) return;
   activeDetailSessionId = id;
@@ -459,19 +462,6 @@ export async function saveQuickSessionTodo(explicitDoneStatus = null) {
     await set(ref(database, getStudentPath(`seances_todos/${key}`)), todoObj);
   }
 
-  // Purge de l'ancien champ global todo sur la séance pour éviter qu'il n'apparaisse sur d'autres semaines
-  try {
-    const ev = state.db.find((s) => s.id === activeDetailSessionId);
-    if (ev && (ev.todo || ev.todoDone)) {
-      delete ev.todo;
-      delete ev.todoDone;
-      await update(ref(database, getStudentPath(`seances/${activeDetailSessionId}`)), {
-        todo: null,
-        todoDone: null,
-      });
-    }
-  } catch (e) {}
-
   render();
 }
 
@@ -596,13 +586,15 @@ export function saveExam() {
   if (!sub || !date) return alert("Veuillez remplir la matière et la date.");
 
   const newId = Date.now().toString();
-  set(ref(database, getStudentPath("examens/" + newId)), {
+  const examObj = {
     id: newId,
     sub,
     type,
     date,
     desc,
-  });
+  };
+
+  set(ref(database, getStudentPath("examens/" + newId)), examObj);
 
   const dInp = document.getElementById("exDesc");
   if (dInp) dInp.value = "";
@@ -610,12 +602,16 @@ export function saveExam() {
 }
 
 export function renderExams() {
-  const container = document.getElementById("examsListContainer");
+  const container = document.getElementById("examsList") || document.getElementById("examsListContainer");
   if (!container) return;
   container.innerHTML = "";
 
   if (!state.examsDb.length) {
-    container.innerHTML = '<div style="text-align:center; padding:30px; color:var(--muted); font-size:13px;">📝 Aucun devoir ou examen planifié.</div>';
+    container.innerHTML = `
+      <div style="grid-column: 1 / -1; text-align:center; padding:50px 20px; color:var(--muted); font-size:13.5px; background:var(--card); border:1.5px dashed var(--dash); border-radius:16px;">
+        📝 <b>Aucun devoir ou examen planifié pour le moment.</b><br>
+        Cliquez sur <b>« + Ajouter un Examen »</b> pour inscrire vos DS et Devoirs de Synthèse.
+      </div>`;
     return;
   }
 
@@ -624,21 +620,31 @@ export function renderExams() {
   sorted.forEach((ex) => {
     const meta = getSubjectMeta(ex.sub);
     const dateObj = new Date(ex.date);
-    const formattedDate = dateObj.toLocaleDateString("fr-FR", { weekday: "short", day: "numeric", month: "short" });
+    const formattedDate = !isNaN(dateObj.getTime())
+      ? dateObj.toLocaleDateString("fr-FR", { weekday: "short", day: "numeric", month: "short", year: "numeric" })
+      : ex.date;
 
-    container.innerHTML += `
-      <div class="exam-card ${meta.cls}">
-        <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-          <div>
-            <div style="font-weight:800; font-size:14px;">${meta.ico} ${ex.sub}</div>
-            <div style="font-size:11.5px; opacity:0.9; margin-top:2px; font-weight:700;">${ex.type}</div>
-          </div>
-          <span style="font-size:11px; font-weight:800; background:rgba(0,0,0,0.1); padding:2px 8px; border-radius:6px;">📅 ${formattedDate}</span>
+    const card = document.createElement("div");
+    card.className = `bac-exam-box ${meta.cls}`;
+    card.style.background = "var(--card)";
+    card.innerHTML = `
+      <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px;">
+        <div>
+          <div style="font-weight:900; font-size:15px; color:var(--text);">${meta.ico} ${ex.sub}</div>
+          <div style="font-size:12px; color:var(--primary); font-weight:800; margin-top:2px;">${ex.type}</div>
         </div>
-        ${ex.desc ? `<div style="font-size:11.5px; margin-top:6px; opacity:0.85;">${ex.desc}</div>` : ""}
-        ${!state.isReadOnly ? `<div style="display:flex; justify-content:flex-end; margin-top:6px;"><button onclick="window.deleteExam('${ex.id}')" style="background:none; border:none; color:#ef4444; font-size:12px; cursor:pointer; font-weight:700;">🗑️ Supprimer</button></div>` : ""}
+        <span style="font-size:11px; font-weight:800; background:var(--dash); color:var(--text); padding:4px 10px; border-radius:99px; white-space:nowrap;">📅 ${formattedDate}</span>
       </div>
+      ${ex.desc ? `<div style="font-size:12px; opacity:0.9; line-height:1.4; color:var(--text); background:var(--dash); padding:8px 12px; border-radius:10px;">📖 <b>Programme :</b> ${ex.desc}</div>` : ""}
+      ${
+        !state.isReadOnly
+          ? `<div style="display:flex; justify-content:flex-end; border-top:1px solid var(--dash); padding-top:8px; margin-top:4px;">
+              <button class="btn-action" style="color:#ef4444; border-color:#fca5a5; font-size:11.5px; padding:4px 10px;" onclick="window.deleteExam('${ex.id}')">🗑️ Supprimer</button>
+            </div>`
+          : ""
+      }
     `;
+    container.appendChild(card);
   });
 }
 
@@ -678,33 +684,49 @@ export function renderStatsData() {
   cont.innerHTML = "";
 
   const totHours = (totalMinutes / 60).toFixed(1);
-  const totEl = document.getElementById("statsTotalHours");
-  if (totEl) totEl.innerText = `${totHours}h`;
+
+  // Carte de synthèse
+  const summaryCard = document.createElement("div");
+  summaryCard.style.cssText = "background: linear-gradient(135deg, #0284c7, #4f46e5); color: white; border-radius: 16px; padding: 18px 22px; display: flex; justify-content: space-between; align-items: center; box-shadow: var(--shadow-md); margin-bottom: 10px;";
+  summaryCard.innerHTML = `
+    <div>
+      <div style="font-size: 13px; opacity: 0.9; font-weight: 700;">Volume de travail hebdomadaire :</div>
+      <div style="font-family: 'JetBrains Mono', monospace; font-size: 30px; font-weight: 900;">${totHours} Heures</div>
+    </div>
+    <div style="background: rgba(255, 255, 255, 0.2); padding: 8px 16px; border-radius: 99px; font-weight: 800; font-size: 13px;">
+      ${filter === "Maison" ? "🏠 À la maison" : filter === "Autonomie" ? "⚡ Autonomie" : "🌐 Totalité"}
+    </div>
+  `;
+  cont.appendChild(summaryCard);
 
   const sorted = Object.entries(subjectsMap).sort((a, b) => b[1] - a[1]);
 
   if (!sorted.length) {
-    cont.innerHTML = '<div style="text-align:center; padding:30px; color:var(--muted)">Aucune donnée d\'étude pour ce filtre.</div>';
+    cont.innerHTML += '<div style="text-align:center; padding:30px; color:var(--muted); font-size:13px; background:var(--card); border:1.5px dashed var(--dash); border-radius:14px;">☕ Aucune séance enregistrée pour ce filtre.</div>';
     return;
   }
+
+  const listCard = document.createElement("div");
+  listCard.style.cssText = "background: var(--card); border: 1.5px solid var(--dash); border-radius: 16px; padding: 18px; display: flex; flex-direction: column; gap: 14px; box-shadow: var(--shadow-sm);";
 
   sorted.forEach(([name, mins]) => {
     const meta = getSubjectMeta(name);
     const hours = (mins / 60).toFixed(1);
     const pct = totalMinutes > 0 ? Math.round((mins / totalMinutes) * 100) : 0;
 
-    cont.innerHTML += `
-      <div style="display:flex; flex-direction:column; gap:4px;">
-        <div style="display:flex; justify-content:space-between; font-size:12.5px; font-weight:700;">
-          <span>${meta.ico} ${name}</span>
-          <span>${hours}h (${pct}%)</span>
+    listCard.innerHTML += `
+      <div style="display:flex; flex-direction:column; gap:6px;">
+        <div style="display:flex; justify-content:space-between; font-size:13px; font-weight:800;">
+          <span style="color:var(--text);">${meta.ico} ${name}</span>
+          <span style="color:var(--primary); font-family:'JetBrains Mono', monospace;">${hours}h (${pct}%)</span>
         </div>
-        <div style="height:8px; background:var(--dash); border-radius:99px; overflow:hidden;">
-          <div style="height:100%; width:${pct}%; background:var(--primary); border-radius:99px;"></div>
+        <div style="height:10px; background:var(--dash); border-radius:99px; overflow:hidden;">
+          <div style="height:100%; width:${pct}%; background:linear-gradient(90deg, var(--primary), #6366f1); border-radius:99px; transition:width 0.4s ease;"></div>
         </div>
       </div>
     `;
   });
+  cont.appendChild(listCard);
 }
 
 export function openStats() {
@@ -713,10 +735,13 @@ export function openStats() {
 }
 
 export function renderTimer() {
-  const m = Math.floor(timerSeconds / 60);
+  const h = Math.floor(timerSeconds / 3600);
+  const m = Math.floor((timerSeconds % 3600) / 60);
   const s = timerSeconds % 60;
   const disp = document.getElementById("timerDisplay");
-  if (disp) disp.innerText = `${m < 10 ? "0" + m : m}:${s < 10 ? "0" + s : s}`;
+  if (disp) {
+    disp.innerText = `${h < 10 ? "0" + h : h}:${m < 10 ? "0" + m : m}:${s < 10 ? "0" + s : s}`;
+  }
 }
 
 export function openTimer() {
@@ -725,26 +750,29 @@ export function openTimer() {
 }
 
 export function setCustomTimer() {
-  const inp = document.getElementById("timerCustomMinutes");
-  const m = parseInt(inp ? inp.value : "25") || 25;
-  timerSeconds = m * 60;
+  const hInp = document.getElementById("tHours");
+  const mInp = document.getElementById("tMinutes");
+  const h = parseInt(hInp ? hInp.value : "1") || 0;
+  const m = parseInt(mInp ? mInp.value : "30") || 0;
+  timerSeconds = (h * 60 + m) * 60;
+  if (timerSeconds <= 0) timerSeconds = 25 * 60;
   renderTimer();
 }
 
 export function toggleTimer() {
-  const btn = document.getElementById("btnTimerToggle");
+  const btn = document.getElementById("btnTimerStart") || document.getElementById("btnTimerToggle");
   if (timerRunning) {
     clearInterval(timerInterval);
     timerRunning = false;
     if (btn) {
-      btn.innerText = "▶️ Démarrer";
-      btn.className = "btn-add";
+      btn.innerText = "Lancer ▶️";
+      btn.style.background = "#10b981";
     }
   } else {
     timerRunning = true;
     if (btn) {
-      btn.innerText = "⏸️ Pause";
-      btn.className = "btn-action";
+      btn.innerText = "Pause ⏸️";
+      btn.style.background = "#f59e0b";
     }
     timerInterval = setInterval(() => {
       if (timerSeconds > 0) {
@@ -754,10 +782,10 @@ export function toggleTimer() {
         clearInterval(timerInterval);
         timerRunning = false;
         playBeep();
-        alert("⏰ Session Pomodoro terminée ! Prenez une pause.");
+        alert("⏰ Session de travail terminée ! Bravo pour votre concentration.");
         if (btn) {
-          btn.innerText = "▶️ Démarrer";
-          btn.className = "btn-add";
+          btn.innerText = "Lancer ▶️";
+          btn.style.background = "#10b981";
         }
       }
     }, 1000);
@@ -767,24 +795,30 @@ export function toggleTimer() {
 export function resetTimer() {
   clearInterval(timerInterval);
   timerRunning = false;
-  const btn = document.getElementById("btnTimerToggle");
+  const btn = document.getElementById("btnTimerStart") || document.getElementById("btnTimerToggle");
   if (btn) {
-    btn.innerText = "▶️ Démarrer";
-    btn.className = "btn-add";
+    btn.innerText = "Lancer ▶️";
+    btn.style.background = "#10b981";
   }
   setCustomTimer();
 }
 
 export function updateBacCountdown() {
-  const bacDate = new Date("2027-06-09T08:00:00");
+  // Date officielle approximative des épreuves nationales du Baccalauréat
   const now = new Date();
+  let bacYear = now.getFullYear();
+  let bacDate = new Date(`${bacYear}-06-10T08:00:00`);
+  if (now > bacDate) {
+    bacYear += 1;
+    bacDate = new Date(`${bacYear}-06-10T08:00:00`);
+  }
   const diff = bacDate - now;
 
-  const el = document.getElementById("bacCountdownDisplay");
+  const el = document.getElementById("bacCountdownText") || document.getElementById("bacCountdownDisplay");
   if (!el) return;
 
   if (diff <= 0) {
-    el.innerText = "🎓 Épreuves en cours !";
+    el.innerText = "🎓 Épreuves en cours ! Bon courage !";
     return;
   }
 
@@ -792,13 +826,11 @@ export function updateBacCountdown() {
   const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
   const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
 
-  el.innerText = `⏳ J-${d} • ${h}h ${m}m restants`;
+  el.innerText = `⏳ J-${d} • ${h}h ${m}m restants (${bacYear})`;
 }
 
 export function updateHomeStreak() {
-  const badge = document.getElementById("homeStreakBadge");
-  if (!badge) return;
-
+  const badgeVal = document.getElementById("streakDaysCount");
   const daysWithHome = new Set();
   state.db.forEach((ev) => {
     if (ev.type && (ev.type.includes("maison") || ev.type.includes("ligne"))) {
@@ -807,7 +839,7 @@ export function updateHomeStreak() {
   });
 
   const count = daysWithHome.size;
-  badge.innerText = `🔥 Série d'étude (Maison/Ligne) : ${count}j / sem`;
+  if (badgeVal) badgeVal.innerText = count;
 }
 
 // Global Window Bindings
@@ -831,9 +863,12 @@ window.handleSaveEditedSession = handleSaveEditedSession;
 window.handleDeleteActiveSession = handleDeleteActiveSession;
 window.saveExam = saveExam;
 window.deleteExam = deleteExam;
+window.renderExams = renderExams;
 window.renderStatsData = renderStatsData;
 window.openStats = openStats;
 window.openTimer = openTimer;
 window.setCustomTimer = setCustomTimer;
 window.toggleTimer = toggleTimer;
 window.resetTimer = resetTimer;
+window.updateBacCountdown = updateBacCountdown;
+window.updateHomeStreak = updateHomeStreak;

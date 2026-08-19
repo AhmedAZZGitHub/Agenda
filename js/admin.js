@@ -5,11 +5,13 @@ import { database, auth, ref, get, set, remove, onValue, sendPasswordResetEmail 
 import { state, showLoading, hideLoading } from "./state.js?v=15.4";
 
 export function switchAdminTab(tab) {
-  document.querySelectorAll(".admin-tab-btn").forEach((b) => b.classList.remove("active"));
-  const btn = document.getElementById(
-    tab === "pending" ? "adminTabPendingBtn" : tab === "users" ? "adminTabUsersBtn" : "adminTabAnnounceBtn"
-  );
-  if (btn) btn.classList.add("active");
+  const tabPending = document.getElementById("adminTabPending");
+  const tabUsers = document.getElementById("adminTabUsers");
+  const tabAnn = document.getElementById("adminTabAnnouncements");
+
+  if (tabPending) tabPending.classList.toggle("active", tab === "pending");
+  if (tabUsers) tabUsers.classList.toggle("active", tab === "users");
+  if (tabAnn) tabAnn.classList.toggle("active", tab === "announcements");
 
   const vPending = document.getElementById("adminViewPending");
   const vUsers = document.getElementById("adminViewUsers");
@@ -17,7 +19,7 @@ export function switchAdminTab(tab) {
 
   if (vPending) vPending.style.display = tab === "pending" ? "block" : "none";
   if (vUsers) vUsers.style.display = tab === "users" ? "block" : "none";
-  if (vAnn) vAnn.style.display = tab === "announcements" ? "block" : "none";
+  if (vAnn) vAnn.style.display = tab === "announcements" ? "flex" : "none";
 }
 
 export async function loadAdminKPIs() {
@@ -41,16 +43,16 @@ export async function loadAdminKPIs() {
     }
 
     const tEl = document.getElementById("kpiTotalUsers");
-    const sEl = document.getElementById("kpiStudents");
-    const pEl = document.getElementById("kpiParents");
-    const pendEl = document.getElementById("kpiPending");
+    const sEl = document.getElementById("kpiTotalStudents");
+    const pEl = document.getElementById("kpiTotalParents");
+    const pendEl = document.getElementById("kpiPendingUsers");
     const bPendEl = document.getElementById("adminPendingBadge");
 
     if (tEl) tEl.innerText = total;
     if (sEl) sEl.innerText = students;
     if (pEl) pEl.innerText = parents;
     if (pendEl) pendEl.innerText = pending;
-    if (bPendEl) bPendEl.innerText = `${pending} en attente`;
+    if (bPendEl) bPendEl.innerText = pending;
 
     renderAdminPendingTable();
     renderAdminUsersTable();
@@ -66,7 +68,7 @@ export function renderAdminPendingTable() {
 
   const pendingUsers = state.allUsersCache.filter((u) => u.status === "pending");
   if (!pendingUsers.length) {
-    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:20px; color:var(--muted)">✨ Aucune demande en attente.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:24px; color:var(--muted); font-weight:700;">✨ Aucune demande en attente pour le moment.</td></tr>`;
     return;
   }
 
@@ -84,7 +86,7 @@ export function renderAdminPendingTable() {
       <td>${u.section || "N/A"}</td>
       <td style="font-size:12px; color:var(--muted);">${dateStr}</td>
       <td style="display:flex; gap:6px;">
-        <button class="btn-add" style="padding:5px 10px; font-size:12px;" onclick="window.approveUserByAdmin('${u.uid}')">✅ Accepter</button>
+        <button class="btn-add" style="padding:5px 12px; font-size:12px;" onclick="window.approveUserByAdmin('${u.uid}')">✅ Accepter</button>
         <button class="btn-action" style="padding:5px 10px; font-size:12px; color:#ef4444;" onclick="window.rejectUserByAdmin('${u.uid}', '${u.parentLinkCode || ""}')">❌ Refuser</button>
       </td>
     `;

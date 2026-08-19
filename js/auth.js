@@ -35,112 +35,28 @@ export function switchAuthTab(tab) {
 
   const tabLogin = document.getElementById("tabLoginBtn");
   const tabReg = document.getElementById("tabRegisterBtn");
-  const tabStatus = document.getElementById("tabStatusBtn");
 
   if (tabLogin) tabLogin.classList.toggle("active", tab === "login");
   if (tabReg) tabReg.classList.toggle("active", tab === "register");
-  if (tabStatus) tabStatus.classList.toggle("active", tab === "status");
 
   const loginForm = document.getElementById("loginForm");
   const regForm = document.getElementById("registerForm");
-  const statusForm = document.getElementById("statusForm");
 
   if (loginForm) loginForm.style.display = tab === "login" ? "flex" : "none";
   if (regForm) regForm.style.display = tab === "register" ? "flex" : "none";
-  if (statusForm) statusForm.style.display = tab === "status" ? "flex" : "none";
 }
 
 export function selectRole(role) {
   state.selectedRegRole = role;
-  const optStudent = document.getElementById("roleOptStudent");
-  const optParent = document.getElementById("roleOptParent");
-  const secField = document.getElementById("regSectionField");
+  const optStudent = document.getElementById("roleOpt_student");
+  const optParent = document.getElementById("roleOpt_parent");
+  const optAdmin = document.getElementById("roleOpt_admin");
+  const secGroup = document.getElementById("regSectionGroup");
 
   if (optStudent) optStudent.classList.toggle("active", role === "student");
   if (optParent) optParent.classList.toggle("active", role === "parent");
-  if (secField) secField.style.display = role === "student" ? "block" : "none";
-}
-
-export async function handleCheckStatus(e) {
-  e.preventDefault();
-  const emailInp = document.getElementById("statusEmail");
-  const email = emailInp ? emailInp.value.trim().toLowerCase() : "";
-  const errDiv = document.getElementById("authErrorMsg");
-  const statusBox = document.getElementById("statusResultBox");
-
-  if (errDiv) errDiv.style.display = "none";
-  if (!email) return;
-
-  try {
-    showLoading("Vérification en cours...");
-    const usersSnap = await get(ref(database, "users"));
-    hideLoading();
-
-    let foundUser = null;
-    if (usersSnap.exists()) {
-      usersSnap.forEach((childSnap) => {
-        const u = childSnap.val();
-        if ((u.email || "").toLowerCase() === email) {
-          foundUser = u;
-        }
-      });
-    }
-
-    if (!statusBox) return;
-
-    if (!foundUser) {
-      statusBox.innerHTML = `
-        <div style="background:#fff1f2; color:#be123c; border:1px solid #fecdd3; border-radius:10px; padding:12px;">
-          ⚠️ <b>Aucune demande trouvée</b> pour l'adresse <code>${email}</code>.<br>
-          Vous pouvez soumettre une demande via l'onglet <b>📝 Demande</b>.
-        </div>`;
-      statusBox.style.display = "block";
-      return;
-    }
-
-    const status = foundUser.status || "approved";
-    const roleLabel = foundUser.role === "student" ? "Élève" : foundUser.role === "parent" ? "Parent" : "Admin";
-    const dateStr = foundUser.createdAt
-      ? new Date(foundUser.createdAt).toLocaleDateString("fr-FR", { hour: "2-digit", minute: "2-digit" })
-      : "Récemment";
-
-    if (status === "pending") {
-      statusBox.innerHTML = `
-        <div style="background:#fffbeb; color:#b45309; border:1.5px solid #fde68a; border-radius:10px; padding:12px; display:flex; flex-direction:column; gap:6px;">
-          <div style="font-weight:800; font-size:13.5px;">⏳ Demande En Attente de Validation</div>
-          <div style="font-size:12px; line-height:1.4;">
-            Bonjour <b>${foundUser.displayName || email}</b>,<br>
-            Votre demande pour le rôle <b>${roleLabel}</b> (soumise le ${dateStr}) est bien enregistrée.<br>
-            L'administrateur doit l'approuver avant que vous puissiez vous connecter.
-          </div>
-        </div>`;
-    } else if (status === "approved") {
-      statusBox.innerHTML = `
-        <div style="background:#ecfdf5; color:#047857; border:1.5px solid #a7f3d0; border-radius:10px; padding:12px; display:flex; flex-direction:column; gap:8px;">
-          <div style="font-weight:800; font-size:13.5px;">✅ Félicitations ! Votre compte est Validé</div>
-          <div style="font-size:12px; line-height:1.4;">
-            Bonjour <b>${foundUser.displayName || email}</b>,<br>
-            L'administrateur a approuvé votre compte (<b>${roleLabel}</b>). Vous pouvez désormais vous connecter !
-          </div>
-          <button type="button" class="btn-add" style="justify-content:center; padding:9px; font-size:13px;" onclick="document.getElementById('loginEmail').value='${foundUser.email}'; window.switchAuthTab('login');">
-            Aller à la page de Connexion 🚀
-          </button>
-        </div>`;
-    } else if (status === "rejected") {
-      statusBox.innerHTML = `
-        <div style="background:#fff1f2; color:#be123c; border:1.5px solid #fecdd3; border-radius:10px; padding:12px;">
-          ❌ <b>Demande Non Retenue</b><br>
-          L'administrateur a refusé cette demande d'accès.
-        </div>`;
-    }
-    statusBox.style.display = "block";
-  } catch (err) {
-    hideLoading();
-    if (errDiv) {
-      errDiv.innerText = "Erreur : " + err.message;
-      errDiv.style.display = "block";
-    }
-  }
+  if (optAdmin) optAdmin.classList.toggle("active", role === "admin");
+  if (secGroup) secGroup.style.display = role === "student" ? "block" : "none";
 }
 
 export async function handleLogin(e) {
@@ -193,7 +109,7 @@ export async function handleRegister(e) {
   if (successDiv) successDiv.style.display = "none";
 
   try {
-    showLoading("Création de votre demande...");
+    showLoading("Création de votre compte...");
     const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
     const user = userCredential.user;
     const uid = user.uid;
@@ -216,12 +132,15 @@ export async function handleRegister(e) {
     };
 
     await set(ref(database, `users/${uid}`), profileData);
+    if (parentCode) {
+      await set(ref(database, `parent_codes/${parentCode}`), uid);
+    }
     hideLoading();
 
     if (!isAutoApproved) {
       await signOut(auth);
       if (successDiv) {
-        successDiv.innerHTML = `🎉 <b>Demande enregistrée avec succès !</b><br>Votre compte doit être validé par l'administrateur avant votre première connexion. Vous pourrez suivre l'état de votre demande dans l'onglet <b>🔍 Suivi Statut</b>.`;
+        successDiv.innerHTML = `🎉 <b>Demande enregistrée avec succès !</b><br>Votre compte a été créé. Vous pouvez vous connecter dès que l'administrateur valide votre accès.`;
         successDiv.style.display = "block";
       }
       switchAuthTab("login");
@@ -519,6 +438,8 @@ export async function handleUpdateProfileInfo(e) {
       setTimeout(() => {
         feedback.style.display = "none";
       }, 3000);
+    } else {
+      alert("✨ Informations enregistrées !");
     }
   } catch (err) {
     hideLoading();
@@ -605,7 +526,7 @@ export async function sendResetPassEmail() {
 }
 
 export function updateReadOnlyUI() {
-  const banner = document.getElementById("parentConsultationBanner");
+  const banner = document.getElementById("viewContextBanner");
   const isConsultation = state.isReadOnly;
 
   if (banner) banner.style.display = isConsultation ? "flex" : "none";
@@ -636,7 +557,7 @@ export async function linkChildWithCode() {
     const codeSnap = await get(ref(database, `parent_codes/${code}`));
     if (!codeSnap.exists()) {
       hideLoading();
-      return alert("Code introuvable.");
+      return alert("Code introuvable. Vérifiez le code fourni par l'élève.");
     }
 
     const studentUid = codeSnap.val();
@@ -692,8 +613,10 @@ export async function onParentSelectChild(sUid) {
   state.activeStudentUid = sUid;
   const sSnap = await get(ref(database, `users/${sUid}`));
   state.activeStudentProfile = sSnap.val();
-  const cNameEl = document.getElementById("parentConsultationChildName");
-  if (cNameEl) cNameEl.innerText = state.activeStudentProfile ? state.activeStudentProfile.displayName : sUid;
+  const bannerText = document.getElementById("viewContextText");
+  if (bannerText) {
+    bannerText.innerText = `👁️ Consultation en direct du planning de : ${state.activeStudentProfile?.displayName || sUid}`;
+  }
   attachStudentDataListeners(sUid);
 }
 
@@ -751,7 +674,6 @@ export function attachStudentDataListeners(sUid) {
 window.showAuthModal = showAuthModal;
 window.switchAuthTab = switchAuthTab;
 window.selectRole = selectRole;
-window.handleCheckStatus = handleCheckStatus;
 window.handleLogin = handleLogin;
 window.handleRegister = handleRegister;
 window.handleLogout = handleLogout;

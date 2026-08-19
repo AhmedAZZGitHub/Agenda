@@ -4,25 +4,25 @@
 import { database, ref, set, get } from "./firebase-config.js?v=15.4";
 import { state, getStudentPath, getSubjectMeta } from "./state.js?v=15.4";
 
-const bacSubjectsList = [
-  { id: "math", name: "Mathématiques", coef: 4 },
-  { id: "phys", name: "Sciences Physiques", coef: 4 },
-  { id: "svt", name: "Sciences SVT", coef: 4 },
-  { id: "info", name: "Informatique (TIC/Algo)", coef: 3 },
-  { id: "philo", name: "Philosophie", coef: 1 },
-  { id: "arabe", name: "Arabe", coef: 1 },
-  { id: "francais", name: "Français", coef: 1 },
-  { id: "anglais", name: "Anglais", coef: 1 },
-  { id: "sport", name: "Sport", coef: 1 },
-  { id: "option", name: "Option / Espagnol / Italien", coef: 1 },
+export const bacSubjectsList = [
+  { id: "math", manifestKey: "math", name: "Mathématiques", coef: 4 },
+  { id: "phys", manifestKey: "phys", name: "Sciences Physiques", coef: 4 },
+  { id: "svt", manifestKey: "svt", name: "Sciences SVT", coef: 4 },
+  { id: "info", manifestKey: "info", name: "Informatique (TIC/Algo)", coef: 3 },
+  { id: "philo", manifestKey: "philo", name: "Philosophie", coef: 1 },
+  { id: "arabe", manifestKey: "arab", name: "Arabe", coef: 1 },
+  { id: "francais", manifestKey: "franc", name: "Français", coef: 1 },
+  { id: "anglais", manifestKey: "angl", name: "Anglais", coef: 1 },
+  { id: "sport", manifestKey: "sport", name: "Sport", coef: 1 },
+  { id: "option", manifestKey: "option", name: "Option / Espagnol / Italien", coef: 1 },
 ];
 
 export function initBacArchiveTabs() {
-  const container = document.getElementById("bacSubjectTabsContainer");
+  const container = document.getElementById("bacArchiveSubjectTabs") || document.getElementById("bacSubjectTabsContainer");
   if (!container) return;
   container.innerHTML = "";
 
-  bacSubjectsList.forEach((sub, idx) => {
+  bacSubjectsList.forEach((sub) => {
     const meta = getSubjectMeta(sub.name);
     const activeClass = sub.id === state.currentBacSubjectId ? "active" : "";
     container.innerHTML += `
@@ -42,11 +42,24 @@ export function selectBacSubject(subId) {
 let bacArchiveFilter = "all";
 export function setBacFilter(filter) {
   bacArchiveFilter = filter;
-  document.querySelectorAll(".bac-filter-btn").forEach((btn) => btn.classList.remove("active"));
-  const activeBtn = document.getElementById(
-    filter === "all" ? "filterBacAll" : filter === "done" ? "filterBacDone" : "filterBacStarred"
-  );
+  const filterBtns = ["bacFilterAll", "bacFilterStarred", "bacFilterDone", "bacFilterTodo"];
+  filterBtns.forEach((btnId) => {
+    const btn = document.getElementById(btnId);
+    if (btn) btn.classList.remove("active");
+  });
+
+  const activeBtnId =
+    filter === "all"
+      ? "bacFilterAll"
+      : filter === "starred"
+      ? "bacFilterStarred"
+      : filter === "done"
+      ? "bacFilterDone"
+      : "bacFilterTodo";
+
+  const activeBtn = document.getElementById(activeBtnId);
   if (activeBtn) activeBtn.classList.add("active");
+
   renderBacArchiveGrid();
 }
 
@@ -56,92 +69,126 @@ export function searchBacOnline(subjectName, year, type = "sujet") {
 }
 
 export function renderBacArchiveGrid() {
-  const grid = document.getElementById("bacArchiveGrid");
+  const grid = document.getElementById("bacExamsGrid") || document.getElementById("bacArchiveGrid");
   if (!grid) return;
   grid.innerHTML = "";
 
   const sub = bacSubjectsList.find((s) => s.id === state.currentBacSubjectId) || bacSubjectsList[0];
-  const manifestData = window.BAC_MANIFEST_DATA?.[sub.id] || {};
-  const years = Object.keys(manifestData).sort((a, b) => b - a);
+  const subjectNameEl = document.getElementById("bacCurrentSubjectName");
+  if (subjectNameEl) subjectNameEl.innerText = sub.name;
 
-  if (!years.length) {
-    for (let y = 2026; y >= 2008; y--) years.push(y.toString());
-  }
+  const manifest = window.BAC_LOCAL_MANIFEST || window.BAC_MANIFEST_DATA || {};
+  const manifestData = manifest[sub.manifestKey] || manifest[sub.id] || {};
 
-  let totalExams = 0;
-  let doneCount = 0;
+  // Recherche par année
+  const searchInput = document.getElementById("bacYearFilterInput");
+  const searchQuery = searchInput ? searchInput.value.trim() : "";
 
-  years.forEach((year) => {
-    const sessions = ["Principale", "Contrôle"];
-    sessions.forEach((sess) => {
-      totalExams++;
-      const yKey = `${year}_${sess.toLowerCase()}`;
-      const savedInfo = state.bacArchiveData?.[sub.id]?.[yKey] || {};
-      const isDone = savedInfo.done === true;
-      const isStarred = savedInfo.starred === true;
-
-      if (isDone) doneCount++;
-
-      if (bacArchiveFilter === "done" && !isDone) return;
-      if (bacArchiveFilter === "starred" && !isStarred) return;
-
-      const pdfUrl = savedInfo.customPdf || manifestData[year]?.[sess.toLowerCase()]?.pdf || null;
-      const correcUrl = savedInfo.customCorrec || manifestData[year]?.[sess.toLowerCase()]?.correc || null;
-
-      const card = document.createElement("div");
-      card.className = `bac-card ${isDone ? "done" : ""}`;
-      card.innerHTML = `
-        <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-          <div>
-            <div style="font-weight:800; font-size:15px; color:var(--text);">Bac ${year} - Session ${sess}</div>
-            <div style="font-size:11px; color:var(--muted); margin-top:2px;">${sub.name} (Coef ${sub.coef})</div>
-          </div>
-          <div style="display:flex; gap:6px;">
-            <button class="btn-icon-star ${isStarred ? "active" : ""}" onclick="window.toggleBacStar('${sub.id}', '${yKey}', ${!isStarred})" title="Mettre en favori">
-              ${isStarred ? "⭐" : "☆"}
-            </button>
-          </div>
-        </div>
-
-        <div style="display:flex; gap:6px; margin:8px 0; flex-wrap:wrap;">
-          ${
-            pdfUrl
-              ? `<a href="${pdfUrl}" target="_blank" class="btn-pdf-link" style="text-decoration:none; padding:4px 10px; font-size:11.5px; border-radius:6px; background:var(--primary); color:white; font-weight:700;">📄 Sujet PDF</a>`
-              : `<button class="btn-action" style="padding:4px 8px; font-size:11px;" onclick="window.searchBacOnline('${sub.name}', '${year}', 'sujet')">🔍 Trouver Sujet</button>`
-          }
-          ${
-            correcUrl
-              ? `<a href="${correcUrl}" target="_blank" class="btn-pdf-link" style="text-decoration:none; padding:4px 10px; font-size:11.5px; border-radius:6px; background:#059669; color:white; font-weight:700;">✅ Corrigé</a>`
-              : `<button class="btn-action" style="padding:4px 8px; font-size:11px;" onclick="window.searchBacOnline('${sub.name}', '${year}', 'corrige')">🔍 Trouver Corrigé</button>`
-          }
-        </div>
-
-        <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid var(--dash); padding-top:8px; margin-top:6px;">
-          <label style="display:flex; align-items:center; gap:6px; font-size:12px; font-weight:700; cursor:pointer; color:${isDone ? "#059669" : "var(--text)"};">
-            <input type="checkbox" ${isDone ? "checked" : ""} onchange="window.toggleBacDone('${sub.id}', '${yKey}', this.checked)" />
-            ${isDone ? "Révisé & Résolu ✅" : "Marquer comme fait"}
-          </label>
-        </div>
-      `;
-      grid.appendChild(card);
+  // Compter le nombre total de fichiers PDF locaux disponibles
+  let totalLocalFiles = 0;
+  Object.keys(manifest).forEach((k) => {
+    const sObj = manifest[k] || {};
+    Object.keys(sObj).forEach((yr) => {
+      if (sObj[yr]?.sujet) totalLocalFiles++;
+      if (sObj[yr]?.correction) totalLocalFiles++;
     });
   });
+  const localCounterEl = document.getElementById("bacLocalFilesCounter");
+  if (localCounterEl && totalLocalFiles > 0) {
+    localCounterEl.innerText = `📁 ${totalLocalFiles} Fichiers PDF Locaux Prêts (2009 → 2026)`;
+  }
 
-  const progressTxt = document.getElementById("bacArchiveProgressText");
-  const percent = totalExams > 0 ? Math.round((doneCount / totalExams) * 100) : 0;
-  if (progressTxt) progressTxt.innerText = `${doneCount} / ${totalExams} épreuves résolues (${percent}%)`;
-  const bar = document.getElementById("bacArchiveProgressBar");
-  if (bar) bar.style.width = `${percent}%`;
+  // Liste des années de 2026 à 2000 (27 ans d'annales)
+  const allYears = [];
+  for (let y = 2026; y >= 2000; y--) {
+    allYears.push(y.toString());
+  }
+
+  let totalExams = allYears.length;
+  let doneCount = 0;
+
+  allYears.forEach((year) => {
+    const savedInfo = state.bacArchiveData?.[sub.id]?.[year] || state.bacArchiveData?.[sub.id]?.[`${year}_principale`] || {};
+    const isDone = savedInfo.done === true;
+    const isStarred = savedInfo.starred === true;
+
+    if (isDone) doneCount++;
+
+    // Filtres
+    if (searchQuery && !year.includes(searchQuery)) return;
+    if (bacArchiveFilter === "done" && !isDone) return;
+    if (bacArchiveFilter === "todo" && isDone) return;
+    if (bacArchiveFilter === "starred" && !isStarred) return;
+
+    const localEntry = manifestData[year] || {};
+    const pdfUrl = savedInfo.customPdf || localEntry.sujet || (localEntry.principale?.pdf) || null;
+    const correcUrl = savedInfo.customCorrec || localEntry.correction || (localEntry.principale?.correc) || null;
+
+    const card = document.createElement("div");
+    card.className = `bac-exam-box ${isDone ? "is-done" : ""} ${isStarred ? "is-starred" : ""}`;
+    card.innerHTML = `
+      <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+        <div>
+          <div style="font-weight:900; font-size:15px; color:var(--text);">Bac ${year} - Session Principale</div>
+          <div style="font-size:11.5px; color:var(--muted); margin-top:2px; font-weight:700;">${sub.name} (Coef ${sub.coef})</div>
+        </div>
+        <button class="star-btn ${isStarred ? "starred" : ""}" onclick="window.toggleBacStar('${sub.id}', '${year}', ${!isStarred})" title="Mettre en favori">
+          ${isStarred ? "⭐" : "☆"}
+        </button>
+      </div>
+
+      <div style="display:flex; gap:6px; margin:8px 0; flex-wrap:wrap;">
+        ${
+          pdfUrl
+            ? `<a href="${pdfUrl}" target="_blank" class="btn-pdf-action">📄 Sujet PDF</a>`
+            : `<button type="button" class="btn-action" style="padding:5px 9px; font-size:11px;" onclick="window.searchBacOnline('${sub.name}', '${year}', 'sujet')">🔍 Trouver Sujet</button>`
+        }
+        ${
+          correcUrl
+            ? `<a href="${correcUrl}" target="_blank" class="btn-pdf-action btn-corr">✅ Corrigé</a>`
+            : `<button type="button" class="btn-action" style="padding:5px 9px; font-size:11px;" onclick="window.searchBacOnline('${sub.name}', '${year}', 'corrige')">🔍 Trouver Corrigé</button>`
+        }
+      </div>
+
+      <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid var(--dash); padding-top:8px; margin-top:4px;">
+        <label style="display:flex; align-items:center; gap:6px; font-size:12px; font-weight:700; cursor:pointer; color:${isDone ? "#059669" : "var(--text)"};">
+          <input type="checkbox" ${isDone ? "checked" : ""} onchange="window.toggleBacDone('${sub.id}', '${year}', this.checked)" />
+          ${isDone ? "Révisé & Résolu ✅" : "Marquer comme fait"}
+        </label>
+        ${pdfUrl || correcUrl ? `<span style="font-size:10px; color:#059669; font-weight:800; background:#dcfce7; padding:2px 6px; border-radius:4px;">📁 PDF Local</span>` : ""}
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+
+  const progressCountEl = document.getElementById("bacSubjectProgressCount");
+  const progressPctEl = document.getElementById("bacSubjectProgressPct");
+  const percent = totalExams > 0 ? ((doneCount / totalExams) * 100).toFixed(1) : "0.0";
+
+  if (progressCountEl) progressCountEl.innerText = `${doneCount} / ${totalExams} Sujets Réalisés`;
+  if (progressPctEl) progressPctEl.innerText = `${percent}% Complété`;
 }
 
 export function toggleBacDone(subId, yKey, isDone) {
   if (state.isReadOnly) return;
+  if (!state.bacArchiveData) state.bacArchiveData = {};
+  if (!state.bacArchiveData[subId]) state.bacArchiveData[subId] = {};
+  if (!state.bacArchiveData[subId][yKey]) state.bacArchiveData[subId][yKey] = {};
+  state.bacArchiveData[subId][yKey].done = isDone;
+
   set(ref(database, getStudentPath(`bac_archive/${subId}/${yKey}/done`)), isDone);
+  renderBacArchiveGrid();
 }
 
 export function toggleBacStar(subId, yKey, isStarred) {
   if (state.isReadOnly) return;
+  if (!state.bacArchiveData) state.bacArchiveData = {};
+  if (!state.bacArchiveData[subId]) state.bacArchiveData[subId] = {};
+  if (!state.bacArchiveData[subId][yKey]) state.bacArchiveData[subId][yKey] = {};
+  state.bacArchiveData[subId][yKey].starred = isStarred;
+
   set(ref(database, getStudentPath(`bac_archive/${subId}/${yKey}/starred`)), isStarred);
+  renderBacArchiveGrid();
 }
 
 export function saveBacPdf(subId, yKey, url) {
@@ -157,25 +204,41 @@ export function saveBacComment(subId, yKey, comment) {
 // --- CARNET DE NOTES TRIMESTRIEL ET MOYENNES ---
 export function switchTrimester(trim) {
   state.currentTrimester = trim;
-  document.querySelectorAll(".btn-tab-item").forEach((b) => b.classList.remove("active"));
-  if (trim === "trim1") document.getElementById("tabTrim1")?.classList.add("active");
-  if (trim === "trim2") document.getElementById("tabTrim2")?.classList.add("active");
-  if (trim === "trim3") document.getElementById("tabTrim3")?.classList.add("active");
-  if (trim === "year") document.getElementById("tabTrimYear")?.classList.add("active");
+
+  const tab1 = document.getElementById("tabTrim1");
+  const tab2 = document.getElementById("tabTrim2");
+  const tab3 = document.getElementById("tabTrim3");
+  const tabYear = document.getElementById("tabTrimYear");
+
+  if (tab1) tab1.classList.toggle("active", trim === "trim1");
+  if (tab2) tab2.classList.toggle("active", trim === "trim2");
+  if (tab3) tab3.classList.toggle("active", trim === "trim3");
+  if (tabYear) tabYear.classList.toggle("active", trim === "year");
+
+  const avgTitleEl = document.getElementById("avgCardTitle");
+  if (avgTitleEl) {
+    if (trim === "trim1") avgTitleEl.innerText = "MOYENNE DU 1ER TRIMESTRE";
+    else if (trim === "trim2") avgTitleEl.innerText = "MOYENNE DU 2ÈME TRIMESTRE";
+    else if (trim === "trim3") avgTitleEl.innerText = "MOYENNE DU 3ÈME TRIMESTRE";
+    else if (trim === "year") avgTitleEl.innerText = "MOYENNE GÉNÉRALE ANNUELLE";
+  }
+
+  const trimView = document.getElementById("trimesterTableView");
+  const yearView = document.getElementById("annualSummaryView");
 
   if (trim === "year") {
-    document.getElementById("trimesterTableView").style.display = "none";
-    document.getElementById("annualSummaryView").style.display = "block";
+    if (trimView) trimView.style.display = "none";
+    if (yearView) yearView.style.display = "block";
     buildAnnualSummaryTable();
   } else {
-    document.getElementById("trimesterTableView").style.display = "block";
-    document.getElementById("annualSummaryView").style.display = "none";
+    if (trimView) trimView.style.display = "block";
+    if (yearView) yearView.style.display = "none";
     buildTrimesterTable();
   }
 }
 
 export function buildTrimesterTable() {
-  const tbody = document.getElementById("trimesterTableBody");
+  const tbody = document.getElementById("gradesTableBody") || document.getElementById("trimesterTableBody");
   if (!tbody) return;
   tbody.innerHTML = "";
 
@@ -189,21 +252,22 @@ export function buildTrimesterTable() {
 
     const tr = document.createElement("tr");
     tr.innerHTML = `
-      <td>
+      <td style="text-align: left;">
         <div style="font-weight:800; font-size:13px;">${meta.ico} ${sub.name}</div>
-        <div style="font-size:10.5px; color:var(--muted);">Coef ${sub.coef}</div>
+        <div style="font-size:10.5px; color:var(--muted);">Coefficient ${sub.coef}</div>
       </td>
-      <td style="text-align:center;">
-        <input type="checkbox" ${hasOral ? "checked" : ""} ${state.isReadOnly ? "disabled" : ""} onchange="window.toggleOralOption('${sub.id}')" />
+      <td style="font-weight:700;">${sub.coef}</td>
+      <td>
+        <div style="display:flex; align-items:center; justify-content:center; gap:6px;">
+          <input type="checkbox" title="Activer / Désactiver la note d'Oral/TP pour cette matière" ${hasOral ? "checked" : ""} ${state.isReadOnly ? "disabled" : ""} onchange="window.toggleOralOption('${sub.id}')" />
+          <input type="number" step="0.25" min="0" max="20" class="input grade-input" ${!hasOral ? "disabled style='opacity:0.35'" : ""} id="grade_oral_${sub.id}" value="${g.oral !== undefined && g.oral !== null ? g.oral : ""}" ${state.isReadOnly ? "disabled" : ""} oninput="window.saveTrimesterGradeInput('${sub.id}')" placeholder="--" />
+        </div>
       </td>
       <td>
-        <input type="number" step="0.25" min="0" max="20" class="input grade-input" ${!hasOral ? "disabled style='opacity:0.4'" : ""} id="grade_oral_${sub.id}" value="${g.oral !== undefined && g.oral !== null ? g.oral : ""}" ${state.isReadOnly ? "disabled" : ""} onchange="window.saveTrimesterGradeInput('${sub.id}')" placeholder="--" />
+        <input type="number" step="0.25" min="0" max="20" class="input grade-input" id="grade_dc_${sub.id}" value="${g.dc !== undefined && g.dc !== null ? g.dc : ""}" ${state.isReadOnly ? "disabled" : ""} oninput="window.saveTrimesterGradeInput('${sub.id}')" placeholder="--" />
       </td>
       <td>
-        <input type="number" step="0.25" min="0" max="20" class="input grade-input" id="grade_dc_${sub.id}" value="${g.dc !== undefined && g.dc !== null ? g.dc : ""}" ${state.isReadOnly ? "disabled" : ""} onchange="window.saveTrimesterGradeInput('${sub.id}')" placeholder="--" />
-      </td>
-      <td>
-        <input type="number" step="0.25" min="0" max="20" class="input grade-input" id="grade_ds_${sub.id}" value="${g.ds !== undefined && g.ds !== null ? g.ds : ""}" ${state.isReadOnly ? "disabled" : ""} onchange="window.saveTrimesterGradeInput('${sub.id}')" placeholder="--" />
+        <input type="number" step="0.25" min="0" max="20" class="input grade-input" id="grade_ds_${sub.id}" value="${g.ds !== undefined && g.ds !== null ? g.ds : ""}" ${state.isReadOnly ? "disabled" : ""} oninput="window.saveTrimesterGradeInput('${sub.id}')" placeholder="--" />
       </td>
       <td style="font-weight:900; font-size:14px; color:${avg !== null ? (avg >= 10 ? "#059669" : "#dc2626") : "var(--muted)"};" id="sub_avg_${sub.id}">
         ${avg !== null ? avg.toFixed(2) : "--"}
@@ -217,10 +281,14 @@ export function buildTrimesterTable() {
 
 export function toggleOralOption(subId) {
   if (state.isReadOnly) return;
-  const trimData = state.userGrades[state.currentTrimester] || {};
-  const current = trimData[subId]?.hasOral === true;
+  if (!state.userGrades[state.currentTrimester]) state.userGrades[state.currentTrimester] = {};
+  if (!state.userGrades[state.currentTrimester][subId]) state.userGrades[state.currentTrimester][subId] = {};
+
+  const current = state.userGrades[state.currentTrimester][subId]?.hasOral === true;
+  state.userGrades[state.currentTrimester][subId].hasOral = !current;
+
   set(ref(database, getStudentPath(`notes_trimestrielles/${state.currentTrimester}/${subId}/hasOral`)), !current);
-  saveTrimesterGradeInput(subId);
+  buildTrimesterTable();
 }
 
 export function saveTrimesterGradeInput(subId) {
@@ -233,24 +301,42 @@ export function saveTrimesterGradeInput(subId) {
   const dcVal = dcEl && dcEl.value.trim() !== "" ? parseFloat(dcEl.value) : null;
   const dsVal = dsEl && dsEl.value.trim() !== "" ? parseFloat(dsEl.value) : null;
 
+  if (!state.userGrades[state.currentTrimester]) state.userGrades[state.currentTrimester] = {};
+  if (!state.userGrades[state.currentTrimester][subId]) state.userGrades[state.currentTrimester][subId] = {};
+
+  state.userGrades[state.currentTrimester][subId].oral = oralVal;
+  state.userGrades[state.currentTrimester][subId].dc = dcVal;
+  state.userGrades[state.currentTrimester][subId].ds = dsVal;
+
   set(ref(database, getStudentPath(`notes_trimestrielles/${state.currentTrimester}/${subId}/oral`)), oralVal);
   set(ref(database, getStudentPath(`notes_trimestrielles/${state.currentTrimester}/${subId}/dc`)), dcVal);
   set(ref(database, getStudentPath(`notes_trimestrielles/${state.currentTrimester}/${subId}/ds`)), dsVal);
+
+  const avg = computeSubjectAverage(state.userGrades[state.currentTrimester][subId]);
+  const subAvgEl = document.getElementById(`sub_avg_${subId}`);
+  if (subAvgEl) {
+    subAvgEl.innerText = avg !== null ? avg.toFixed(2) : "--";
+    subAvgEl.style.color = avg !== null ? (avg >= 10 ? "#059669" : "#dc2626") : "var(--muted)";
+  }
+
+  calculateTrimesterAverages();
 }
 
 export function computeSubjectAverage(g) {
   if (!g) return null;
   const hasOral = g.hasOral === true;
-  const oral = typeof g.oral === "number" ? g.oral : null;
-  const dc = typeof g.dc === "number" ? g.dc : null;
-  const ds = typeof g.ds === "number" ? g.ds : null;
+  const oral = typeof g.oral === "number" && !isNaN(g.oral) ? g.oral : null;
+  const dc = typeof g.dc === "number" && !isNaN(g.dc) ? g.dc : null;
+  const ds = typeof g.ds === "number" && !isNaN(g.ds) ? g.ds : null;
 
   if (ds === null && dc === null && (!hasOral || oral === null)) return null;
 
+  // Formule officielle avec Oral : CC = (Oral + DC)/2, Moyenne = (CC + DS*2)/3
   if (hasOral && oral !== null && dc !== null && ds !== null) {
     const cc = (oral + dc) / 2;
     return (cc + ds * 2) / 3;
   }
+  // Formule standard sans Oral : (DC + DS*2)/3
   if (dc !== null && ds !== null) {
     return (dc + ds * 2) / 3;
   }
@@ -262,21 +348,30 @@ export function computeSubjectAverage(g) {
 
 export function calculateTrimesterAverages() {
   const trimData = state.userGrades[state.currentTrimester] || {};
+  const calcMode = document.getElementById("gradeCalcMode")?.value || "Trimestre";
   let totalPoints = 0;
   let totalCoef = 0;
 
   bacSubjectsList.forEach((sub) => {
     const g = trimData[sub.id] || {};
     const avg = computeSubjectAverage(g);
+
     if (avg !== null) {
-      totalPoints += avg * sub.coef;
-      totalCoef += sub.coef;
+      if (sub.id === "option" && calcMode === "Bac") {
+        // En mode Bac, l'option apporte seulement les points au-dessus de 10 (Bonus) sans ajouter au total des coefficients
+        if (avg > 10) {
+          totalPoints += avg - 10;
+        }
+      } else {
+        totalPoints += avg * sub.coef;
+        totalCoef += sub.coef;
+      }
     }
   });
 
-  const avgEl = document.getElementById("trimesterAverageDisplay");
-  const pointsEl = document.getElementById("trimesterTotalPoints");
-  const coefEl = document.getElementById("trimesterTotalCoef");
+  const avgEl = document.getElementById("totalTrimesterAverage") || document.getElementById("trimesterAverageDisplay");
+  const pointsEl = document.getElementById("totalPointsSum") || document.getElementById("trimesterTotalPoints");
+  const coefEl = document.getElementById("totalCoefSum") || document.getElementById("trimesterTotalCoef");
 
   if (totalCoef > 0) {
     const genAvg = totalPoints / totalCoef;
@@ -291,7 +386,7 @@ export function calculateTrimesterAverages() {
 }
 
 export function buildAnnualSummaryTable() {
-  const tbody = document.getElementById("annualSummaryBody");
+  const tbody = document.getElementById("annualGradesTableBody") || document.getElementById("annualSummaryBody");
   if (!tbody) return;
   tbody.innerHTML = "";
 
@@ -314,10 +409,11 @@ export function buildAnnualSummaryTable() {
 
     const tr = document.createElement("tr");
     tr.innerHTML = `
-      <td>
+      <td style="text-align: left;">
         <div style="font-weight:800; font-size:13px;">${meta.ico} ${sub.name}</div>
-        <div style="font-size:10.5px; color:var(--muted);">Coef ${sub.coef}</div>
+        <div style="font-size:10.5px; color:var(--muted);">Coefficient ${sub.coef}</div>
       </td>
+      <td style="font-weight:700;">${sub.coef}</td>
       <td style="font-weight:700;">${avgT1 !== null ? avgT1.toFixed(2) : "--"}</td>
       <td style="font-weight:700;">${avgT2 !== null ? avgT2.toFixed(2) : "--"}</td>
       <td style="font-weight:700;">${avgT3 !== null ? avgT3.toFixed(2) : "--"}</td>
@@ -345,6 +441,7 @@ export function buildAnnualSummaryTable() {
 }
 
 // Global Window Bindings
+window.initBacArchiveTabs = initBacArchiveTabs;
 window.selectBacSubject = selectBacSubject;
 window.setBacFilter = setBacFilter;
 window.searchBacOnline = searchBacOnline;
@@ -354,6 +451,8 @@ window.toggleBacStar = toggleBacStar;
 window.saveBacPdf = saveBacPdf;
 window.saveBacComment = saveBacComment;
 window.switchTrimester = switchTrimester;
+window.buildTrimesterTable = buildTrimesterTable;
 window.toggleOralOption = toggleOralOption;
 window.saveTrimesterGradeInput = saveTrimesterGradeInput;
 window.calculateTrimesterAverages = calculateTrimesterAverages;
+window.buildAnnualSummaryTable = buildAnnualSummaryTable;
