@@ -1187,34 +1187,30 @@
 
 <body>
   <!-- OVERLAY AUTHENTIFICATION -->
-  <!-- PORTAIL D'ACCÈS INITIAL OBLIGATOIRE (ACCÈS SÉCURISÉ) -->
+  <!-- OVERLAY AUTHENTIFICATION / PREMIÈRE PAGE -->
   <div class="auth-overlay" id="authOverlay" style="display: flex">
-    <div class="auth-card" style="max-width: 480px;">
+    <div class="auth-card">
       <div class="auth-logo">
         <span>🎓</span>
-        <span>Planning Baccalauréat</span>
+        <span>Mon Planning Bac</span>
       </div>
-      <div style="text-align: center; font-size: 13px; color: var(--muted); line-height: 1.4;">
-        Portail sécurisé d'accès & gestion scolaire pour Élèves, Parents & Administration
+      <div style="text-align: center; font-size: 13px; color: var(--muted)">
+        Plateforme collaborative de gestion & suivi scolaire
       </div>
 
-      <div class="auth-tabs" style="grid-template-columns: 1fr 1.2fr 1fr;">
+      <div class="auth-tabs">
         <button class="auth-tab-btn active" id="tabLoginBtn" onclick="window.switchAuthTab('login')">
-          🔑 Connexion
+          Connexion
         </button>
         <button class="auth-tab-btn" id="tabRegisterBtn" onclick="window.switchAuthTab('register')">
-          📝 Demande
-        </button>
-        <button class="auth-tab-btn" id="tabStatusBtn" onclick="window.switchAuthTab('status')">
-          🔍 Suivi Statut
+          Créer un compte
         </button>
       </div>
 
       <div class="auth-error" id="authErrorMsg"></div>
-      <div id="authSuccessMsg" style="display: none; color: #15803d; font-size: 12px; font-weight: 700; background: #dcfce7; padding: 12px; border-radius: 12px; border: 1.5px solid #86efac; line-height: 1.4;"></div>
-      <div id="statusResultBox" style="display: none; font-size: 12.5px; border-radius: 12px; padding: 12px; line-height: 1.4;"></div>
+      <div id="authSuccessMsg" style="display: none; color: #15803d; font-size: 12px; font-weight: 700; background: #dcfce7; padding: 10px 12px; border-radius: 10px; border: 1.5px solid #86efac; line-height: 1.4;"></div>
 
-      <!-- 1. FORMULAIRE CONNEXION -->
+      <!-- FORMULAIRE CONNEXION -->
       <form id="loginForm" onsubmit="window.handleLogin(event)"
         style="display: flex; flex-direction: column; gap: 12px">
         <div>
@@ -1231,20 +1227,16 @@
         </div>
         <button type="submit" class="btn-add"
           style="width: 100%; padding: 12px; justify-content: center; font-size: 14px; margin-top: 4px;">
-          Se connecter à mon espace 🚀
+          Se connecter 🚀
         </button>
         <div style="font-size: 11.5px; text-align: center; color: var(--muted); margin-top: 2px;">
-          Pas encore de compte ? <a href="javascript:void(0)" onclick="window.switchAuthTab('register')" style="color: var(--primary); font-weight: 700;">Faire une demande</a>
+          Pas encore de compte ? <a href="javascript:void(0)" onclick="window.switchAuthTab('register')" style="color: var(--primary); font-weight: 700;">Créer un compte</a>
         </div>
       </form>
 
-      <!-- 2. FORMULAIRE DEMANDE D'INSCRIPTION -->
+      <!-- FORMULAIRE CRÉER UN COMPTE -->
       <form id="registerForm" onsubmit="window.handleRegister(event)"
         style="display: none; flex-direction: column; gap: 12px">
-        <div style="font-size: 11.5px; background: rgba(2, 132, 199, 0.08); color: var(--primary); padding: 8px 12px; border-radius: 10px; font-weight: 700; border: 1px dashed var(--primary); line-height: 1.4;">
-          🔒 <b>Accès Restreint</b> : Après soumission, votre demande sera transmise à l'administrateur pour approbation avant activation de votre compte.
-        </div>
-
         <div>
           <label style="font-size: 11px; font-weight: 700; color: var(--muted); display: block; margin-bottom: 4px;">Nom
             et Prénom :</label>
@@ -1265,8 +1257,8 @@
 
         <div>
           <label
-            style="font-size: 11px; font-weight: 700; color: var(--muted); display: block; margin-bottom: 6px;">Profil
-            demandé :</label>
+            style="font-size: 11px; font-weight: 700; color: var(--muted); display: block; margin-bottom: 6px;">Type de
+            Profil :</label>
           <div class="role-picker">
             <div class="role-option active" id="roleOpt_student" onclick="window.selectRole('student')">
               <span class="role-icon">🎓</span>
@@ -1305,23 +1297,11 @@
 
         <button type="submit" class="btn-add"
           style="width: 100%; padding: 12px; justify-content: center; font-size: 14px; margin-top: 4px;">
-          Envoyer ma demande d'accès ✨
+          Créer mon compte ✨
         </button>
-      </form>
-
-      <!-- 3. FORMULAIRE VÉRIFICATION STATUT -->
-      <form id="statusForm" onsubmit="window.handleCheckStatus(event)"
-        style="display: none; flex-direction: column; gap: 12px">
-        <div style="font-size: 12px; color: var(--muted); line-height: 1.4;">
-          Vérifiez en temps réel si votre demande de compte a été acceptée par l'administrateur :
+        <div style="font-size: 11.5px; text-align: center; color: var(--muted); margin-top: 2px;">
+          Vous avez déjà un compte ? <a href="javascript:void(0)" onclick="window.switchAuthTab('login')" style="color: var(--primary); font-weight: 700;">Se connecter</a>
         </div>
-        <div>
-          <label style="font-size: 11px; font-weight: 700; color: var(--muted); display: block; margin-bottom: 4px;">Votre adresse email :</label>
-          <input type="email" id="statusEmailInput" class="input" style="width: 100%" placeholder="ex: sami@bac.tn" required />
-        </div>
-        <button type="submit" class="btn-add" style="width: 100%; padding: 11px; justify-content: center; font-size: 13.5px;">
-          🔍 Vérifier l'état de ma demande
-        </button>
       </form>
     </div>
   </div>
@@ -2035,16 +2015,16 @@
       document.getElementById("authErrorMsg").style.display = "none";
       const successDiv = document.getElementById("authSuccessMsg");
       if (successDiv && tab !== "login") successDiv.style.display = "none";
-      const statusBox = document.getElementById("statusResultBox");
-      if (statusBox) statusBox.style.display = "none";
 
-      document.getElementById("tabLoginBtn").classList.toggle("active", tab === "login");
-      document.getElementById("tabRegisterBtn").classList.toggle("active", tab === "register");
-      document.getElementById("tabStatusBtn").classList.toggle("active", tab === "status");
+      const tabLogin = document.getElementById("tabLoginBtn");
+      const tabReg = document.getElementById("tabRegisterBtn");
+      if (tabLogin) tabLogin.classList.toggle("active", tab === "login");
+      if (tabReg) tabReg.classList.toggle("active", tab === "register");
 
-      document.getElementById("loginForm").style.display = tab === "login" ? "flex" : "none";
-      document.getElementById("registerForm").style.display = tab === "register" ? "flex" : "none";
-      document.getElementById("statusForm").style.display = tab === "status" ? "flex" : "none";
+      const loginForm = document.getElementById("loginForm");
+      const regForm = document.getElementById("registerForm");
+      if (loginForm) loginForm.style.display = tab === "login" ? "flex" : "none";
+      if (regForm) regForm.style.display = tab === "register" ? "flex" : "none";
     };
 
     window.selectRole = function (role) {
