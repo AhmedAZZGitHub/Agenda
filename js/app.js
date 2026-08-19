@@ -14,8 +14,19 @@ import "./admin.js";
 
 // Gestion de l'état d'authentification Firebase
 onAuthStateChanged(auth, async (user) => {
+  const authOverlay = document.getElementById("authOverlay");
+  const mainApp = document.getElementById("mainAppWrap");
+  const authBtn = document.getElementById("authActionBtn");
+
   if (user) {
     state.currentUser = user;
+    if (authOverlay) authOverlay.style.display = "none";
+    if (mainApp) mainApp.style.display = "flex";
+    if (authBtn) {
+      authBtn.innerText = "🚪 Déconnexion";
+      authBtn.style.color = "#ef4444";
+      authBtn.onclick = window.handleLogout;
+    }
     await loadUserProfile(user.uid);
   } else {
     state.currentUser = null;
@@ -28,6 +39,14 @@ onAuthStateChanged(auth, async (user) => {
     state.examsDb = [];
     state.userGrades = {};
     state.bacArchiveData = {};
+
+    if (authOverlay) authOverlay.style.display = "flex";
+    if (mainApp) mainApp.style.display = "none";
+    if (authBtn) {
+      authBtn.innerText = "🔑 Connexion";
+      authBtn.style.color = "var(--primary)";
+      authBtn.onclick = window.showAuthModal;
+    }
 
     const nameEl = document.getElementById("userNameLabel");
     const roleBadge = document.getElementById("userRoleBadge");
@@ -50,12 +69,20 @@ onAuthStateChanged(auth, async (user) => {
 
     updateReadOnlyUI();
     render();
-    window.showAuthModal();
   }
 });
 
 // Initialisation globale au chargement du DOM
 document.addEventListener("DOMContentLoaded", () => {
+  // Nettoyage proactif des anciens Service Workers / Cache
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.getRegistrations().then((registrations) => {
+      for (let registration of registrations) {
+        registration.unregister();
+      }
+    });
+  }
+
   // Thème sombre
   const savedDark = localStorage.getItem("app_dark_mode");
   if (savedDark === "true") {

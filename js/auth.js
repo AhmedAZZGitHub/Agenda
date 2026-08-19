@@ -279,7 +279,10 @@ export async function loadUserProfile(uid) {
         errDiv.innerHTML = "⏳ <b>Compte en attente</b> : Votre inscription doit être validée par l'administrateur.";
         errDiv.style.display = "block";
       }
-      window.openOverlay("authOverlay");
+      const authOverlay = document.getElementById("authOverlay");
+      const mainApp = document.getElementById("mainAppWrap");
+      if (authOverlay) authOverlay.style.display = "flex";
+      if (mainApp) mainApp.style.display = "none";
       return;
     }
 
@@ -291,7 +294,10 @@ export async function loadUserProfile(uid) {
         errDiv.innerHTML = "❌ <b>Accès refusé</b> : Cette demande a été refusée par l'administrateur.";
         errDiv.style.display = "block";
       }
-      window.openOverlay("authOverlay");
+      const authOverlay = document.getElementById("authOverlay");
+      const mainApp = document.getElementById("mainAppWrap");
+      if (authOverlay) authOverlay.style.display = "flex";
+      if (mainApp) mainApp.style.display = "none";
       return;
     }
 
@@ -318,10 +324,20 @@ export async function loadUserProfile(uid) {
 
     listenToAnnouncements();
     render();
+
+    const authOverlay = document.getElementById("authOverlay");
+    const mainApp = document.getElementById("mainAppWrap");
+    if (authOverlay) authOverlay.style.display = "none";
+    if (mainApp) mainApp.style.display = "flex";
   } catch (e) {
     console.error("Erreur chargement profil:", e);
   } finally {
-    window.closeOverlay("authOverlay");
+    const authOverlay = document.getElementById("authOverlay");
+    const mainApp = document.getElementById("mainAppWrap");
+    if (state.currentUser && state.currentUserProfile?.status === "approved") {
+      if (authOverlay) authOverlay.style.display = "none";
+      if (mainApp) mainApp.style.display = "flex";
+    }
     hideLoading();
   }
 }
