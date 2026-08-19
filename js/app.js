@@ -1,17 +1,17 @@
 // js/app.js
 // Point d'Entrée Principal de l'Application
 
-import { auth, onAuthStateChanged } from "./firebase-config.js?v=15.0";
-import { state } from "./state.js?v=15.0";
-import { loadUserProfile, detachAllDataListeners, renderUserProfileBar, updateReadOnlyUI } from "./auth.js?v=15.0";
-import { render, updateBacCountdown, updateHomeStreak } from "./calendar.js?v=15.0";
-import { initBacArchiveTabs, switchTrimester } from "./grades.js?v=15.0";
+import { auth, onAuthStateChanged } from "./firebase-config.js?v=15.1";
+import { state } from "./state.js?v=15.1";
+import { loadUserProfile, detachAllDataListeners, renderUserProfileBar, updateReadOnlyUI } from "./auth.js?v=15.1";
+import { render, updateBacCountdown, updateHomeStreak } from "./calendar.js?v=15.1";
+import { initBacArchiveTabs, switchTrimester } from "./grades.js?v=15.1";
 
 // Import modules to register window bindings
-import "./maps.js?v=15.0";
-import "./ai-assistant.js?v=15.0";
-import "./admin.js?v=15.0";
-import "./tutor-ai.js?v=15.0";
+import "./maps.js?v=15.1";
+import "./ai-assistant.js?v=15.1";
+import "./admin.js?v=15.1";
+import "./tutor-ai.js?v=15.1";
 
 // Initialisation par défaut du modèle d'élite Google Gemini 3.1 Pro
 try {

@@ -20,7 +20,6 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
     try {
-      localStorage.setItem("gemini_model_name", "gemini-3.1-pro");
       if ("serviceWorker" in navigator) {
         navigator.serviceWorker.getRegistrations().then(function (registrations) {
           for (var registration of registrations) {
@@ -37,7 +36,7 @@
       }
     } catch (e) {}
   </script>
-  <link rel="stylesheet" href="css/styles.css?v=15.0" />
+  <link rel="stylesheet" href="css/styles.css?v=15.1" />
 </head>
 
 <body>
@@ -1292,7 +1291,7 @@
   </div>
 
   <!-- SCRIPT APPLICATION -->
-  <script type="module" src="js/app.js?v=15.0"></script>
+  <script type="module" src="js/app.js?v=15.1"></script>
 </body>
 
 </html>

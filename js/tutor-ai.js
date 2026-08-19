@@ -1,8 +1,8 @@
 // js/tutor-ai.js
 // Tuteur IA Éducatif Gemini Pro (Baccalauréat Tunisien) & Correction d'Exercices par Photo
 
-import { getAiModelName, getAiApiKey } from "./ai-assistant.js?v=15.0";
-import { state, showLoading, hideLoading, playBeep } from "./state.js?v=15.0";
+import { getAiModelName, getAiApiKey } from "./ai-assistant.js?v=15.1";
+import { state, showLoading, hideLoading, playBeep } from "./state.js?v=15.1";
 
 let tutorChatHistory = [];
 let tutorAttachedImageBase64 = null;
@@ -41,8 +41,8 @@ RÈGLES STRICTES ET NON NÉGOCIABLES :
 
 export function getTutorModelName() {
   const saved = localStorage.getItem("gemini_model_name");
-  if (saved && saved.trim()) return saved.trim();
-  return "gemini-3.1-pro"; // Modèle d'élite Google Gemini 3.1 Pro
+  if (saved && saved.trim() && saved !== "gemini-3.1-pro") return saved.trim();
+  return "gemini-1.5-pro"; // Modèle Google Gemini 1.5 Pro par défaut
 }
 
 export async function promptSetAiApiKey() {
@@ -62,7 +62,14 @@ export async function promptSetAiApiKey() {
 
   showLoading("Vérification de votre clé auprès des serveurs Google Gemini...");
   try {
-    const candidateModels = ["gemini-1.5-pro", "gemini-2.0-flash", "gemini-1.5-flash"];
+    const candidateModels = [
+      "gemini-1.5-pro",
+      "gemini-2.0-flash",
+      "gemini-1.5-flash",
+      "gemini-1.5-pro-latest",
+      "gemini-1.5-flash-latest",
+      "gemini-pro"
+    ];
     let testSuccess = false;
     let lastError = "";
 
@@ -284,7 +291,14 @@ export async function sendTutorMessage() {
   let botReply = "";
 
   try {
-    const candidateModels = ["gemini-1.5-pro", "gemini-2.0-flash", "gemini-1.5-flash"];
+    const candidateModels = [
+      "gemini-1.5-pro",
+      "gemini-2.0-flash",
+      "gemini-1.5-flash",
+      "gemini-1.5-pro-latest",
+      "gemini-1.5-flash-latest",
+      "gemini-pro"
+    ];
     let apiSuccess = false;
     let lastErrorStatus = null;
 
