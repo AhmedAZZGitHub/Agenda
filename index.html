@@ -2388,10 +2388,17 @@
 
         <div style="border-top: 1px solid var(--dash); padding-top: 8px; display: flex; flex-direction: column; gap: 6px; font-size: 12px;">
           <div style="display: flex; justify-content: space-between; align-items: center;">
-            <span style="color: var(--muted); font-weight: 700;">🆔 ID Compte :</span>
+            <span style="color: var(--muted); font-weight: 700;">🆔 ID Compte (UID) :</span>
             <div style="display: flex; align-items: center; gap: 6px;">
               <code style="background: var(--card); padding: 2px 6px; border-radius: 6px; font-size: 11px;" id="profUidCode">uid_xxx</code>
-              <button class="btn-action" style="padding: 2px 8px; font-size: 11px;" onclick="window.copyMyUid()">📋 Copier</button>
+              <button type="button" class="btn-action" style="padding: 2px 8px; font-size: 11px;" onclick="window.copyMyUid()">📋 Copier</button>
+            </div>
+          </div>
+          <div id="profParentCodeRow" style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="color: var(--muted); font-weight: 700;">🔗 Code Élève (Liaison Parent) :</span>
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <code style="background: var(--card); padding: 2px 6px; border-radius: 6px; font-size: 11px; font-weight: 800; color: var(--primary);" id="profParentCodeVal">BAC-XXXX</code>
+              <button type="button" class="btn-action" style="padding: 2px 8px; font-size: 11px;" onclick="window.copyMyParentCode()">📋 Copier</button>
             </div>
           </div>
           <div style="display: flex; justify-content: space-between; align-items: center;">
@@ -2900,13 +2907,13 @@
       const firstLetter = (currentUserProfile.displayName || "U")[0].toUpperCase();
       avatarEl.innerText = firstLetter;
 
-      document.getElementById("btnMyParentCode").style.display = currentUserProfile.role === "student" ? "inline-flex" : "none";
+      document.getElementById("btnMyParentCode").style.display = (currentUserProfile.role === "student" || currentUserProfile.role === "admin") ? "inline-flex" : "none";
       document.getElementById("parentChildControls").style.display = currentUserProfile.role === "parent" ? "inline-flex" : "none";
       document.getElementById("btnAdminConsole").style.display = currentUserProfile.role === "admin" ? "inline-flex" : "none";
       const btnProf = document.getElementById("btnMyProfile");
       if (btnProf) btnProf.style.display = "inline-flex";
 
-      if (currentUserProfile.role === "student" && currentUserProfile.parentLinkCode) {
+      if (currentUserProfile.parentLinkCode) {
         document.getElementById("myParentCodeDisplay").innerText = currentUserProfile.parentLinkCode;
       }
     }
@@ -2936,9 +2943,25 @@
       const d = currentUserProfile.createdAt ? new Date(currentUserProfile.createdAt) : null;
       document.getElementById("profCreatedDate").innerText = d ? d.toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" }) : "Récemment";
 
+      if (!currentUserProfile.parentLinkCode && (currentUserProfile.role === "student" || currentUserProfile.role === "admin")) {
+        currentUserProfile.parentLinkCode = "BAC-" + Math.random().toString(36).substring(2, 6).toUpperCase();
+        set(ref(database, `users/${currentUser.uid}/parentLinkCode`), currentUserProfile.parentLinkCode);
+        set(ref(database, `parent_codes/${currentUserProfile.parentLinkCode}`), currentUser.uid);
+      }
+
+      const pCodeRow = document.getElementById("profParentCodeRow");
+      if (pCodeRow) {
+        if (currentUserProfile.parentLinkCode) {
+          pCodeRow.style.display = "flex";
+          document.getElementById("profParentCodeVal").innerText = currentUserProfile.parentLinkCode;
+        } else {
+          pCodeRow.style.display = "none";
+        }
+      }
+
       document.getElementById("profInputName").value = currentUserProfile.displayName || "";
       const secGroup = document.getElementById("profSectionGroup");
-      if (secGroup) secGroup.style.display = currentUserProfile.role === "student" ? "block" : "none";
+      if (secGroup) secGroup.style.display = (currentUserProfile.role === "student" || currentUserProfile.role === "admin") ? "block" : "none";
       const secSelect = document.getElementById("profInputSection");
       if (secSelect) secSelect.value = currentUserProfile.section || "Mathematiques";
 
