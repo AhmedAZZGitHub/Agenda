@@ -1187,14 +1187,15 @@
 
 <body>
   <!-- OVERLAY AUTHENTIFICATION -->
-  <div class="auth-overlay" id="authOverlay" style="display: none">
+  <!-- OVERLAY AUTHENTIFICATION BLOQUANT INITIAL -->
+  <div class="auth-overlay" id="authOverlay" style="display: flex">
     <div class="auth-card">
       <div class="auth-logo">
         <span>🎓</span>
         <span>Mon Planning Bac</span>
       </div>
       <div style="text-align: center; font-size: 13px; color: var(--muted)">
-        Plateforme collaborative de gestion & suivi scolaire
+        Plateforme collaborative sécurisée de gestion & suivi scolaire
       </div>
 
       <div class="auth-tabs">
@@ -1207,6 +1208,7 @@
       </div>
 
       <div class="auth-error" id="authErrorMsg"></div>
+      <div id="authSuccessMsg" style="display: none; color: #15803d; font-size: 12px; font-weight: 700; background: #dcfce7; padding: 10px 12px; border-radius: 10px; border: 1.5px solid #86efac; line-height: 1.4;"></div>
 
       <!-- FORMULAIRE CONNEXION -->
       <form id="loginForm" onsubmit="window.handleLogin(event)"
@@ -1232,6 +1234,10 @@
       <!-- FORMULAIRE INSCRIPTION -->
       <form id="registerForm" onsubmit="window.handleRegister(event)"
         style="display: none; flex-direction: column; gap: 12px">
+        <div style="font-size: 11.5px; background: rgba(2, 132, 199, 0.08); color: var(--primary); padding: 8px 12px; border-radius: 10px; font-weight: 700; border: 1px dashed var(--primary); line-height: 1.4;">
+          🔒 <b>Accès Restreint</b> : Après soumission, votre compte sera envoyé à l'administrateur pour approbation avant votre première connexion.
+        </div>
+
         <div>
           <label style="font-size: 11px; font-weight: 700; color: var(--muted); display: block; margin-bottom: 4px;">Nom
             et Prénom :</label>
@@ -1292,7 +1298,7 @@
 
         <button type="submit" class="btn-add"
           style="width: 100%; padding: 12px; justify-content: center; font-size: 14px; margin-top: 4px;">
-          Créer mon compte ✨
+          Envoyer ma demande d'accès ✨
         </button>
       </form>
     </div>
@@ -1310,9 +1316,9 @@
   <div class="fullscreen-overlay" id="adminOverlay">
     <div class="overlay-header">
       <div>
-        <div class="overlay-title">🛡️ Console d'Administration & Supervision</div>
+        <div class="overlay-title">🛡️ Console d'Administration & Validation</div>
         <div style="font-size: 13px; color: var(--muted); margin-top: 3px">
-          Gestion globale des utilisateurs, des annonces et supervision système
+          Validation des demandes d'accès, gestion globale des comptes et annonces
         </div>
       </div>
       <button class="btn-close" onclick="window.closeOverlay('adminOverlay')">Fermer ✕</button>
@@ -1320,35 +1326,62 @@
 
     <div style="max-width: 1150px; margin: 0 auto; width: 100%; display: flex; flex-direction: column; gap: 16px">
       <div class="admin-kpi-grid">
+        <div class="admin-kpi-card" style="border-left: 4px solid #ea580c;">
+          <span style="font-size: 12px; font-weight: 700; color: #ea580c">⏳ EN ATTENTE DE VALIDATION</span>
+          <span class="admin-kpi-val" id="kpiPendingUsers" style="color: #ea580c">0</span>
+        </div>
         <div class="admin-kpi-card">
-          <span style="font-size: 12px; font-weight: 700; color: var(--muted)">👥 TOTAL UTILISATEURS</span>
+          <span style="font-size: 12px; font-weight: 700; color: var(--muted)">👥 COMPTES ACTIFS</span>
           <span class="admin-kpi-val" id="kpiTotalUsers">0</span>
         </div>
         <div class="admin-kpi-card">
-          <span style="font-size: 12px; font-weight: 700; color: var(--muted)">🎓 ÉLÈVES INSCRITS</span>
+          <span style="font-size: 12px; font-weight: 700; color: var(--muted)">🎓 ÉLÈVES VALIDÉS</span>
           <span class="admin-kpi-val" id="kpiTotalStudents">0</span>
         </div>
         <div class="admin-kpi-card">
-          <span style="font-size: 12px; font-weight: 700; color: var(--muted)">👨‍👩‍👧 PARENTS CONNECTÉS</span>
+          <span style="font-size: 12px; font-weight: 700; color: var(--muted)">👨‍👩‍👧 PARENTS VALIDÉS</span>
           <span class="admin-kpi-val" id="kpiTotalParents">0</span>
-        </div>
-        <div class="admin-kpi-card">
-          <span style="font-size: 12px; font-weight: 700; color: var(--muted)">📅 TOTAL SÉANCES GLOBALES</span>
-          <span class="admin-kpi-val" id="kpiTotalSessions">0</span>
         </div>
       </div>
 
       <div class="custom-tabs">
-        <button class="btn-tab-item active" id="adminTabUsers" onclick="window.switchAdminTab('users')">👥 Gestion des
-          Comptes</button>
-        <button class="btn-tab-item" id="adminTabAnnouncements" onclick="window.switchAdminTab('announcements')">📢
-          Annonces Globales</button>
+        <button class="btn-tab-item active" id="adminTabPending" onclick="window.switchAdminTab('pending')">
+          ⏳ Demandes en attente <span id="adminPendingBadge" style="background:#ea580c; color:white; padding:2px 7px; border-radius:99px; font-size:11px; margin-left:4px;">0</span>
+        </button>
+        <button class="btn-tab-item" id="adminTabUsers" onclick="window.switchAdminTab('users')">
+          👥 Tous les Comptes
+        </button>
+        <button class="btn-tab-item" id="adminTabAnnouncements" onclick="window.switchAdminTab('announcements')">
+          📢 Annonces Globales
+        </button>
       </div>
 
-      <div id="adminViewUsers">
+      <!-- ONGLET DEMANDES EN ATTENTE -->
+      <div id="adminViewPending">
+        <div style="font-size: 13px; color: var(--muted); margin-bottom: 12px; font-weight: 700;">
+          Approuvez ou refusez les demandes d'inscription pour autoriser l'accès à la solution :
+        </div>
+        <div style="overflow-x: auto">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Demandeur</th>
+                <th>Rôle demandé</th>
+                <th>Section / Profil</th>
+                <th>Date de Demande</th>
+                <th>Décision</th>
+              </tr>
+            </thead>
+            <tbody id="adminPendingTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ONGLET TOUS LES COMPTES -->
+      <div id="adminViewUsers" style="display: none;">
         <div
           style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 10px">
-          <input type="text" id="adminSearchInput" class="input" placeholder="🔍 Rechercher..."
+          <input type="text" id="adminSearchInput" class="input" placeholder="🔍 Rechercher un compte..."
             oninput="window.renderAdminUsersTable()" style="max-width: 320px; width: 100%" />
           <div style="font-size: 12px; color: var(--muted); font-weight: 700">Cliquez sur « 👁️ Inspecter » pour
             consulter le planning d'un élève.</div>
@@ -1357,6 +1390,7 @@
           <table class="admin-table">
             <thead>
               <tr>
+                <th>Statut</th>
                 <th>Nom & Email</th>
                 <th>Rôle</th>
                 <th>Section / Code Liaison</th>
@@ -1369,6 +1403,7 @@
         </div>
       </div>
 
+      <!-- ONGLET ANNONCES GLOBALES -->
       <div id="adminViewAnnouncements" style="display: none; flex-direction: column; gap: 14px">
         <div
           style="background: var(--card); border: 1.5px solid var(--dash); border-radius: 16px; padding: 18px; display: flex; flex-direction: column; gap: 10px">
@@ -1975,6 +2010,9 @@
 
     window.switchAuthTab = function (tab) {
       document.getElementById("authErrorMsg").style.display = "none";
+      const successDiv = document.getElementById("authSuccessMsg");
+      if (successDiv && tab !== "login") successDiv.style.display = "none";
+
       document.getElementById("tabLoginBtn").classList.toggle("active", tab === "login");
       document.getElementById("tabRegisterBtn").classList.toggle("active", tab === "register");
       document.getElementById("loginForm").style.display = tab === "login" ? "flex" : "none";
@@ -1994,7 +2032,9 @@
       const email = document.getElementById("loginEmail").value.trim();
       const pass = document.getElementById("loginPassword").value;
       const errDiv = document.getElementById("authErrorMsg");
+      const successDiv = document.getElementById("authSuccessMsg");
       errDiv.style.display = "none";
+      if (successDiv) successDiv.style.display = "none";
 
       try {
         showLoading("Connexion en cours...");
@@ -2015,7 +2055,9 @@
       const section = document.getElementById("regSection").value;
       const adminKey = document.getElementById("regAdminKey").value.trim();
       const errDiv = document.getElementById("authErrorMsg");
+      const successDiv = document.getElementById("authSuccessMsg");
       errDiv.style.display = "none";
+      if (successDiv) successDiv.style.display = "none";
 
       if (selectedRegRole === "admin" && adminKey !== "ADMIN2026") {
         errDiv.innerText = "Clé secrète Administrateur invalide (ADMIN2026).";
@@ -2024,7 +2066,7 @@
       }
 
       try {
-        showLoading("Création du profil...");
+        showLoading("Enregistrement de la demande...");
         const userCred = await createUserWithEmailAndPassword(auth, email, pass);
         const uid = userCred.user.uid;
         await updateProfile(userCred.user, { displayName: name });
@@ -2035,11 +2077,13 @@
           await set(ref(database, `parent_codes/${parentCode}`), uid);
         }
 
+        const isAutoApproved = selectedRegRole === "admin";
         const profileData = {
           uid: uid,
           email: email,
           displayName: name,
           role: selectedRegRole,
+          status: isAutoApproved ? "approved" : "pending",
           section: selectedRegRole === "student" ? section : null,
           parentLinkCode: parentCode || null,
           linkedStudents: selectedRegRole === "parent" ? [] : null,
@@ -2048,6 +2092,16 @@
 
         await set(ref(database, `users/${uid}`), profileData);
         hideLoading();
+
+        if (!isAutoApproved) {
+          // L'élève ou parent est mis en attente et déconnecté
+          await signOut(auth);
+          if (successDiv) {
+            successDiv.innerHTML = `🎉 <b>Demande enregistrée avec succès !</b><br>Votre compte doit être validé par l'administrateur avant votre première connexion. Vous pourrez vous connecter dès validation.`;
+            successDiv.style.display = "block";
+          }
+          window.switchAuthTab("login");
+        }
       } catch (err) {
         hideLoading();
         errDiv.innerText = formatAuthError(err.code || err.message);
@@ -2064,9 +2118,9 @@
 
     function formatAuthError(code) {
       if (code.includes("user-not-found") || code.includes("wrong-password") || code.includes("invalid-credential"))
-        return "Identifiants invalides.";
+        return "Identifiants invalides ou mot de passe incorrect.";
       if (code.includes("email-already-in-use"))
-        return "Email déjà enregistré. Connectez-vous.";
+        return "Cette adresse email est déjà enregistrée. Veuillez vous connecter.";
       if (code.includes("weak-password"))
         return "Le mot de passe doit contenir au moins 6 caractères.";
       return "Erreur : " + code;
@@ -2074,12 +2128,42 @@
 
     onAuthStateChanged(auth, async (user) => {
       if (user) {
-        currentUser = user;
-        document.getElementById("authOverlay").style.display = "none";
-        document.getElementById("authActionBtn").innerText = "🚪 Déconnexion";
-        document.getElementById("authActionBtn").style.color = "#ef4444";
-        document.getElementById("authActionBtn").onclick = window.handleLogout;
-        await loadUserProfile(user.uid);
+        try {
+          const userSnap = await get(ref(database, `users/${user.uid}`));
+          const profile = userSnap.val() || {};
+          const status = profile.status || "approved"; // Les anciens comptes sont considérés approuvés
+
+          if (status === "pending") {
+            const errDiv = document.getElementById("authErrorMsg");
+            if (errDiv) {
+              errDiv.innerHTML = "⏳ <b>Compte en attente d'approbation</b> : Votre demande d'inscription n'a pas encore été validée par l'administrateur. Veuillez patienter.";
+              errDiv.style.display = "block";
+            }
+            await signOut(auth);
+            document.getElementById("authOverlay").style.display = "flex";
+            return;
+          }
+
+          if (status === "rejected") {
+            const errDiv = document.getElementById("authErrorMsg");
+            if (errDiv) {
+              errDiv.innerHTML = "❌ <b>Accès refusé</b> : Votre demande de création de compte a été rejetée par l'administrateur.";
+              errDiv.style.display = "block";
+            }
+            await signOut(auth);
+            document.getElementById("authOverlay").style.display = "flex";
+            return;
+          }
+
+          currentUser = user;
+          document.getElementById("authOverlay").style.display = "none";
+          document.getElementById("authActionBtn").innerText = "🚪 Déconnexion";
+          document.getElementById("authActionBtn").style.color = "#ef4444";
+          document.getElementById("authActionBtn").onclick = window.handleLogout;
+          await loadUserProfile(user.uid);
+        } catch (e) {
+          console.error(e);
+        }
       } else {
         currentUser = null;
         currentUserProfile = null;
@@ -2088,8 +2172,9 @@
         document.getElementById("authActionBtn").innerText = "🔑 Connexion";
         document.getElementById("authActionBtn").style.color = "var(--primary)";
         document.getElementById("authActionBtn").onclick = window.showAuthModal;
-        document.getElementById("userNameLabel").innerText = "Visiteur";
-        document.getElementById("authOverlay").style.display = "none";
+        document.getElementById("userNameLabel").innerText = "Non connecté";
+        // L'écran de connexion reste toujours affiché au lancement pour bloquer l'accès non autorisé
+        document.getElementById("authOverlay").style.display = "flex";
         window.render();
       }
     });
@@ -2103,6 +2188,7 @@
             email: currentUser.email,
             displayName: currentUser.displayName || "Élève",
             role: "student",
+            status: "approved",
             parentLinkCode: "BAC-" + Math.random().toString(36).substring(2, 6).toUpperCase(),
             createdAt: Date.now(),
           };
@@ -2308,8 +2394,10 @@
     }
 
     window.switchAdminTab = function (tab) {
+      document.getElementById("adminTabPending").classList.toggle("active", tab === "pending");
       document.getElementById("adminTabUsers").classList.toggle("active", tab === "users");
       document.getElementById("adminTabAnnouncements").classList.toggle("active", tab === "announcements");
+      document.getElementById("adminViewPending").style.display = tab === "pending" ? "block" : "none";
       document.getElementById("adminViewUsers").style.display = tab === "users" ? "block" : "none";
       document.getElementById("adminViewAnnouncements").style.display = tab === "announcements" ? "flex" : "none";
     };
@@ -2319,29 +2407,95 @@
         allUsersCache = [];
         let studentsCount = 0;
         let parentsCount = 0;
+        let pendingCount = 0;
 
         snapshot.forEach((childSnap) => {
           const u = childSnap.val();
           allUsersCache.push(u);
-          if (u.role === "student") studentsCount++;
-          if (u.role === "parent") parentsCount++;
+          const status = u.status || "approved";
+          if (status === "pending") {
+            pendingCount++;
+          } else if (status === "approved") {
+            if (u.role === "student") studentsCount++;
+            if (u.role === "parent") parentsCount++;
+          }
         });
 
-        document.getElementById("kpiTotalUsers").innerText = allUsersCache.length;
+        document.getElementById("kpiPendingUsers").innerText = pendingCount;
+        document.getElementById("adminPendingBadge").innerText = pendingCount;
+        document.getElementById("kpiTotalUsers").innerText = (studentsCount + parentsCount);
         document.getElementById("kpiTotalStudents").innerText = studentsCount;
         document.getElementById("kpiTotalParents").innerText = parentsCount;
+
+        renderAdminPendingTable();
         window.renderAdminUsersTable();
       });
-
-      onValue(ref(database, "student_data"), (snapshot) => {
-        let totalSessions = 0;
-        snapshot.forEach((childSnap) => {
-          const data = childSnap.val();
-          if (data?.seances) totalSessions += Object.keys(data.seances).length;
-        });
-        document.getElementById("kpiTotalSessions").innerText = totalSessions;
-      });
     }
+
+    window.renderAdminPendingTable = function () {
+      const tbody = document.getElementById("adminPendingTableBody");
+      if (!tbody) return;
+      tbody.innerHTML = "";
+
+      const pendingUsers = allUsersCache.filter((u) => u.status === "pending");
+
+      if (!pendingUsers.length) {
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:30px; color:var(--muted); font-weight:700;">🎉 Aucune demande en attente. Tous les comptes ont été validés !</td></tr>`;
+        return;
+      }
+
+      pendingUsers.forEach((u) => {
+        const tr = document.createElement("tr");
+        const dateStr = u.createdAt ? new Date(u.createdAt).toLocaleDateString("fr-FR", { hour: "2-digit", minute: "2-digit" }) : "N/A";
+        const roleBadgeClass = `role-${u.role || "student"}`;
+
+        let details = "-";
+        if (u.role === "student") details = `Section: <b>${u.section || "Maths"}</b>`;
+        else if (u.role === "parent") details = `Compte Parent d'élève`;
+
+        tr.innerHTML = `
+            <td>
+              <div style="font-weight:800;">${u.displayName || "Sans nom"}</div>
+              <div style="font-size:11px; color:var(--muted);">${u.email || ""}</div>
+            </td>
+            <td><span class="role-badge ${roleBadgeClass}">${(u.role || "student").toUpperCase()}</span></td>
+            <td><span style="font-size:12.5px;">${details}</span></td>
+            <td style="font-size:12px; color:var(--muted);">${dateStr}</td>
+            <td style="display:flex; gap:6px;">
+              <button class="btn-add" style="padding:6px 12px; font-size:11.5px;" onclick="window.approveUserByAdmin('${u.uid}')">✅ Approuver</button>
+              <button class="btn-action" style="padding:6px 10px; font-size:11.5px; color:#ef4444;" onclick="window.rejectUserByAdmin('${u.uid}', '${u.parentLinkCode || ""}')">❌ Refuser</button>
+            </td>
+          `;
+        tbody.appendChild(tr);
+      });
+    };
+
+    window.approveUserByAdmin = async function (uid) {
+      showLoading("Validation du compte...");
+      try {
+        await update(ref(database, `users/${uid}`), { status: "approved" });
+        hideLoading();
+        alert("✨ Compte approuvé avec succès ! L'utilisateur peut désormais se connecter à l'application.");
+      } catch (e) {
+        hideLoading();
+        alert("Erreur lors de la validation : " + e.message);
+      }
+    };
+
+    window.rejectUserByAdmin = async function (uid, parentCode) {
+      if (confirm("Refuser cette demande et supprimer le compte ?")) {
+        showLoading("Suppression de la demande...");
+        try {
+          await remove(ref(database, `users/${uid}`));
+          if (parentCode) await remove(ref(database, `parent_codes/${parentCode}`));
+          hideLoading();
+          alert("Demande refusée et supprimée.");
+        } catch (e) {
+          hideLoading();
+          alert("Erreur : " + e.message);
+        }
+      }
+    };
 
     window.renderAdminUsersTable = function () {
       const tbody = document.getElementById("adminUsersTableBody");
@@ -2357,7 +2511,7 @@
       });
 
       if (!filtered.length) {
-        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:20px; color:var(--muted)">Aucun utilisateur correspondant.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:20px; color:var(--muted)">Aucun utilisateur correspondant.</td></tr>`;
         return;
       }
 
@@ -2365,12 +2519,21 @@
         const tr = document.createElement("tr");
         const dateStr = u.createdAt ? new Date(u.createdAt).toLocaleDateString("fr-FR") : "N/A";
         const roleBadgeClass = `role-${u.role || "student"}`;
+        const status = u.status || "approved";
+
+        let statusBadge = `<span style="font-size:11px; font-weight:800; background:#dcfce7; color:#15803d; padding:2px 7px; border-radius:99px;">✅ Actif</span>`;
+        if (status === "pending") {
+          statusBadge = `<span style="font-size:11px; font-weight:800; background:#fef3c7; color:#b45309; padding:2px 7px; border-radius:99px;">⏳ En attente</span>`;
+        } else if (status === "rejected") {
+          statusBadge = `<span style="font-size:11px; font-weight:800; background:#fee2e2; color:#b91c1c; padding:2px 7px; border-radius:99px;">❌ Refusé</span>`;
+        }
 
         let details = "-";
         if (u.role === "student") details = `Section: <b>${u.section || "Maths"}</b> | Code: <code>${u.parentLinkCode || "N/A"}</code>`;
         else if (u.role === "parent") details = `${(u.linkedStudents || []).length} élève(s) associé(s)`;
 
         tr.innerHTML = `
+            <td>${statusBadge}</td>
             <td>
               <div style="font-weight:800;">${u.displayName || "Sans nom"}</div>
               <div style="font-size:11px; color:var(--muted);">${u.email || ""}</div>
@@ -2378,8 +2541,9 @@
             <td><span class="role-badge ${roleBadgeClass}">${(u.role || "student").toUpperCase()}</span></td>
             <td><span style="font-size:12px;">${details}</span></td>
             <td style="font-size:12px; color:var(--muted);">${dateStr}</td>
-            <td>
-              ${u.role === "student" ? `<button class="btn-action" style="padding:4px 8px; font-size:11px;" onclick="window.inspectStudentByAdmin('${u.uid}')">👁️ Inspecter</button>` : ""}
+            <td style="display:flex; gap:5px; flex-wrap:wrap;">
+              ${status === "pending" ? `<button class="btn-add" style="padding:4px 8px; font-size:11px;" onclick="window.approveUserByAdmin('${u.uid}')">✅ Valider</button>` : ""}
+              ${u.role === "student" && status === "approved" ? `<button class="btn-action" style="padding:4px 8px; font-size:11px;" onclick="window.inspectStudentByAdmin('${u.uid}')">👁️ Inspecter</button>` : ""}
               <button class="btn-action" style="padding:4px 8px; font-size:11px; color:#ef4444;" onclick="window.deleteUserByAdmin('${u.uid}', '${u.parentLinkCode || ""}')">🗑️</button>
             </td>
           `;
