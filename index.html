@@ -12,6 +12,9 @@
     href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@700;800;900&display=swap"
     rel="stylesheet" />
   <script src="bac_manifest.js"></script>
+  <!-- LIBRAIRIE CARTOGRAPHIQUE INTERACTIVE LEAFLET -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <style>
     :root {
       --primary: #0284c7;
@@ -1879,7 +1882,7 @@
           <label
             style="font-size: 11px; font-weight: 700; color: var(--muted); display: block; margin-bottom: 4px;">Lieu /
             Type :</label>
-          <select id="mType" class="input" style="width: 100%">
+          <select id="mType" class="input" style="width: 100%" onchange="window.onSessionTypeChange(this.value)">
             <option value="À la maison">🏠 À la maison (Autonomie)</option>
             <option value="En ligne">💻 En ligne</option>
             <option value="Lycée">🏫 Lycée</option>
@@ -1894,6 +1897,37 @@
             <option value="Toutes les semaines">Chaque semaine</option>
             <option value="Par quinzaine (1/2)">1 semaine sur 2 (Quinzaine)</option>
           </select>
+        </div>
+      </div>
+
+      <!-- MODULE MAPS INTERACTIF POUR COURS PARTICULIERS -->
+      <div id="particularMapBox" style="display: none; flex-direction: column; gap: 8px; background: var(--dash); padding: 12px; border-radius: 12px; border: 1.5px solid var(--dash);">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <span style="font-size: 11.5px; font-weight: 800; color: var(--text); display: flex; align-items: center; gap: 4px;">
+            📍 Localisation du cours particulier :
+          </span>
+          <button type="button" class="btn-action" style="padding: 2px 8px; font-size: 11px;" onclick="window.getUserCurrentGps()">
+            🧭 Ma position GPS
+          </button>
+        </div>
+
+        <input type="text" id="mLocationText" class="input" style="width: 100%" placeholder="ex: Centre d'études Ennasr 2, Tunis / Chez Professeur..." />
+        <input type="hidden" id="mLocationLat" value="36.8065" />
+        <input type="hidden" id="mLocationLng" value="10.1815" />
+
+        <!-- RACCOURCIS VILLES & QUARTIERS RAPIDES -->
+        <div style="display: flex; gap: 4px; flex-wrap: wrap;">
+          <span class="example-chip" onclick="window.setMapPresetLocation('Tunis Centre / Lafayette', 36.8065, 10.1815)">Tunis</span>
+          <span class="example-chip" onclick="window.setMapPresetLocation('Menzah / Ennasr', 36.8450, 10.1650)">Menzah / Ennasr</span>
+          <span class="example-chip" onclick="window.setMapPresetLocation('Ariana Centre', 36.8665, 10.1956)">Ariana</span>
+          <span class="example-chip" onclick="window.setMapPresetLocation('Sousse Ville', 35.8256, 10.6369)">Sousse</span>
+          <span class="example-chip" onclick="window.setMapPresetLocation('Sfax Centre', 34.7406, 10.7603)">Sfax</span>
+          <span class="example-chip" onclick="window.setMapPresetLocation('Bizerte Ville', 37.2744, 9.8739)">Bizerte</span>
+        </div>
+
+        <div id="sessionPickerMap" style="height: 180px; width: 100%; border-radius: 10px; border: 1.5px solid var(--dash); z-index: 1;"></div>
+        <div style="font-size: 10.5px; color: var(--muted); font-weight: 600;">
+          💡 <i>Vous pouvez cliquer ou glisser le marqueur sur la carte pour définir l'emplacement précis.</i>
         </div>
       </div>
 
@@ -1929,6 +1963,34 @@
         style="width: 100%; margin-top: 6px; padding: 10px; justify-content: center;">
         Enregistrer dans le planning
       </button>
+    </div>
+  </div>
+
+  <!-- MODALE AFFICHAGE CARTE INTERACTIVE DU COURS PARTICULIER -->
+  <div class="modal" id="mapViewerModal">
+    <div class="modal-box" style="max-width: 520px; gap: 14px;">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <span style="font-weight: 800; font-size: 16px; display: flex; align-items: center; gap: 6px;" id="mapViewerTitle">
+          📍 Localisation du Cours Particulier
+        </span>
+        <span onclick="window.closeModal('mapViewerModal')" style="cursor: pointer; color: #ef4444; font-size: 18px">✕</span>
+      </div>
+
+      <div style="background: var(--dash); padding: 10px 14px; border-radius: 10px; font-size: 12.5px; display: flex; flex-direction: column; gap: 4px;">
+        <div style="font-weight: 800; color: var(--primary); font-size: 13.5px;" id="mapViewerAddress">Adresse</div>
+        <div style="color: var(--muted); font-weight: 700;" id="mapViewerTime">Date et Heure</div>
+      </div>
+
+      <div id="sessionViewerMap" style="height: 240px; width: 100%; border-radius: 12px; border: 1.5px solid var(--dash); z-index: 1;"></div>
+
+      <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+        <button type="button" class="btn-add" id="btnGoogleMapsNav" style="flex: 1; justify-content: center; padding: 10px; font-size: 13px;">
+          🧭 Ouvrir l'Itinéraire (Google Maps)
+        </button>
+        <button type="button" class="btn-action" id="btnCopyMapAddr" style="padding: 10px 14px; font-size: 12px;">
+          📋 Copier l'adresse
+        </button>
+      </div>
     </div>
   </div>
 
@@ -3706,6 +3768,7 @@
           const isQuin = ev.freq && ev.freq.includes("quinzaine");
           const isHome = ev.type && ev.type.includes("maison");
           const isOnline = ev.type && ev.type.includes("ligne");
+          const isPart = ev.type && ev.type.includes("Particulier");
 
           const c = document.createElement("div");
           c.className = `event-card ${meta.cls} ${status.class}`;
@@ -3717,8 +3780,8 @@
                 <div style="font-weight:800; font-size:10.5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
                   ${meta.ico} ${ev.sub}
                 </div>
-                <div style="margin-top:1px;">
-                  ${ev.type ? `<span class="tag-meta" style="${isHome ? "background:#059669; color:white;" : isOnline ? "background:#0891b2; color:white;" : ""}">${ev.type}</span>` : ""}
+                <div style="margin-top:1px; display:flex; gap:2px; flex-wrap:wrap;">
+                  ${isPart ? `<span class="tag-meta" style="background:#7c3aed; color:white; cursor:pointer;" onclick="event.stopPropagation(); window.openMapViewer('${ev.id}')" title="Voir l'emplacement sur la carte">📍 ${ev.location?.address ? (ev.location.address.length > 12 ? ev.location.address.substring(0, 12) + '...' : ev.location.address) : 'Particulier'}</span>` : (ev.type ? `<span class="tag-meta" style="${isHome ? "background:#059669; color:white;" : isOnline ? "background:#0891b2; color:white;" : ""}">${ev.type}</span>` : "")}
                   ${isQuin ? `<span class="tag-meta" style="background:#f59e0b; color:white;">1/2</span>` : ""}
                 </div>
               </div>
@@ -3762,14 +3825,15 @@
         const isQuin = ev.freq && ev.freq.includes("quinzaine");
         const isHome = ev.type && ev.type.includes("maison");
         const isOnline = ev.type && ev.type.includes("ligne");
+        const isPart = ev.type && ev.type.includes("Particulier");
 
         ml.innerHTML += `
             <div class="mob-card ${meta.cls} ${status.class}">
               <div>
                 ${status.text}
                 <div style="font-size:14px;font-weight:800;">${meta.ico} ${ev.sub}</div>
-                <div style="margin:3px 0;">
-                  ${ev.type ? `<span class="tag-meta" style="${isHome ? "background:#059669; color:white;" : isOnline ? "background:#0891b2; color:white;" : ""}">${ev.type}</span>` : ""}
+                <div style="margin:3px 0; display:flex; gap:3px; flex-wrap:wrap;">
+                  ${isPart ? `<span class="tag-meta" style="background:#7c3aed; color:white; cursor:pointer; font-weight:800;" onclick="event.stopPropagation(); window.openMapViewer('${ev.id}')">📍 ${ev.location?.address || 'Cours Particulier (Carte)'}</span>` : (ev.type ? `<span class="tag-meta" style="${isHome ? "background:#059669; color:white;" : isOnline ? "background:#0891b2; color:white;" : ""}">${ev.type}</span>` : "")}
                   ${isQuin ? `<span class="tag-meta" style="background:#f59e0b; color:white;">1/2 quinzaine</span>` : ""}
                 </div>
                 <div style="font-size:12px;opacity:0.85;font-weight:600;">🕒 ${formatM(ev.s)} - ${formatM(ev.e)}</div>
@@ -3819,6 +3883,15 @@
       const [eH, eM] = document.getElementById("mEnd").value.split(":").map(Number);
 
       const newId = Date.now().toString();
+
+      let locData = null;
+      if (type === "Particulier") {
+        const addr = document.getElementById("mLocationText")?.value.trim() || "Cours Particulier";
+        const lat = parseFloat(document.getElementById("mLocationLat")?.value) || 36.8065;
+        const lng = parseFloat(document.getElementById("mLocationLng")?.value) || 10.1815;
+        locData = { address: addr, lat, lng };
+      }
+
       const newEvent = {
         id: newId,
         day: parseInt(document.getElementById("mDay").value),
@@ -3827,10 +3900,136 @@
         sub,
         type,
         freq,
+        location: locData,
       };
 
       set(ref(database, getStudentPath("seances/" + newId)), newEvent);
       window.closeModal("addModal");
+    };
+
+    // --- GESTION DE LA CARTE INTERACTIVE LEAFLET (COURS PARTICULIERS) ---
+    let pickerMap = null;
+    let pickerMarker = null;
+    let currentMapLat = 36.8065;
+    let currentMapLng = 10.1815;
+
+    window.onSessionTypeChange = function (val) {
+      const mapBox = document.getElementById("particularMapBox");
+      if (val === "Particulier") {
+        mapBox.style.display = "flex";
+        setTimeout(() => {
+          window.initPickerMap(currentMapLat, currentMapLng);
+        }, 150);
+      } else {
+        mapBox.style.display = "none";
+      }
+    };
+
+    window.initPickerMap = function (lat, lng) {
+      lat = lat || 36.8065;
+      lng = lng || 10.1815;
+      const mapContainer = document.getElementById("sessionPickerMap");
+      if (!mapContainer || typeof L === "undefined") return;
+
+      if (!pickerMap) {
+        pickerMap = L.map("sessionPickerMap").setView([lat, lng], 13);
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+          attribution: "&copy; OpenStreetMap",
+          maxZoom: 19,
+        }).addTo(pickerMap);
+
+        pickerMarker = L.marker([lat, lng], { draggable: true }).addTo(pickerMap);
+        pickerMarker.on("dragend", function (e) {
+          const pos = e.target.getLatLng();
+          document.getElementById("mLocationLat").value = pos.lat.toFixed(6);
+          document.getElementById("mLocationLng").value = pos.lng.toFixed(6);
+        });
+
+        pickerMap.on("click", function (e) {
+          pickerMarker.setLatLng(e.latlng);
+          document.getElementById("mLocationLat").value = e.latlng.lat.toFixed(6);
+          document.getElementById("mLocationLng").value = e.latlng.lng.toFixed(6);
+        });
+      } else {
+        pickerMap.invalidateSize();
+        pickerMap.setView([lat, lng], 13);
+        pickerMarker.setLatLng([lat, lng]);
+      }
+      document.getElementById("mLocationLat").value = lat;
+      document.getElementById("mLocationLng").value = lng;
+    };
+
+    window.setMapPresetLocation = function (name, lat, lng) {
+      document.getElementById("mLocationText").value = name;
+      currentMapLat = lat;
+      currentMapLng = lng;
+      window.initPickerMap(lat, lng);
+    };
+
+    window.getUserCurrentGps = function () {
+      if (navigator.geolocation) {
+        showLoading("Localisation GPS en cours...");
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            hideLoading();
+            const lat = pos.coords.latitude;
+            const lng = pos.coords.longitude;
+            window.setMapPresetLocation("Ma position GPS actuelle", lat, lng);
+          },
+          (err) => {
+            hideLoading();
+            alert("Accès GPS non disponible : " + err.message);
+          }
+        );
+      } else {
+        alert("La géolocalisation n'est pas supportée par votre navigateur.");
+      }
+    };
+
+    let viewerMap = null;
+    let viewerMarker = null;
+
+    window.openMapViewer = function (sessionId) {
+      const ev = db.find((e) => e.id === sessionId);
+      if (!ev) return;
+
+      const loc = ev.location || { address: "Cours Particulier", lat: 36.8065, lng: 10.1815 };
+      const meta = getSubjectMeta(ev.sub);
+
+      document.getElementById("mapViewerTitle").innerText = `📍 ${meta.ico} ${ev.sub} (Cours Particulier)`;
+      document.getElementById("mapViewerAddress").innerText = loc.address || "Cours Particulier";
+      document.getElementById("mapViewerTime").innerText = `🕒 ${days[ev.day]} de ${formatM(ev.s)} à ${formatM(ev.e)}`;
+
+      document.getElementById("btnGoogleMapsNav").onclick = function () {
+        window.open(`https://www.google.com/maps/dir/?api=1&destination=${loc.lat},${loc.lng}`, "_blank");
+      };
+
+      document.getElementById("btnCopyMapAddr").onclick = function () {
+        navigator.clipboard.writeText(loc.address || "Cours Particulier");
+        alert("📋 Adresse copiée dans le presse-papier :\n" + (loc.address || "Cours Particulier"));
+      };
+
+      window.openModal("mapViewerModal");
+
+      setTimeout(() => {
+        const container = document.getElementById("sessionViewerMap");
+        if (!container || typeof L === "undefined") return;
+
+        if (!viewerMap) {
+          viewerMap = L.map("sessionViewerMap").setView([loc.lat, loc.lng], 14);
+          L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+            attribution: "&copy; OpenStreetMap",
+            maxZoom: 19,
+          }).addTo(viewerMap);
+
+          viewerMarker = L.marker([loc.lat, loc.lng]).addTo(viewerMap);
+        } else {
+          viewerMap.invalidateSize();
+          viewerMap.setView([loc.lat, loc.lng], 14);
+          viewerMarker.setLatLng([loc.lat, loc.lng]);
+        }
+        viewerMarker.bindPopup(`<b>${meta.ico} ${ev.sub}</b><br>${loc.address || "Cours Particulier"}`).openPopup();
+      }, 150);
     };
 
     window.renderStatsData = function () {
@@ -4145,6 +4344,7 @@
           e: eH * 60 + eM,
           type: parsedResult.type || "À la maison",
           freq: "Chaque semaine",
+          location: parsedResult.location || null,
         };
         await set(ref(database, getStudentPath("seances/" + newId)), sessionObj);
       }
@@ -4155,7 +4355,8 @@
       feedback.style.color = "#047857";
       feedback.style.border = "1.5px solid #a7f3d0";
       const timeFmt = `${sH < 10 ? "0" + sH : sH}:${sM < 10 ? "0" + sM : sM} - ${eH < 10 ? "0" + eH : eH}:${eM < 10 ? "0" + eM : eM}`;
-      feedback.innerHTML = `🎉 <b>Ajouté avec succès !</b><br>📚 <b>${parsedResult.subject}</b> planifié pour <b>${dayNamesFr[dayIdx]}</b> (${timeFmt})<br>${parsedResult.replyMessage ? `<i>💬 ${parsedResult.replyMessage}</i>` : ""}`;
+      const locNotice = parsedResult.location?.address ? `<br>📍 <i>Lieu : ${parsedResult.location.address}</i>` : "";
+      feedback.innerHTML = `🎉 <b>Ajouté avec succès !</b><br>📚 <b>${parsedResult.subject}</b> planifié pour <b>${dayNamesFr[dayIdx]}</b> (${timeFmt})${locNotice}<br>${parsedResult.replyMessage ? `<i>💬 ${parsedResult.replyMessage}</i>` : ""}`;
     };
 
     async function callGeminiTunisianParser(userText, apiKey) {
@@ -4175,7 +4376,8 @@ Analyse la phrase de l'élève et extrait les données en JSON STRICT sans forma
   "startMinute": nombre 0 ou 30,
   "endHour": nombre de 9 à 24,
   "endMinute": nombre 0 ou 30,
-  "type": "À la maison" | "En ligne" | "Lycée",
+  "type": "À la maison" | "En ligne" | "Lycée" | "Particulier",
+  "location": { "address": "nom du lieu ou ville (ex: Ennasr 2)", "lat": 36.8065, "lng": 10.1815 },
   "replyMessage": "Message de confirmation court et amical bilingue français/tunisien"
 }`;
 
@@ -4261,6 +4463,30 @@ Analyse la phrase de l'élève et extrait les données en JSON STRICT sans forma
 
       const isExam = /devoir|examen|ds|dc|test|امتحان|فرض/i.test(text);
 
+      const isPart = /particulier|etude|étude|dar el prof|chez prof|fi darou/i.test(text);
+      let sessionType = "À la maison";
+      let sessionLoc = null;
+
+      if (isPart) {
+        sessionType = "Particulier";
+        let addr = "Cours Particulier";
+        let lat = 36.8065, lng = 10.1815;
+        if (/nasser|ennasr/i.test(text)) { addr = "Ennasr, Ariana"; lat = 36.8450; lng = 10.1650; }
+        else if (/ariana/i.test(text)) { addr = "Ariana Centre"; lat = 36.8665; lng = 10.1956; }
+        else if (/menzah/i.test(text)) { addr = "El Menzah, Tunis"; lat = 36.8380; lng = 10.1750; }
+        else if (/sousse/i.test(text)) { addr = "Sousse Ville"; lat = 35.8256; lng = 10.6369; }
+        else if (/sfax/i.test(text)) { addr = "Sfax Centre"; lat = 34.7406; lng = 10.7603; }
+        else if (/bizerte/i.test(text)) { addr = "Bizerte"; lat = 37.2744; lng = 9.8739; }
+        else if (/dar el prof|chez prof/i.test(text)) { addr = "Chez le Professeur"; }
+        sessionLoc = { address: addr, lat, lng };
+      } else if (/dar|maison|دار/i.test(text)) {
+        sessionType = "À la maison";
+      } else if (/ligne|zoom|meet|اونلاين/i.test(text)) {
+        sessionType = "En ligne";
+      } else if (/lycee|lycée|ecole|معهد/i.test(text)) {
+        sessionType = "Lycée";
+      }
+
       return {
         action: isExam ? "add_exam" : "add_session",
         subject: subject,
@@ -4269,8 +4495,9 @@ Analyse la phrase de l'élève et extrait les données en JSON STRICT sans forma
         startMinute: startMinute,
         endHour: endHour,
         endMinute: endMinute,
-        type: /dar|maison|دار/i.test(text) ? "À la maison" : /ligne|zoom|meet|اونلاين/i.test(text) ? "En ligne" : "À la maison",
-        replyMessage: "فهمتك بالباهي ! تم تسجيل الحصة في جدول أوقاتك بنجاح.",
+        type: sessionType,
+        location: sessionLoc,
+        replyMessage: isPart ? "فهمتك بالباهي ! تم تسجيل حصة الدرس الخصوصي مع تحديد الموقع على الخريطة بنجاح." : "فهمتك بالباهي ! تم تسجيل الحصة في جدول أوقاتك بنجاح.",
       };
     }
 
