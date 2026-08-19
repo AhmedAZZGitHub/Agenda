@@ -35,6 +35,49 @@
         });
       }
     } catch (e) {}
+
+    // Bootstrap immédiat des fonctions globales d'interface pour éviter tout 'is not a function'
+    window.openOverlay = function (id) {
+      var el = document.getElementById(id);
+      if (el) el.style.display = "flex";
+      if (id === "bacArchiveOverlay" && window.initBacArchiveTabs) window.initBacArchiveTabs();
+      if (id === "gradesOverlay" && window.switchTrimester) window.switchTrimester(window.state ? window.state.currentTrimester : "trim1");
+      if (id === "examsOverlay" && window.renderExams) window.renderExams();
+      if (id === "timerOverlay" && window.renderTimer) window.renderTimer();
+      if (id === "statsOverlay" && window.renderStatsData) window.renderStatsData();
+    };
+    window.closeOverlay = function (id) {
+      var el = document.getElementById(id);
+      if (el) el.style.display = "none";
+    };
+    window.openModal = function (id) {
+      var el = document.getElementById(id);
+      if (el) el.style.display = "flex";
+    };
+    window.closeModal = function (id) {
+      var el = document.getElementById(id);
+      if (el) el.style.display = "none";
+    };
+    window.openBacArchiveOverlay = function () {
+      window.openOverlay("bacArchiveOverlay");
+      if (window.initBacArchiveTabs) window.initBacArchiveTabs();
+    };
+    window.openGradesOverlay = function () {
+      window.openOverlay("gradesOverlay");
+      if (window.switchTrimester) window.switchTrimester(window.state ? window.state.currentTrimester : "trim1");
+    };
+    window.openExamsOverlay = function () {
+      window.openOverlay("examsOverlay");
+      if (window.renderExams) window.renderExams();
+    };
+    window.openTimer = function () {
+      window.openOverlay("timerOverlay");
+      if (window.renderTimer) window.renderTimer();
+    };
+    window.openStats = function () {
+      window.openOverlay("statsOverlay");
+      if (window.renderStatsData) window.renderStatsData();
+    };
   </script>
   <link rel="stylesheet" href="css/styles.css?v=15.5" />
 </head>
@@ -593,15 +636,15 @@
           <button class="btn-toggle" id="btnMob" onclick="window.setLayout('mobile')">📱 Mobile</button>
           <button class="btn-toggle" id="btnPc" onclick="window.setLayout('pc')">💻 PC</button>
         </div>
-        <button class="btn-action" onclick="window.goToToday()">Aujourd'hui</button>
+        <button class="btn-action" onclick="window.goToToday ? window.goToToday() : null">Aujourd'hui</button>
         <button class="btn-action" style="border-color: #0284c7; color: #0284c7; font-weight: 800;"
-          onclick="window.openBacArchiveOverlay()">
+          onclick="window.openBacArchiveOverlay ? window.openBacArchiveOverlay() : window.openOverlay('bacArchiveOverlay')">
           📚 Annales Bac (2000-2026)
         </button>
-        <button class="btn-action" onclick="window.openExamsOverlay()">📝 Examens & DS</button>
-        <button class="btn-action" onclick="window.openGradesOverlay()">🎯 Carnet Trimestriel</button>
-        <button class="btn-action" onclick="window.openStats()">📊 Répartition</button>
-        <button class="btn-action" onclick="window.openTimer()">⏱️ Minuteur</button>
+        <button class="btn-action" onclick="window.openExamsOverlay ? window.openExamsOverlay() : window.openOverlay('examsOverlay')">📝 Examens & DS</button>
+        <button class="btn-action" onclick="window.openGradesOverlay ? window.openGradesOverlay() : window.openOverlay('gradesOverlay')">🎯 Carnet Trimestriel</button>
+        <button class="btn-action" onclick="window.openStats ? window.openStats() : window.openOverlay('statsOverlay')">📊 Répartition</button>
+        <button class="btn-action" onclick="window.openTimer ? window.openTimer() : window.openOverlay('timerOverlay')">⏱️ Minuteur</button>
       </div>
 
       <div class="date-row">
