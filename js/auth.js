@@ -268,6 +268,9 @@ export async function loadUserProfile(uid) {
       await set(ref(database, `parent_codes/${state.currentUserProfile.parentLinkCode}`), uid);
     } else {
       state.currentUserProfile = userSnap.val();
+      if (!state.currentUserProfile.status) {
+        state.currentUserProfile.status = "approved";
+      }
     }
 
     // Vérification du statut en attente
@@ -334,7 +337,7 @@ export async function loadUserProfile(uid) {
   } finally {
     const authOverlay = document.getElementById("authOverlay");
     const mainApp = document.getElementById("mainAppWrap");
-    if (state.currentUser && state.currentUserProfile?.status === "approved") {
+    if (state.currentUser && state.currentUserProfile && state.currentUserProfile.status !== "pending" && state.currentUserProfile.status !== "rejected") {
       if (authOverlay) authOverlay.style.display = "none";
       if (mainApp) mainApp.style.display = "flex";
     }
