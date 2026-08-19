@@ -18,7 +18,12 @@
   <!-- LIBRAIRIE CARTOGRAPHIQUE INTERACTIVE LEAFLET -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <link rel="stylesheet" href="css/styles.css?v=3.2" />
+  <script>
+    try {
+      localStorage.setItem("gemini_model_name", "gemini-1.5-pro");
+    } catch (e) {}
+  </script>
+  <link rel="stylesheet" href="css/styles.css?v=3.3" />
 </head>
 
 <body>
@@ -1270,7 +1275,7 @@
   </div>
 
   <!-- SCRIPT APPLICATION -->
-  <script type="module" src="js/app.js?v=3.2"></script>
+  <script type="module" src="js/app.js?v=3.3"></script>
 </body>
 
 </html>
