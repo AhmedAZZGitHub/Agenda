@@ -161,6 +161,11 @@ export function renderAdminUsersTable() {
     if (u.role === "student" || u.role === "admin") details = `Section: <b>${u.section || "Maths"}</b> | Code: <code>${u.parentLinkCode || "N/A"}</code>`;
     else if (u.role === "parent") details = `${(u.linkedStudents || []).length} élève(s) associé(s)`;
 
+    const isTutorActive = u.tutorAiEnabled !== false;
+    const tutorToggleBtn = u.role === "student"
+      ? `<button type="button" class="btn-action" style="padding:4px 8px; font-size:11px; ${isTutorActive ? "color:#059669; font-weight:800; border-color:#a7f3d0; background:#ecfdf5;" : "color:#ef4444; border-color:#fecdd3; background:#fff1f2;"}" title="Activer / Désactiver le Tuteur IA pour cet élève" onclick="window.toggleUserTutorAi('${u.uid}', ${isTutorActive})">${isTutorActive ? "🤖 Tuteur: Actif ✅" : "🤖 Tuteur: Inactif ❌"}</button>`
+      : "";
+
     tr.innerHTML = `
       <td>${statusBadge}</td>
       <td>
@@ -173,6 +178,7 @@ export function renderAdminUsersTable() {
       <td style="display:flex; gap:5px; flex-wrap:wrap;">
         <button class="btn-action" style="padding:4px 8px; font-size:11px;" title="Copier l'UID" onclick="navigator.clipboard.writeText('${u.uid}'); alert('📋 UID copié : ${u.uid}')">📋 UID</button>
         ${status === "pending" ? `<button class="btn-add" style="padding:4px 8px; font-size:11px;" onclick="window.approveUserByAdmin('${u.uid}')">✅ Valider</button>` : ""}
+        ${tutorToggleBtn}
         ${(u.role === "student" || u.role === "admin") && status === "approved" ? `<button class="btn-action" style="padding:4px 8px; font-size:11px;" onclick="window.inspectStudentByAdmin('${u.uid}')">👁️ Inspecter</button>` : ""}
         <button class="btn-action" style="padding:4px 8px; font-size:11px;" title="Envoyer email de réinitialisation" onclick="window.adminResetUserPassword('${u.email}')">🔑 Réinit Pass</button>
         <button class="btn-action" style="padding:4px 8px; font-size:11px; color:#ef4444;" onclick="window.deleteUserByAdmin('${u.uid}', '${u.parentLinkCode || ""}')">🗑️</button>
@@ -180,6 +186,19 @@ export function renderAdminUsersTable() {
     `;
     tbody.appendChild(tr);
   });
+}
+
+export async function toggleUserTutorAi(uid, currentStatus) {
+  const newStatus = !currentStatus;
+  showLoading(newStatus ? "Activation du Tuteur IA..." : "Désactivation du Tuteur IA...");
+  try {
+    await set(ref(database, `users/${uid}/tutorAiEnabled`), newStatus);
+    hideLoading();
+    loadAdminKPIs();
+  } catch (e) {
+    hideLoading();
+    alert("Erreur lors de la mise à jour des permissions : " + e.message);
+  }
 }
 
 export async function adminResetUserPassword(email) {
@@ -300,6 +319,7 @@ window.renderAdminPendingTable = renderAdminPendingTable;
 window.approveUserByAdmin = approveUserByAdmin;
 window.rejectUserByAdmin = rejectUserByAdmin;
 window.renderAdminUsersTable = renderAdminUsersTable;
+window.toggleUserTutorAi = toggleUserTutorAi;
 window.adminResetUserPassword = adminResetUserPassword;
 window.inspectStudentByAdmin = inspectStudentByAdmin;
 window.deleteUserByAdmin = deleteUserByAdmin;

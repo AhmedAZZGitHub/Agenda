@@ -40,6 +40,11 @@ RÈGLES STRICTES ET NON NÉGOCIABLES :
    - Tu comprends parfaitement le français, l'arabe classique et le dialecte tunisien (Derja / Arabizi). Tu peux répondre en français soigné ou adapter tes explications bilingues selon le besoin de l'élève.`;
 
 export function openTutorChat() {
+  if (state.currentUserProfile && state.currentUserProfile.role === "student" && state.currentUserProfile.tutorAiEnabled === false) {
+    alert("🔒 Accès Tuteur IA Désactivé\n\nCette option n'a pas été activée pour votre compte par l'administrateur. Veuillez contacter votre administrateur pour débloquer l'accès au Tuteur IA et à la correction par photo.");
+    return;
+  }
+
   const modal = document.getElementById("tutorChatModal");
   if (modal) modal.style.display = "flex";
 
@@ -179,6 +184,14 @@ export function clearTutorChatHistory() {
 }
 
 export async function sendTutorMessage() {
+  if (state.currentUserProfile && state.currentUserProfile.role === "student" && state.currentUserProfile.tutorAiEnabled === false) {
+    appendTutorMessage(
+      "bot",
+      "🔒 <b>Accès restreint</b> : Le Tuteur IA n'est pas activé pour votre compte. Contactez l'administrateur pour débloquer cette fonctionnalité."
+    );
+    return;
+  }
+
   const textInput = document.getElementById("tutorTextInput");
   const userText = textInput ? textInput.value.trim() : "";
   const attachedBase64 = tutorAttachedImageBase64;

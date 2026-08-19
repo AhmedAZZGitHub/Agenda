@@ -374,6 +374,12 @@ export function renderUserProfileBar() {
   if (pCodeDisp && state.currentUserProfile.parentLinkCode) {
     pCodeDisp.innerText = state.currentUserProfile.parentLinkCode;
   }
+
+  const fabTutor = document.getElementById("btnOpenTutorFab");
+  if (fabTutor) {
+    const isTutorActive = state.currentUserProfile.role === "admin" || state.currentUserProfile.tutorAiEnabled !== false;
+    fabTutor.style.display = isTutorActive ? "flex" : "none";
+  }
 }
 
 export function openUserProfileModal() {
