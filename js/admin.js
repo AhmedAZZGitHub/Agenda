@@ -162,9 +162,7 @@ export function renderAdminUsersTable() {
     else if (u.role === "parent") details = `${(u.linkedStudents || []).length} élève(s) associé(s)`;
 
     const isTutorActive = u.tutorAiEnabled !== false;
-    const tutorToggleBtn = u.role === "student"
-      ? `<button type="button" class="btn-action" style="padding:4px 8px; font-size:11px; ${isTutorActive ? "color:#059669; font-weight:800; border-color:#a7f3d0; background:#ecfdf5;" : "color:#ef4444; border-color:#fecdd3; background:#fff1f2;"}" title="Activer / Désactiver le Tuteur IA pour cet élève" onclick="window.toggleUserTutorAi('${u.uid}', ${isTutorActive})">${isTutorActive ? "🤖 Tuteur: Actif ✅" : "🤖 Tuteur: Inactif ❌"}</button>`
-      : "";
+    const tutorToggleBtn = `<button type="button" class="btn-action" style="padding:4px 8px; font-size:11px; ${isTutorActive ? "color:#059669; font-weight:800; border-color:#a7f3d0; background:#ecfdf5;" : "color:#ef4444; border-color:#fecdd3; background:#fff1f2;"}" title="Activer / Désactiver le Tuteur IA pour ce compte" onclick="window.toggleUserTutorAi('${u.uid}', ${isTutorActive})">${isTutorActive ? "🤖 Tuteur: Actif ✅" : "🤖 Tuteur: Inactif ❌"}</button>`;
 
     tr.innerHTML = `
       <td>${statusBadge}</td>
