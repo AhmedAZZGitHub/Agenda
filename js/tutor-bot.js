@@ -213,7 +213,7 @@ export async function sendTutorMessage() {
     userDisplayImg = `data:${attachedMime};base64,${attachedBase64}`;
   }
 
-appendTutorMessage("user", formatUserMessageText(userText || "Analyse de cette photo d'exercice"), userDisplayImg);
+  appendTutorMessage("user", formatUserMessageText(userText || "Analyse de cette photo d'exercice"), userDisplayImg);
 
   if (textInput) textInput.value = "";
   clearTutorAttachedPhoto();
@@ -282,14 +282,6 @@ MESSAGE / QUESTION DE L'ÉLÈVE :
   const formattedBotReply = formatMarkdownForChat(botReply);
   appendTutorMessage("bot", formattedBotReply);
   playBeep();
-} catch (err) {
-  const loadingEl = document.getElementById(loadingMsgId);
-  if (loadingEl && loadingEl.parentElement) {
-    loadingEl.parentElement.parentElement.remove();
-  }
-  const fallbackReply = generateBuiltInPedagogicalResponse(userText, attachedBase64, state.currentUserProfile?.section);
-  appendTutorMessage("bot", formatMarkdownForChat(fallbackReply));
-}
 }
 
 // Moteur Pédagogique Spécialisé Baccalauréat (Garantie de réponse 100%)
