@@ -1,8 +1,8 @@
 // js/ai-assistant.js
 // Assistant Vocal Multilingue (Tounsi / Arabe / Français), Gemini Pro 3.1 & Vision Scanner
 
-import { database, ref, set } from "./firebase-config.js?v=15.1";
-import { state, getStudentPath, showLoading, hideLoading, playBeep } from "./state.js?v=15.1";
+import { database, ref, set } from "./firebase-config.js?v=15.2";
+import { state, getStudentPath, showLoading, hideLoading, playBeep } from "./state.js?v=15.2";
 
 let selectedAiSpeechLang = "ar-TN";
 let aiSpeechRecognition = null;
@@ -18,8 +18,8 @@ export function getAiApiKey() {
 
 export function getAiModelName() {
   const saved = localStorage.getItem("gemini_model_name");
-  if (saved && saved.trim() && saved !== "gemini-3.1-pro") return saved.trim();
-  return "gemini-1.5-pro"; // Modèle Google Gemini 1.5 Pro par défaut
+  if (saved && saved.trim()) return saved.trim();
+  return "gemini-3.1-pro"; // Modèle Google Gemini 3.1 Pro par défaut exigé
 }
 
 export function openAiSettingsModal() {
@@ -33,7 +33,7 @@ export function openAiSettingsModal() {
   const customBox = document.getElementById("customModelBox");
   const customInput = document.getElementById("aiCustomModelInput");
 
-  const standardModels = ["gemini-1.5-pro", "gemini-2.0-flash", "gemini-1.5-flash"];
+  const standardModels = ["gemini-3.1-pro", "gemini-1.5-pro", "gemini-2.0-flash", "gemini-1.5-flash"];
   if (standardModels.includes(currentModel)) {
     if (modelSelect) modelSelect.value = currentModel;
     if (customBox) customBox.style.display = "none";

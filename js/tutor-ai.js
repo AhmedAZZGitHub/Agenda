@@ -1,8 +1,8 @@
 // js/tutor-ai.js
 // Tuteur IA Éducatif Gemini Pro (Baccalauréat Tunisien) & Correction d'Exercices par Photo
 
-import { getAiModelName, getAiApiKey } from "./ai-assistant.js?v=15.1";
-import { state, showLoading, hideLoading, playBeep } from "./state.js?v=15.1";
+import { getAiModelName, getAiApiKey } from "./ai-assistant.js?v=15.2";
+import { state, showLoading, hideLoading, playBeep } from "./state.js?v=15.2";
 
 let tutorChatHistory = [];
 let tutorAttachedImageBase64 = null;
@@ -41,8 +41,8 @@ RÈGLES STRICTES ET NON NÉGOCIABLES :
 
 export function getTutorModelName() {
   const saved = localStorage.getItem("gemini_model_name");
-  if (saved && saved.trim() && saved !== "gemini-3.1-pro") return saved.trim();
-  return "gemini-1.5-pro"; // Modèle Google Gemini 1.5 Pro par défaut
+  if (saved && saved.trim()) return saved.trim();
+  return "gemini-3.1-pro"; // Modèle Google Gemini 3.1 Pro par défaut exigé
 }
 
 export async function promptSetAiApiKey() {
@@ -63,6 +63,7 @@ export async function promptSetAiApiKey() {
   showLoading("Vérification de votre clé auprès des serveurs Google Gemini...");
   try {
     const candidateModels = [
+      "gemini-3.1-pro",
       "gemini-1.5-pro",
       "gemini-2.0-flash",
       "gemini-1.5-flash",
@@ -292,6 +293,7 @@ export async function sendTutorMessage() {
 
   try {
     const candidateModels = [
+      "gemini-3.1-pro",
       "gemini-1.5-pro",
       "gemini-2.0-flash",
       "gemini-1.5-flash",
