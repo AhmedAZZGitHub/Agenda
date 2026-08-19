@@ -1242,8 +1242,94 @@
     </div>
   </div>
 
+  <!-- BOUTON FLOTTANT DU TUTEUR IA ÉDUCATIF -->
+  <button class="tutor-fab" id="btnOpenTutorFab" onclick="window.openTutorChat()" title="Ouvrir le Tuteur IA Éducatif">
+    <div class="tutor-fab-badge"></div>
+    <span>💬 Tuteur IA Bac</span>
+  </button>
+
+  <!-- MODALE / CHAT DU TUTEUR IA ÉDUCATIF GEMINI -->
+  <div class="tutor-chat-modal" id="tutorChatModal">
+    <div class="tutor-chat-box">
+      <!-- HEADER -->
+      <div class="tutor-chat-header">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div style="width: 38px; height: 38px; border-radius: 50%; background: linear-gradient(135deg, #0284c7, #6366f1); color: white; display: flex; align-items: center; justify-content: center; font-size: 20px;">
+            🎓
+          </div>
+          <div>
+            <div style="font-weight: 800; font-size: 15px; display: flex; align-items: center; gap: 8px;">
+              <span>Tuteur Bac IA</span>
+              <span style="font-size: 10px; font-weight: 800; background: var(--primary-light); color: var(--primary); padding: 2px 7px; border-radius: 99px;" id="tutorModelBadge">🤖 Gemini Pro</span>
+            </div>
+            <div style="font-size: 11px; color: var(--muted);">Spécialisé exclusivement dans le programme du Baccalauréat</div>
+          </div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 6px;">
+          <button type="button" class="btn-action" style="padding: 4px 8px; font-size: 11.5px; color: #ef4444;" onclick="window.clearTutorChatHistory()" title="Effacer l'historique">
+            🗑️
+          </button>
+          <span onclick="window.closeTutorChat()" style="cursor: pointer; color: #ef4444; font-size: 22px; font-weight: 800; padding: 0 4px;">✕</span>
+        </div>
+      </div>
+
+      <!-- MESSAGES AREA -->
+      <div class="tutor-messages-wrap" id="tutorChatMessages">
+        <!-- Messages injectés dynamiquement -->
+      </div>
+
+      <!-- CHIPS / SUGGESTIONS RAPIDES -->
+      <div class="tutor-chips-bar">
+        <button type="button" class="tutor-chip-btn" onclick="window.useTutorQuickPrompt('Peux-tu corriger et m\'expliquer cet exercice de Maths étape par étape ?')">
+          📐 Corriger un exercice de Maths
+        </button>
+        <button type="button" class="tutor-chip-btn" onclick="window.useTutorQuickPrompt('Explique-moi les notions clés et les pièges classiques en Physique-Chimie.')">
+          🔬 Notion clé en Physique
+        </button>
+        <button type="button" class="tutor-chip-btn" onclick="window.useTutorQuickPrompt('Donne-moi un algorithme Python type Bac avec explication et jeu d\'essai.')">
+          💻 Code Python type Bac
+        </button>
+        <button type="button" class="tutor-chip-btn" onclick="window.useTutorQuickPrompt('Quels sont les critères et le barème pour réussir une dissertation en Philo ?')">
+          🧠 Méthode Philo Bac
+        </button>
+        <button type="button" class="tutor-chip-btn" onclick="window.useTutorQuickPrompt('Pose-moi 3 questions d\'entraînement sous forme de quiz pour tester mes connaissances.')">
+          ⚡ Quiz d'entraînement
+        </button>
+      </div>
+
+      <!-- INPUT BAR -->
+      <div class="tutor-input-bar">
+        <!-- APERÇU PHOTO ATTACHÉE -->
+        <div id="tutorPhotoPreviewTag" class="tutor-img-preview-tag" style="display: none;">
+          <span>📷 Photo prête :</span>
+          <b id="tutorPhotoPreviewName">exercice.jpg</b>
+          <span onclick="window.clearTutorAttachedPhoto()" title="Retirer l'image">✕</span>
+        </div>
+
+        <form onsubmit="event.preventDefault(); window.sendTutorMessage();" style="display: flex; gap: 8px; align-items: center;">
+          <!-- INPUT FICHIER IMAGE CACHÉ -->
+          <input type="file" id="tutorPhotoInput" accept="image/*" style="display: none;" onchange="window.handleTutorPhotoSelect(event)" />
+          
+          <button type="button" class="btn-action" style="padding: 9px 12px; font-size: 15px;" onclick="document.getElementById('tutorPhotoInput').click()" title="Prendre / Envoyer une photo d'exercice ou brouillon">
+            📷
+          </button>
+          
+          <button type="button" class="btn-action" id="btnTutorVoice" style="padding: 9px 12px; font-size: 15px;" onclick="window.toggleTutorVoice()" title="Dictée vocale (Derja / Français / Arabe)">
+            🎙️
+          </button>
+
+          <input type="text" id="tutorTextInput" class="input" style="flex: 1; font-size: 13.5px;" placeholder="Pose ta question ou décris ton exercice..." autocomplete="off" />
+
+          <button type="submit" class="btn-add" style="padding: 9px 16px; font-weight: 800; font-size: 13.5px;">
+            Envoyer 🚀
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
   <!-- SCRIPT APPLICATION -->
-  <script type="module" src="js/app.js?v=2.3"></script>
+  <script type="module" src="js/app.js?v=2.4"></script>
 </body>
 
 </html>

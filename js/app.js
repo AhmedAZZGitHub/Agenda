@@ -11,6 +11,7 @@ import { initBacArchiveTabs, switchTrimester } from "./grades.js";
 import "./maps.js";
 import "./ai-assistant.js";
 import "./admin.js";
+import "./tutor-bot.js";
 
 // Gestion de l'état d'authentification Firebase
 onAuthStateChanged(auth, async (user) => {
