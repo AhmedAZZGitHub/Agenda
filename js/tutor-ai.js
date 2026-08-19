@@ -40,7 +40,7 @@ RÈGLES STRICTES ET NON NÉGOCIABLES :
    - Tu comprends parfaitement le français, l'arabe classique et le dialecte tunisien (Derja / Arabizi). Tu peux répondre en français soigné ou adapter tes explications bilingues selon le besoin de l'élève.`;
 
 export function getTutorModelName() {
-  return "gemini-1.5-pro"; // Endpoint officiel Google Gemini Pro
+  return "gemini-3.7-flash"; // Modèle d'élite Gemini 3.7 Flash High
 }
 
 export function openTutorChat() {
@@ -54,7 +54,7 @@ export function openTutorChat() {
 
   const modelBadge = document.getElementById("tutorModelBadge");
   if (modelBadge) {
-    modelBadge.innerText = "✨ Gemini 1.5 Pro";
+    modelBadge.innerText = "⚡ Gemini 3.7 Flash High";
   }
 
   // Nettoyage automatique des anciens messages d'erreur résiduels

@@ -13,10 +13,10 @@ import "./ai-assistant.js?v=7.0";
 import "./admin.js?v=7.0";
 import "./tutor-ai.js?v=7.0";
 
-// Nettoyage automatique des modèles obsolètes
-if (localStorage.getItem("gemini_model_name") && !["gemini-1.5-pro", "gemini-2.0-flash", "gemini-1.5-flash"].includes(localStorage.getItem("gemini_model_name"))) {
-  localStorage.setItem("gemini_model_name", "gemini-1.5-pro");
-}
+// Initialisation par défaut du modèle d'élite Gemini 3.7 Flash High
+try {
+  localStorage.setItem("gemini_model_name", "gemini-3.7-flash");
+} catch (e) {}
 
 // Gestion de l'état d'authentification Firebase
 onAuthStateChanged(auth, async (user) => {
