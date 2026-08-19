@@ -1,8 +1,8 @@
 // js/ai-assistant.js
 // Assistant Vocal Multilingue (Tounsi / Arabe / Français), Gemini Pro 3.1 & Vision Scanner
 
-import { database, ref, set } from "./firebase-config.js?v=15.3";
-import { state, getStudentPath, showLoading, hideLoading, playBeep } from "./state.js?v=15.3";
+import { database, ref, set } from "./firebase-config.js?v=15.4";
+import { state, getStudentPath, showLoading, hideLoading, playBeep } from "./state.js?v=15.4";
 
 let selectedAiSpeechLang = "ar-TN";
 let aiSpeechRecognition = null;
@@ -33,7 +33,14 @@ export function openAiSettingsModal() {
   const customBox = document.getElementById("customModelBox");
   const customInput = document.getElementById("aiCustomModelInput");
 
-  const standardModels = ["gemini-3.1-pro", "gemini-1.5-pro", "gemini-2.0-flash", "gemini-1.5-flash"];
+  const standardModels = [
+    "gemini-3.7-flash",
+    "gemini-3.6-flash",
+    "gemini-3.1-pro",
+    "gemini-3.0-pro",
+    "gemini-2.5-pro",
+    "gemini-2.5-flash"
+  ];
   if (standardModels.includes(currentModel)) {
     if (modelSelect) modelSelect.value = currentModel;
     if (customBox) customBox.style.display = "none";

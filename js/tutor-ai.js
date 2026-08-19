@@ -1,8 +1,8 @@
 // js/tutor-ai.js
 // Tuteur IA Éducatif Gemini Pro (Baccalauréat Tunisien) & Correction d'Exercices par Photo
 
-import { getAiModelName, getAiApiKey } from "./ai-assistant.js?v=15.3";
-import { state, showLoading, hideLoading, playBeep } from "./state.js?v=15.3";
+import { getAiModelName, getAiApiKey } from "./ai-assistant.js?v=15.4";
+import { state, showLoading, hideLoading, playBeep } from "./state.js?v=15.4";
 
 let tutorChatHistory = [];
 let tutorAttachedImageBase64 = null;
@@ -64,12 +64,13 @@ export async function promptSetAiApiKey() {
   try {
     const candidateModels = [
       "gemini-3.1-pro",
+      "gemini-3.7-flash",
+      "gemini-3.6-flash",
+      "gemini-3.0-pro",
+      "gemini-2.5-pro",
+      "gemini-2.5-flash",
       "gemini-1.5-pro",
-      "gemini-2.0-flash",
-      "gemini-1.5-flash",
-      "gemini-1.5-pro-latest",
-      "gemini-1.5-flash-latest",
-      "gemini-pro"
+      "gemini-1.5-flash"
     ];
     let testSuccess = false;
     let lastError = "";
@@ -303,12 +304,13 @@ export async function sendTutorMessage() {
   try {
     const candidateModels = [
       "gemini-3.1-pro",
+      "gemini-3.7-flash",
+      "gemini-3.6-flash",
+      "gemini-3.0-pro",
+      "gemini-2.5-pro",
+      "gemini-2.5-flash",
       "gemini-1.5-pro",
-      "gemini-2.0-flash",
-      "gemini-1.5-flash",
-      "gemini-1.5-pro-latest",
-      "gemini-1.5-flash-latest",
-      "gemini-pro"
+      "gemini-1.5-flash"
     ];
     let apiSuccess = false;
     let lastErrorStatus = null;
