@@ -1299,37 +1299,39 @@
 
       <!-- INPUT BAR -->
       <div class="tutor-input-bar">
-        <!-- APERÇU PHOTO ATTACHÉE -->
-        <div id="tutorPhotoPreviewTag" class="tutor-img-preview-tag" style="display: none;">
-          <span>📷 Photo prête :</span>
-          <b id="tutorPhotoPreviewName">exercice.jpg</b>
-          <span onclick="window.clearTutorAttachedPhoto()" title="Retirer l'image">✕</span>
+        <div class="tutor-input-container">
+          <!-- APERÇU PHOTO ATTACHÉE -->
+          <div id="tutorPhotoPreviewTag" class="tutor-img-preview-tag" style="display: none;">
+            <span>📷 Photo prête :</span>
+            <b id="tutorPhotoPreviewName">exercice.jpg</b>
+            <span onclick="window.clearTutorAttachedPhoto()" title="Retirer l'image">✕</span>
+          </div>
+
+          <form onsubmit="event.preventDefault(); window.sendTutorMessage();" style="display: flex; gap: 8px; align-items: center;">
+            <!-- INPUT FICHIER IMAGE CACHÉ -->
+            <input type="file" id="tutorPhotoInput" accept="image/*" style="display: none;" onchange="window.handleTutorPhotoSelect(event)" />
+            
+            <button type="button" class="btn-action" style="padding: 10px 14px; font-size: 16px;" onclick="document.getElementById('tutorPhotoInput').click()" title="Prendre / Envoyer une photo d'exercice ou brouillon">
+              📷
+            </button>
+            
+            <button type="button" class="btn-action" id="btnTutorVoice" style="padding: 10px 14px; font-size: 16px;" onclick="window.toggleTutorVoice()" title="Dictée vocale (Derja / Français / Arabe)">
+              🎙️
+            </button>
+
+            <input type="text" id="tutorTextInput" class="input" style="flex: 1; font-size: 14px; padding: 11px 14px;" placeholder="Pose ta question de cours ou demande une correction d'exercice..." autocomplete="off" />
+
+            <button type="submit" class="btn-add" style="padding: 11px 20px; font-weight: 800; font-size: 14px;">
+              Envoyer 🚀
+            </button>
+          </form>
         </div>
-
-        <form onsubmit="event.preventDefault(); window.sendTutorMessage();" style="display: flex; gap: 8px; align-items: center;">
-          <!-- INPUT FICHIER IMAGE CACHÉ -->
-          <input type="file" id="tutorPhotoInput" accept="image/*" style="display: none;" onchange="window.handleTutorPhotoSelect(event)" />
-          
-          <button type="button" class="btn-action" style="padding: 9px 12px; font-size: 15px;" onclick="document.getElementById('tutorPhotoInput').click()" title="Prendre / Envoyer une photo d'exercice ou brouillon">
-            📷
-          </button>
-          
-          <button type="button" class="btn-action" id="btnTutorVoice" style="padding: 9px 12px; font-size: 15px;" onclick="window.toggleTutorVoice()" title="Dictée vocale (Derja / Français / Arabe)">
-            🎙️
-          </button>
-
-          <input type="text" id="tutorTextInput" class="input" style="flex: 1; font-size: 13.5px;" placeholder="Pose ta question ou décris ton exercice..." autocomplete="off" />
-
-          <button type="submit" class="btn-add" style="padding: 9px 16px; font-weight: 800; font-size: 13.5px;">
-            Envoyer 🚀
-          </button>
-        </form>
       </div>
     </div>
   </div>
 
   <!-- SCRIPT APPLICATION -->
-  <script type="module" src="js/app.js?v=2.6"></script>
+  <script type="module" src="js/app.js?v=2.7"></script>
 </body>
 
 </html>
