@@ -1994,6 +1994,172 @@
     </div>
   </div>
 
+  <!-- MODALE DÉTAILS ET MODIFICATION DE SÉANCE -->
+  <div class="modal" id="sessionDetailModal">
+    <div class="modal-box" style="max-width: 540px; gap: 14px;">
+      <!-- EN-TÊTE SÉANCE -->
+      <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span style="font-size: 26px;" id="sdIco">📐</span>
+          <div>
+            <div style="font-weight: 900; font-size: 17px; color: var(--text);" id="sdSubTitle">Mathématiques</div>
+            <div style="font-size: 12px; color: var(--muted); font-weight: 700;" id="sdTimeBadge">Lundi • 08:00 - 10:00 (2h00)</div>
+          </div>
+        </div>
+        <span onclick="window.closeModal('sessionDetailModal')" style="cursor: pointer; color: #ef4444; font-size: 20px; font-weight: 800;">✕</span>
+      </div>
+
+      <!-- ONGLETS: VUE DÉTAILS / MODE MODIFICATION -->
+      <div class="auth-tabs" style="margin-bottom: 0;">
+        <button class="auth-tab-btn active" id="sdTabOverviewBtn" onclick="window.switchSdTab('overview')">
+          📋 Détails & Devoirs
+        </button>
+        <button class="auth-tab-btn" id="sdTabEditBtn" onclick="window.switchSdTab('edit')">
+          ✏️ Modifier la Séance
+        </button>
+      </div>
+
+      <!-- CONTENU VUE 1 : APERÇU, TRAVAIL À FAIRE & MAPS -->
+      <div id="sdViewOverview" style="display: flex; flex-direction: column; gap: 12px;">
+        <!-- INFORMATIONS CLÉS -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+          <div style="background: var(--dash); padding: 10px 12px; border-radius: 10px; font-size: 12px;">
+            <span style="color: var(--muted); font-weight: 700; display: block; margin-bottom: 2px;">Lieu / Type :</span>
+            <span style="font-weight: 800; font-size: 13px;" id="sdTypeVal">🏠 À la maison</span>
+          </div>
+          <div style="background: var(--dash); padding: 10px 12px; border-radius: 10px; font-size: 12px;">
+            <span style="color: var(--muted); font-weight: 700; display: block; margin-bottom: 2px;">Fréquence :</span>
+            <span style="font-weight: 800; font-size: 13px;" id="sdFreqVal">Chaque semaine</span>
+          </div>
+        </div>
+
+        <!-- SECTION TRAVAIL À FAIRE / DEVOIRS / NOTES -->
+        <div style="background: var(--card); border: 1.5px solid var(--dash); border-radius: 12px; padding: 14px; display: flex; flex-direction: column; gap: 8px;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-weight: 800; font-size: 13px; display: flex; align-items: center; gap: 6px;">
+              📝 Travail à faire / Devoirs :
+            </span>
+            <label style="display: flex; align-items: center; gap: 4px; font-size: 11.5px; font-weight: 800; color: #15803d; cursor: pointer;">
+              <input type="checkbox" id="sdTodoDone" onchange="window.saveQuickSessionTodo()" />
+              Fait ✅
+            </label>
+          </div>
+          <textarea id="sdTodoText" class="input" style="width: 100%; height: 75px; resize: none; font-size: 12.5px;"
+            placeholder="Ex: Exercices 3 et 4 p.112 sur les nombres complexes / Préparer le TP..."
+            onchange="window.saveQuickSessionTodo()"></textarea>
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-size: 11px; color: var(--muted);">💡 Note enregistrée en direct</span>
+            <button type="button" class="btn-action" style="padding: 4px 12px; font-size: 11.5px; font-weight: 700;" onclick="window.saveQuickSessionTodo()">
+              💾 Enregistrer
+            </button>
+          </div>
+        </div>
+
+        <!-- SECTION LOCALISATION MAPS (SI COURS PARTICULIER) -->
+        <div id="sdParticularMapSection" style="display: none; flex-direction: column; gap: 8px; background: var(--card); border: 1.5px solid var(--dash); border-radius: 12px; padding: 14px;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-weight: 800; font-size: 13px; display: flex; align-items: center; gap: 6px;">
+              📍 Localisation du Cours Particulier :
+            </span>
+          </div>
+          <div style="font-size: 12.5px; font-weight: 800; color: var(--primary);" id="sdLocationAddressText">
+            Adresse non spécifiée
+          </div>
+          <div id="sdDetailMap" style="height: 180px; width: 100%; border-radius: 10px; border: 1.5px solid var(--dash); z-index: 1;"></div>
+          <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+            <button type="button" class="btn-add" id="sdBtnGoogleNav" style="flex: 1; justify-content: center; padding: 8px 12px; font-size: 12px;">
+              🧭 Ouvrir l'Itinéraire (Google Maps)
+            </button>
+            <button type="button" class="btn-action" id="sdBtnCopyAddr" style="padding: 8px 12px; font-size: 12px;">
+              📋 Copier
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- CONTENU VUE 2 : FORMULAIRE COMPLET D'ÉDITION -->
+      <form id="sdViewEdit" onsubmit="window.handleSaveEditedSession(event)" style="display: none; flex-direction: column; gap: 10px;">
+        <input type="hidden" id="sdEditId" />
+
+        <div>
+          <label style="font-size: 11px; font-weight: 700; color: var(--muted); display: block; margin-bottom: 4px;">Matière :</label>
+          <select id="sdEditSub" class="input" style="width: 100%">
+            <option value="Mathématiques">📐 Mathématiques</option>
+            <option value="Physique-Chimie">🔬 Sciences Physiques</option>
+            <option value="Sciences SVT">🧬 SVT</option>
+            <option value="Informatique">💻 Informatique</option>
+            <option value="Français">🇫🇷 Français</option>
+            <option value="Anglais">🇬🇧 Anglais</option>
+            <option value="Philosophie">🧠 Philosophie</option>
+            <option value="Arabe">📖 Arabe</option>
+            <option value="Sport">🏃 Sport</option>
+            <option value="Option">📌 Option</option>
+          </select>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px">
+          <div>
+            <label style="font-size: 11px; font-weight: 700; color: var(--muted); display: block; margin-bottom: 4px;">Lieu / Type :</label>
+            <select id="sdEditType" class="input" style="width: 100%" onchange="window.onEditSessionTypeChange(this.value)">
+              <option value="À la maison">🏠 À la maison (Autonomie)</option>
+              <option value="En ligne">💻 En ligne</option>
+              <option value="Lycée">🏫 Lycée</option>
+              <option value="Particulier">👨‍🏫 Étude / Particulier</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size: 11px; font-weight: 700; color: var(--muted); display: block; margin-bottom: 4px;">Fréquence :</label>
+            <select id="sdEditFreq" class="input" style="width: 100%">
+              <option value="Toutes les semaines">Chaque semaine</option>
+              <option value="Par quinzaine (1/2)">1 semaine sur 2</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- ZONE CARTE POUR MODIFICATION PARTICULIER -->
+        <div id="sdEditMapBox" style="display: none; flex-direction: column; gap: 8px; background: var(--dash); padding: 12px; border-radius: 12px;">
+          <label style="font-size: 11px; font-weight: 800; color: var(--text);">📍 Adresse & Emplacement :</label>
+          <input type="text" id="sdEditLocText" class="input" style="width: 100%" placeholder="ex: Ennasr 2, Tunis / Chez Prof..." />
+          <input type="hidden" id="sdEditLocLat" value="36.8065" />
+          <input type="hidden" id="sdEditLocLng" value="10.1815" />
+          <div id="sdEditPickerMap" style="height: 160px; width: 100%; border-radius: 10px; border: 1.5px solid var(--dash); z-index: 1;"></div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px">
+          <div>
+            <label style="font-size: 11px; font-weight: 700; color: var(--muted); display: block; margin-bottom: 4px;">Jour :</label>
+            <select id="sdEditDay" class="input" style="width: 100%">
+              <option value="0">Lundi</option>
+              <option value="1">Mardi</option>
+              <option value="2">Mercredi</option>
+              <option value="3">Jeudi</option>
+              <option value="4">Vendredi</option>
+              <option value="5">Samedi</option>
+              <option value="6">Dimanche</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size: 11px; font-weight: 700; color: var(--muted); display: block; margin-bottom: 4px;">Début :</label>
+            <input type="time" id="sdEditStart" class="input" style="width: 100%" required />
+          </div>
+          <div>
+            <label style="font-size: 11px; font-weight: 700; color: var(--muted); display: block; margin-bottom: 4px;">Fin :</label>
+            <input type="time" id="sdEditEnd" class="input" style="width: 100%" required />
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 8px; margin-top: 6px;">
+          <button type="submit" class="btn-add" style="flex: 1; justify-content: center; padding: 10px;">
+            💾 Enregistrer les modifications
+          </button>
+          <button type="button" class="btn-action" style="color: #ef4444; border-color: #fca5a5; padding: 10px;" onclick="window.handleDeleteActiveSession()">
+            🗑️ Supprimer
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- MODALE CRÉATION EXAMEN -->
   <div class="modal" id="addExamModal">
     <div class="modal-box">
@@ -4030,6 +4196,211 @@
         }
         viewerMarker.bindPopup(`<b>${meta.ico} ${ev.sub}</b><br>${loc.address || "Cours Particulier"}`).openPopup();
       }, 150);
+    };
+
+    // --- GESTION DES DÉTAILS ET MODIFICATION DE SÉANCE ---
+    let sdDetailMap = null;
+    let sdDetailMarker = null;
+    let sdEditMap = null;
+    let sdEditMarker = null;
+    let activeDetailSessionId = null;
+
+    window.openSessionDetails = function (sessionId) {
+      const ev = db.find((e) => e.id === sessionId);
+      if (!ev) return;
+      activeDetailSessionId = sessionId;
+
+      const meta = getSubjectMeta(ev.sub);
+      const durHours = ((ev.e - ev.s) / 60).toFixed(1);
+
+      document.getElementById("sdIco").innerText = meta.ico;
+      document.getElementById("sdSubTitle").innerText = `${ev.sub} (Coef ${meta.coef || 1})`;
+      document.getElementById("sdTimeBadge").innerText = `🗓️ ${days[ev.day]} • ${formatM(ev.s)} - ${formatM(ev.e)} (${durHours}h)`;
+
+      document.getElementById("sdTypeVal").innerText = ev.type || "À la maison";
+      document.getElementById("sdFreqVal").innerText = ev.freq || "Chaque semaine";
+
+      document.getElementById("sdTodoText").value = ev.todo || "";
+      document.getElementById("sdTodoDone").checked = ev.todoDone === true;
+
+      // Section Carte pour les cours particuliers
+      const isPart = ev.type && ev.type.includes("Particulier");
+      const mapSec = document.getElementById("sdParticularMapSection");
+      if (isPart || ev.location) {
+        const loc = ev.location || { address: "Cours Particulier", lat: 36.8065, lng: 10.1815 };
+        mapSec.style.display = "flex";
+        document.getElementById("sdLocationAddressText").innerText = loc.address || "Cours Particulier";
+
+        document.getElementById("sdBtnGoogleNav").onclick = function () {
+          window.open(`https://www.google.com/maps/dir/?api=1&destination=${loc.lat},${loc.lng}`, "_blank");
+        };
+        document.getElementById("sdBtnCopyAddr").onclick = function () {
+          navigator.clipboard.writeText(loc.address || "Cours Particulier");
+          alert("📋 Adresse copiée : " + (loc.address || "Cours Particulier"));
+        };
+
+        setTimeout(() => {
+          const mapCont = document.getElementById("sdDetailMap");
+          if (mapCont && typeof L !== "undefined") {
+            if (!sdDetailMap) {
+              sdDetailMap = L.map("sdDetailMap").setView([loc.lat, loc.lng], 14);
+              L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+                attribution: "&copy; OpenStreetMap",
+                maxZoom: 19,
+              }).addTo(sdDetailMap);
+              sdDetailMarker = L.marker([loc.lat, loc.lng]).addTo(sdDetailMap);
+            } else {
+              sdDetailMap.invalidateSize();
+              sdDetailMap.setView([loc.lat, loc.lng], 14);
+              sdDetailMarker.setLatLng([loc.lat, loc.lng]);
+            }
+            sdDetailMarker.bindPopup(`<b>${meta.ico} ${ev.sub}</b><br>${loc.address || "Cours Particulier"}`).openPopup();
+          }
+        }, 150);
+      } else {
+        mapSec.style.display = "none";
+      }
+
+      // Pré-remplissage du formulaire d'édition
+      document.getElementById("sdEditId").value = ev.id;
+      document.getElementById("sdEditSub").value = ev.sub;
+      document.getElementById("sdEditType").value = ev.type || "À la maison";
+      document.getElementById("sdEditFreq").value = ev.freq || "Toutes les semaines";
+      document.getElementById("sdEditDay").value = ev.day;
+      document.getElementById("sdEditStart").value = formatM(ev.s);
+      document.getElementById("sdEditEnd").value = formatM(ev.e);
+
+      const locObj = ev.location || { address: "", lat: 36.8065, lng: 10.1815 };
+      document.getElementById("sdEditLocText").value = locObj.address || "";
+      document.getElementById("sdEditLocLat").value = locObj.lat || 36.8065;
+      document.getElementById("sdEditLocLng").value = locObj.lng || 10.1815;
+
+      window.switchSdTab("overview");
+      window.openModal("sessionDetailModal");
+    };
+
+    window.switchSdTab = function (tab) {
+      const tabOverviewBtn = document.getElementById("sdTabOverviewBtn");
+      const tabEditBtn = document.getElementById("sdTabEditBtn");
+      const viewOverview = document.getElementById("sdViewOverview");
+      const viewEdit = document.getElementById("sdViewEdit");
+
+      if (tabOverviewBtn) tabOverviewBtn.classList.toggle("active", tab === "overview");
+      if (tabEditBtn) tabEditBtn.classList.toggle("active", tab === "edit");
+      if (viewOverview) viewOverview.style.display = tab === "overview" ? "flex" : "none";
+      if (viewEdit) viewEdit.style.display = tab === "edit" ? "flex" : "none";
+
+      if (tab === "edit") {
+        const type = document.getElementById("sdEditType").value;
+        window.onEditSessionTypeChange(type);
+      }
+    };
+
+    window.onEditSessionTypeChange = function (val) {
+      const mapBox = document.getElementById("sdEditMapBox");
+      if (val === "Particulier") {
+        mapBox.style.display = "flex";
+        const lat = parseFloat(document.getElementById("sdEditLocLat").value) || 36.8065;
+        const lng = parseFloat(document.getElementById("sdEditLocLng").value) || 10.1815;
+        setTimeout(() => {
+          window.initEditPickerMap(lat, lng);
+        }, 150);
+      } else {
+        mapBox.style.display = "none";
+      }
+    };
+
+    window.initEditPickerMap = function (lat, lng) {
+      lat = lat || 36.8065;
+      lng = lng || 10.1815;
+      const cont = document.getElementById("sdEditPickerMap");
+      if (!cont || typeof L === "undefined") return;
+
+      if (!sdEditMap) {
+        sdEditMap = L.map("sdEditPickerMap").setView([lat, lng], 13);
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+          attribution: "&copy; OpenStreetMap",
+          maxZoom: 19,
+        }).addTo(sdEditMap);
+
+        sdEditMarker = L.marker([lat, lng], { draggable: true }).addTo(sdEditMap);
+        sdEditMarker.on("dragend", function (e) {
+          const pos = e.target.getLatLng();
+          document.getElementById("sdEditLocLat").value = pos.lat.toFixed(6);
+          document.getElementById("sdEditLocLng").value = pos.lng.toFixed(6);
+        });
+
+        sdEditMap.on("click", function (e) {
+          sdEditMarker.setLatLng(e.latlng);
+          document.getElementById("sdEditLocLat").value = e.latlng.lat.toFixed(6);
+          document.getElementById("sdEditLocLng").value = e.latlng.lng.toFixed(6);
+        });
+      } else {
+        sdEditMap.invalidateSize();
+        sdEditMap.setView([lat, lng], 13);
+        sdEditMarker.setLatLng([lat, lng]);
+      }
+    };
+
+    window.saveQuickSessionTodo = async function () {
+      if (isReadOnly || !activeDetailSessionId) return;
+      const todo = document.getElementById("sdTodoText").value.trim();
+      const todoDone = document.getElementById("sdTodoDone").checked;
+
+      await update(ref(database, getStudentPath("seances/" + activeDetailSessionId)), {
+        todo: todo,
+        todoDone: todoDone,
+      });
+    };
+
+    window.handleSaveEditedSession = async function (e) {
+      e.preventDefault();
+      if (isReadOnly || !activeDetailSessionId) return alert("Accès en lecture seule.");
+
+      const sub = document.getElementById("sdEditSub").value.trim();
+      const type = document.getElementById("sdEditType").value;
+      const freq = document.getElementById("sdEditFreq").value;
+      const day = parseInt(document.getElementById("sdEditDay").value);
+      const [sH, sM] = document.getElementById("sdEditStart").value.split(":").map(Number);
+      const [eH, eM] = document.getElementById("sdEditEnd").value.split(":").map(Number);
+
+      let locData = null;
+      if (type === "Particulier") {
+        const addr = document.getElementById("sdEditLocText").value.trim() || "Cours Particulier";
+        const lat = parseFloat(document.getElementById("sdEditLocLat").value) || 36.8065;
+        const lng = parseFloat(document.getElementById("sdEditLocLng").value) || 10.1815;
+        locData = { address: addr, lat, lng };
+      }
+
+      showLoading("Enregistrement des modifications...");
+      try {
+        await update(ref(database, getStudentPath("seances/" + activeDetailSessionId)), {
+          sub,
+          type,
+          freq,
+          day,
+          s: sH * 60 + sM,
+          e: eH * 60 + eM,
+          location: locData,
+        });
+        hideLoading();
+        window.closeModal("sessionDetailModal");
+        playBeep();
+        alert("✨ Séance modifiée avec succès !");
+      } catch (err) {
+        hideLoading();
+        alert("Erreur lors de la modification : " + err.message);
+      }
+    };
+
+    window.handleDeleteActiveSession = async function () {
+      if (isReadOnly || !activeDetailSessionId) return;
+      if (confirm("Voulez-vous vraiment supprimer cette séance ?")) {
+        showLoading("Suppression...");
+        await remove(ref(database, getStudentPath("seances/" + activeDetailSessionId)));
+        hideLoading();
+        window.closeModal("sessionDetailModal");
+      }
     };
 
     window.renderStatsData = function () {
