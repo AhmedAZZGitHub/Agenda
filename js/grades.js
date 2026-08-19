@@ -1,7 +1,7 @@
 // js/grades.js
-// Gestion du Carnet Trimestriel, Calcul des Moyennes et Annales du Bac
+// Gestion du Carnet Trimestriel, Calcul des Moyennes et Annales du Bac (2000 -> 2026)
 
-import { database, ref, set, get } from "./firebase-config.js?v=15.4";
+import { database, ref, set } from "./firebase-config.js?v=15.4";
 import { state, getStudentPath, getSubjectMeta } from "./state.js?v=15.4";
 
 export const bacSubjectsList = [
@@ -14,32 +14,71 @@ export const bacSubjectsList = [
   { id: "francais", manifestKey: "franc", name: "Français", coef: 1 },
   { id: "anglais", manifestKey: "angl", name: "Anglais", coef: 1 },
   { id: "sport", manifestKey: "sport", name: "Sport", coef: 1 },
-  { id: "option", manifestKey: "option", name: "Option / Espagnol / Italien", coef: 1 },
+  { id: "option", manifestKey: "option", name: "Option / Espagnol", coef: 1 },
 ];
+
+let bacArchiveFilter = "all";
+
+export function openBacArchiveOverlay() {
+  if (!state.currentBacSubjectId) state.currentBacSubjectId = "math";
+  bacArchiveFilter = "all";
+
+  const searchInput = document.getElementById("bacYearFilterInput");
+  if (searchInput) searchInput.value = "";
+
+  const filterBtns = ["bacFilterAll", "bacFilterStarred", "bacFilterDone", "bacFilterTodo"];
+  filterBtns.forEach((btnId) => {
+    const btn = document.getElementById(btnId);
+    if (btn) btn.classList.toggle("active", btnId === "bacFilterAll");
+  });
+
+  const overlay = document.getElementById("bacArchiveOverlay");
+  if (overlay) overlay.style.display = "flex";
+
+  initBacArchiveTabs();
+}
+
+export function resetBacFilters() {
+  bacArchiveFilter = "all";
+  const searchInput = document.getElementById("bacYearFilterInput");
+  if (searchInput) searchInput.value = "";
+
+  const filterBtns = ["bacFilterAll", "bacFilterStarred", "bacFilterDone", "bacFilterTodo"];
+  filterBtns.forEach((btnId) => {
+    const btn = document.getElementById(btnId);
+    if (btn) btn.classList.toggle("active", btnId === "bacFilterAll");
+  });
+
+  renderBacArchiveGrid();
+}
 
 export function initBacArchiveTabs() {
   const container = document.getElementById("bacArchiveSubjectTabs") || document.getElementById("bacSubjectTabsContainer");
   if (!container) return;
-  container.innerHTML = "";
 
+  if (!state.currentBacSubjectId) state.currentBacSubjectId = "math";
+
+  let html = "";
   bacSubjectsList.forEach((sub) => {
     const meta = getSubjectMeta(sub.name);
-    const activeClass = sub.id === state.currentBacSubjectId ? "active" : "";
-    container.innerHTML += `
-      <button class="btn-tab-item ${activeClass}" onclick="window.selectBacSubject('${sub.id}')">
+    const isActive = sub.id === state.currentBacSubjectId;
+    html += `
+      <button type="button" class="btn-tab-item ${isActive ? "active" : ""}" onclick="window.selectBacSubject('${sub.id}')">
         ${meta.ico} ${sub.name}
       </button>
     `;
   });
+  container.innerHTML = html;
+
   renderBacArchiveGrid();
 }
 
 export function selectBacSubject(subId) {
-  state.currentBacSubjectId = subId;
+  if (subId) state.currentBacSubjectId = subId;
+  else if (!state.currentBacSubjectId) state.currentBacSubjectId = "math";
   initBacArchiveTabs();
 }
 
-let bacArchiveFilter = "all";
 export function setBacFilter(filter) {
   bacArchiveFilter = filter;
   const filterBtns = ["bacFilterAll", "bacFilterStarred", "bacFilterDone", "bacFilterTodo"];
@@ -98,7 +137,7 @@ export function renderBacArchiveGrid() {
     localCounterEl.innerText = `📁 ${totalLocalFiles} Fichiers PDF Locaux Prêts (2009 → 2026)`;
   }
 
-  // Liste des années de 2026 à 2000 (27 ans d'annales)
+  // Liste des 27 années officielles de 2026 à 2000
   const allYears = [];
   for (let y = 2026; y >= 2000; y--) {
     allYears.push(y.toString());
@@ -106,6 +145,7 @@ export function renderBacArchiveGrid() {
 
   let totalExams = allYears.length;
   let doneCount = 0;
+  let displayedCount = 0;
 
   allYears.forEach((year) => {
     const savedInfo = state.bacArchiveData?.[sub.id]?.[year] || state.bacArchiveData?.[sub.id]?.[`${year}_principale`] || {};
@@ -120,6 +160,8 @@ export function renderBacArchiveGrid() {
     if (bacArchiveFilter === "todo" && isDone) return;
     if (bacArchiveFilter === "starred" && !isStarred) return;
 
+    displayedCount++;
+
     const localEntry = manifestData[year] || {};
     const pdfUrl = savedInfo.customPdf || localEntry.sujet || (localEntry.principale?.pdf) || null;
     const correcUrl = savedInfo.customCorrec || localEntry.correction || (localEntry.principale?.correc) || null;
@@ -132,7 +174,7 @@ export function renderBacArchiveGrid() {
           <div style="font-weight:900; font-size:15px; color:var(--text);">Bac ${year} - Session Principale</div>
           <div style="font-size:11.5px; color:var(--muted); margin-top:2px; font-weight:700;">${sub.name} (Coef ${sub.coef})</div>
         </div>
-        <button class="star-btn ${isStarred ? "starred" : ""}" onclick="window.toggleBacStar('${sub.id}', '${year}', ${!isStarred})" title="Mettre en favori">
+        <button type="button" class="star-btn ${isStarred ? "starred" : ""}" onclick="window.toggleBacStar('${sub.id}', '${year}', ${!isStarred})" title="${isStarred ? "Retirer des favoris" : "Mettre en favori"}">
           ${isStarred ? "⭐" : "☆"}
         </button>
       </div>
@@ -155,11 +197,33 @@ export function renderBacArchiveGrid() {
           <input type="checkbox" ${isDone ? "checked" : ""} onchange="window.toggleBacDone('${sub.id}', '${year}', this.checked)" />
           ${isDone ? "Révisé & Résolu ✅" : "Marquer comme fait"}
         </label>
-        ${pdfUrl || correcUrl ? `<span style="font-size:10px; color:#059669; font-weight:800; background:#dcfce7; padding:2px 6px; border-radius:4px;">📁 PDF Local</span>` : ""}
+        ${pdfUrl || correcUrl ? `<span style="font-size:10px; color:#059669; font-weight:800; background:#dcfce7; padding:2px 6px; border-radius:4px;">📁 PDF Local Prêt</span>` : `<span style="font-size:10px; color:var(--muted); font-weight:700;">Recherche Web</span>`}
       </div>
     `;
     grid.appendChild(card);
   });
+
+  // Message si 0 résultat après filtrage
+  if (displayedCount === 0) {
+    const filterLabels = {
+      all: "Tous",
+      starred: "🌟 Favoris",
+      done: "✅ Révisés",
+      todo: "⏳ À faire",
+    };
+    grid.innerHTML = `
+      <div style="grid-column: 1 / -1; text-align: center; padding: 40px 20px; background: var(--card); border: 1.5px dashed var(--dash); border-radius: 16px;">
+        <div style="font-size: 36px; margin-bottom: 8px;">🔍</div>
+        <div style="font-weight: 800; font-size: 15px; color: var(--text);">Aucune épreuve ne correspond à vos filtres</div>
+        <div style="font-size: 12.5px; color: var(--muted); margin-top: 4px; margin-bottom: 14px;">
+          ${searchQuery ? `Recherche : "<b>${searchQuery}</b>" • ` : ""}Filtre : <b>${filterLabels[bacArchiveFilter] || bacArchiveFilter}</b>
+        </div>
+        <button type="button" class="btn-add" style="margin: 0 auto; padding: 8px 18px;" onclick="window.resetBacFilters()">
+          🔄 Réinitialiser les filtres (Afficher tout)
+        </button>
+      </div>
+    `;
+  }
 
   const progressCountEl = document.getElementById("bacSubjectProgressCount");
   const progressPctEl = document.getElementById("bacSubjectProgressPct");
@@ -202,6 +266,18 @@ export function saveBacComment(subId, yKey, comment) {
 }
 
 // --- CARNET DE NOTES TRIMESTRIEL ET MOYENNES ---
+export function openGradesOverlay() {
+  const overlay = document.getElementById("gradesOverlay");
+  if (overlay) overlay.style.display = "flex";
+  switchTrimester(state.currentTrimester || "trim1");
+}
+
+export function openExamsOverlay() {
+  const overlay = document.getElementById("examsOverlay");
+  if (overlay) overlay.style.display = "flex";
+  if (window.renderExams) window.renderExams();
+}
+
 export function switchTrimester(trim) {
   state.currentTrimester = trim;
 
@@ -358,7 +434,6 @@ export function calculateTrimesterAverages() {
 
     if (avg !== null) {
       if (sub.id === "option" && calcMode === "Bac") {
-        // En mode Bac, l'option apporte seulement les points au-dessus de 10 (Bonus) sans ajouter au total des coefficients
         if (avg > 10) {
           totalPoints += avg - 10;
         }
@@ -441,6 +516,10 @@ export function buildAnnualSummaryTable() {
 }
 
 // Global Window Bindings
+window.openBacArchiveOverlay = openBacArchiveOverlay;
+window.resetBacFilters = resetBacFilters;
+window.openGradesOverlay = openGradesOverlay;
+window.openExamsOverlay = openExamsOverlay;
 window.initBacArchiveTabs = initBacArchiveTabs;
 window.selectBacSubject = selectBacSubject;
 window.setBacFilter = setBacFilter;

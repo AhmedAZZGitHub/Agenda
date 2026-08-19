@@ -101,6 +101,20 @@ export function getEventStatus(eventDay, startMins, endMins) {
 window.openOverlay = function (id) {
   const el = document.getElementById(id);
   if (el) el.style.display = "flex";
+
+  if (id === "bacArchiveOverlay") {
+    if (window.initBacArchiveTabs) window.initBacArchiveTabs();
+  } else if (id === "gradesOverlay") {
+    if (window.switchTrimester) window.switchTrimester(state.currentTrimester || "trim1");
+  } else if (id === "examsOverlay") {
+    if (window.renderExams) window.renderExams();
+  } else if (id === "statsOverlay") {
+    if (window.renderStatsData) window.renderStatsData();
+  } else if (id === "timerOverlay") {
+    if (window.renderTimer) window.renderTimer();
+  } else if (id === "adminOverlay") {
+    if (window.loadAdminKPIs) window.loadAdminKPIs();
+  }
 };
 
 window.closeOverlay = function (id) {
