@@ -79,7 +79,7 @@
       if (window.renderStatsData) window.renderStatsData();
     };
   </script>
-  <link rel="stylesheet" href="css/styles.css?v=15.6" />
+  <link rel="stylesheet" href="css/styles.css?v=15.7" />
 </head>
 
 <body>
@@ -205,6 +205,7 @@
     <div style="font-size: 16px; font-weight: 700; letter-spacing: 0.3px" id="loadingText">
       Synchronisation en cours...
     </div>
+    <button type="button" style="margin-top: 14px; background: rgba(255,255,255,0.18); color: white; border: 1px solid rgba(255,255,255,0.35); padding: 7px 16px; font-size: 12.5px; border-radius: 99px; cursor: pointer; font-weight: 800;" onclick="window.hideLoading ? window.hideLoading() : document.getElementById('loadingOverlay').style.display='none'">Annuler ✕</button>
   </div>
 
   <!-- OVERLAY ADMIN -->
@@ -1136,6 +1137,58 @@
     </div>
   </div>
 
+  <!-- MODALE PARAMÈTRES IA & CLÉ GOOGLE GEMINI -->
+  <div class="modal" id="aiSettingsModal">
+    <div class="modal-box" style="max-width: 500px; gap: 14px;">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <span style="font-weight: 800; font-size: 16px; display: flex; align-items: center; gap: 6px;">
+          ⚙️ Configuration de l'Intelligence Artificielle
+        </span>
+        <span onclick="window.closeModal('aiSettingsModal')" style="cursor: pointer; color: #ef4444; font-size: 18px; font-weight: 800;">✕</span>
+      </div>
+
+      <form onsubmit="window.handleSaveAiSettings(event)" style="display: flex; flex-direction: column; gap: 12px;">
+        <div>
+          <label style="font-size: 11.5px; font-weight: 700; color: var(--muted); display: block; margin-bottom: 4px;">
+            🔑 Clé API Google Gemini (AI Studio) :
+          </label>
+          <input type="password" id="aiApiKeyInput" class="input" style="width: 100%; font-family: monospace; font-size: 13px;" placeholder="AIzaSy..." />
+          <div style="font-size: 11px; color: var(--muted); margin-top: 4px;">
+            💡 Obtenez votre clé API 100% gratuite sur <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color: var(--primary); font-weight: 700;">Google AI Studio</a>.
+          </div>
+        </div>
+
+        <div>
+          <label style="font-size: 11.5px; font-weight: 700; color: var(--muted); display: block; margin-bottom: 4px;">
+            🤖 Modèle Google Gemini :
+          </label>
+          <select id="aiModelSelect" class="input" style="width: 100%" onchange="window.onAiModelChange(this.value)">
+            <option value="gemini-1.5-flash">⚡ Gemini 1.5 Flash (Ultra Rapide - Recommandé)</option>
+            <option value="gemini-2.0-flash">🚀 Gemini 2.0 Flash (Nouvelle Génération)</option>
+            <option value="gemini-1.5-pro">🧠 Gemini 1.5 Pro (Raisonnement Complexe)</option>
+            <option value="custom">⚙️ Autre modèle personnalisé...</option>
+          </select>
+        </div>
+
+        <div id="customModelBox" style="display: none; flex-direction: column; gap: 4px;">
+          <label style="font-size: 11px; font-weight: 700; color: var(--muted);">Nom du modèle :</label>
+          <input type="text" id="aiCustomModelInput" class="input" style="width: 100%" placeholder="gemini-1.5-flash" />
+        </div>
+
+        <div id="aiTestFeedback" style="display: none; padding: 10px; border-radius: 10px; font-size: 12px; font-weight: 700;"></div>
+
+        <div style="display: flex; gap: 8px; margin-top: 4px;">
+          <button type="button" class="btn-action" style="flex: 1;" onclick="window.testAiModelConnection()">
+            🔌 Tester la connexion
+          </button>
+          <button type="submit" class="btn-add" style="flex: 1; justify-content: center;">
+            💾 Enregistrer
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- MODALE ESPACE PROFIL ET GESTION DU COMPTE -->
   <div class="modal" id="userProfileModal">
     <div class="modal-box" style="max-width: 500px; gap: 16px;">
@@ -1345,7 +1398,7 @@
   </div>
 
   <!-- SCRIPT APPLICATION -->
-  <script type="module" src="js/app.js?v=15.6"></script>
+  <script type="module" src="js/app.js?v=15.7"></script>
 </body>
 
 </html>

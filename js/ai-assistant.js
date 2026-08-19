@@ -1,8 +1,8 @@
 // js/ai-assistant.js
 // Assistant Vocal Multilingue (Tounsi / Arabe / Français), Gemini Pro 3.1 & Vision Scanner
 
-import { database, ref, set } from "./firebase-config.js?v=15.6";
-import { state, getStudentPath, showLoading, hideLoading, playBeep } from "./state.js?v=15.6";
+import { database, ref, set } from "./firebase-config.js?v=15.7";
+import { state, getStudentPath, showLoading, hideLoading, playBeep } from "./state.js?v=15.7";
 
 let selectedAiSpeechLang = "ar-TN";
 let aiSpeechRecognition = null;
@@ -18,8 +18,8 @@ export function getAiApiKey() {
 
 export function getAiModelName() {
   const saved = localStorage.getItem("gemini_model_name");
-  if (saved && saved.trim()) return saved.trim();
-  return "gemini-3.1-pro"; // Modèle Google Gemini 3.1 Pro par défaut exigé
+  if (saved && saved.trim() && !saved.includes("3.1") && !saved.includes("3.0")) return saved.trim();
+  return "gemini-1.5-flash"; // Modèle Google Gemini Vision officiel par défaut
 }
 
 export function openAiSettingsModal() {
@@ -620,7 +620,18 @@ Règles :
       } catch (innerErr) {
         hideLoading();
         console.error("Erreur Vision IA:", innerErr);
-        alert("⚠️ Erreur lors de l'analyse par l'IA :\n" + innerErr.message + "\n\n💡 Vérifiez votre clé API Google Gemini dans les paramètres ou réessayez avec une photo plus nette.");
+        if (innerErr.message.includes("blocked") || innerErr.message.includes("403") || innerErr.message.includes("PERMISSION_DENIED")) {
+          const proceed = confirm(
+            "⚠️ Clé API Google Gemini requise pour la Vision IA :\n\n" +
+            "La clé par défaut du projet ne dispose pas des droits d'accès à l'API Vision (Erreur 403: API_KEY_SERVICE_BLOCKED).\n\n" +
+            "👉 Voulez-vous coller votre propre clé API gratuite Google (obtenue en 30 secondes sur https://aistudio.google.com) pour scanner vos emplois du temps ?"
+          );
+          if (proceed) {
+            window.promptSetAiApiKey ? window.promptSetAiApiKey() : window.openAiSettingsModal();
+          }
+        } else {
+          alert("⚠️ Erreur lors de l'analyse par l'IA :\n" + innerErr.message + "\n\n💡 Vérifiez votre clé API Google Gemini dans les paramètres ou réessayez avec une photo plus nette.");
+        }
       } finally {
         hideLoading();
         if (e.target) e.target.value = "";

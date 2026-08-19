@@ -1,21 +1,24 @@
 // js/app.js
 // Point d'Entrée Principal de l'Application
 
-import { auth, onAuthStateChanged } from "./firebase-config.js?v=15.6";
-import { state } from "./state.js?v=15.6";
-import { loadUserProfile, detachAllDataListeners, renderUserProfileBar, updateReadOnlyUI } from "./auth.js?v=15.6";
-import { render, updateBacCountdown, updateHomeStreak } from "./calendar.js?v=15.6";
-import { initBacArchiveTabs, switchTrimester } from "./grades.js?v=15.6";
+import { auth, onAuthStateChanged } from "./firebase-config.js?v=15.7";
+import { state } from "./state.js?v=15.7";
+import { loadUserProfile, detachAllDataListeners, renderUserProfileBar, updateReadOnlyUI } from "./auth.js?v=15.7";
+import { render, updateBacCountdown, updateHomeStreak } from "./calendar.js?v=15.7";
+import { initBacArchiveTabs, switchTrimester } from "./grades.js?v=15.7";
 
 // Import modules to register window bindings
-import "./maps.js?v=15.6";
-import "./ai-assistant.js?v=15.6";
-import "./admin.js?v=15.6";
-import "./tutor-ai.js?v=15.6";
+import "./maps.js?v=15.7";
+import "./ai-assistant.js?v=15.7";
+import "./admin.js?v=15.7";
+import "./tutor-ai.js?v=15.7";
 
-// Initialisation par défaut du modèle d'élite Google Gemini 3.1 Pro
+// Initialisation par défaut du modèle officiel Google Gemini Vision
 try {
-  localStorage.setItem("gemini_model_name", "gemini-3.1-pro");
+  const curM = localStorage.getItem("gemini_model_name");
+  if (!curM || curM.includes("3.1") || curM.includes("3.0")) {
+    localStorage.setItem("gemini_model_name", "gemini-1.5-flash");
+  }
 } catch (e) {}
 
 // Gestion de l'état d'authentification Firebase

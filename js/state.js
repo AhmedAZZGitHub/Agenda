@@ -42,14 +42,26 @@ export function formatM(m) {
   return `${h < 10 ? "0" + h : h}:${min < 10 ? "0" + min : min}`;
 }
 
+let loadingTimeout = null;
+
 export function showLoading(msg) {
   const textEl = document.getElementById("loadingText");
   const overlayEl = document.getElementById("loadingOverlay");
   if (textEl) textEl.innerText = msg;
   if (overlayEl) overlayEl.style.display = "flex";
+
+  if (loadingTimeout) clearTimeout(loadingTimeout);
+  // Auto-timeout de sécurité : ferme automatiquement le chargement après 15 secondes max
+  loadingTimeout = setTimeout(() => {
+    hideLoading();
+  }, 15000);
 }
 
 export function hideLoading() {
+  if (loadingTimeout) {
+    clearTimeout(loadingTimeout);
+    loadingTimeout = null;
+  }
   const overlayEl = document.getElementById("loadingOverlay");
   if (overlayEl) overlayEl.style.display = "none";
 }
@@ -98,6 +110,9 @@ export function getEventStatus(eventDay, startMins, endMins) {
 }
 
 // Global UI Window Bindings
+window.showLoading = showLoading;
+window.hideLoading = hideLoading;
+
 window.openOverlay = function (id) {
   const el = document.getElementById(id);
   if (el) el.style.display = "flex";

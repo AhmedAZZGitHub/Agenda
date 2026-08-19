@@ -1,8 +1,8 @@
 // js/tutor-ai.js
 // Tuteur IA Éducatif Gemini Pro (Baccalauréat Tunisien) & Correction d'Exercices par Photo
 
-import { getAiModelName, getAiApiKey } from "./ai-assistant.js?v=15.6";
-import { state, showLoading, hideLoading, playBeep } from "./state.js?v=15.6";
+import { getAiModelName, getAiApiKey } from "./ai-assistant.js?v=15.7";
+import { state, showLoading, hideLoading, playBeep } from "./state.js?v=15.7";
 
 let tutorChatHistory = [];
 let tutorAttachedImageBase64 = null;
@@ -63,14 +63,11 @@ export async function promptSetAiApiKey() {
   showLoading("Vérification de votre clé auprès des serveurs Google Gemini...");
   try {
     const candidateModels = [
-      "gemini-3.1-pro",
-      "gemini-3.7-flash",
-      "gemini-3.6-flash",
-      "gemini-3.0-pro",
-      "gemini-2.5-pro",
-      "gemini-2.5-flash",
+      "gemini-1.5-flash",
+      "gemini-2.0-flash",
       "gemini-1.5-pro",
-      "gemini-1.5-flash"
+      "gemini-2.5-flash",
+      "gemini-2.5-pro"
     ];
     let testSuccess = false;
     let lastError = "";
