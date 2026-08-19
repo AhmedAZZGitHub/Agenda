@@ -1728,11 +1728,15 @@
     <!-- BARRE UTILISATEUR TOP -->
     <div class="user-top-bar" id="userTopBar">
       <div class="user-info-group">
-        <div class="user-avatar" id="userAvatarIco">👤</div>
-        <div class="user-name-role">
+        <div class="user-avatar" id="userAvatarIco" onclick="window.openUserProfileModal()" style="cursor: pointer;" title="Ouvrir mon profil">👤</div>
+        <div class="user-name-role" onclick="window.openUserProfileModal()" style="cursor: pointer;" title="Ouvrir mon profil">
           <span class="user-name" id="userNameLabel">Visiteur</span>
           <span class="role-badge role-student" id="userRoleBadge">ÉLÈVE</span>
         </div>
+
+        <button class="btn-action" id="btnMyProfile" onclick="window.openUserProfileModal()" style="display: none; font-weight: 700;">
+          👤 Mon Profil
+        </button>
 
         <button class="btn-action btn-accent" id="btnMyParentCode" onclick="window.openStudentCodeModal()"
           style="display: none">
@@ -2049,6 +2053,109 @@
     </div>
   </div>
 
+  <!-- MODALE ESPACE PROFIL ET GESTION DU COMPTE -->
+  <div class="modal" id="userProfileModal">
+    <div class="modal-box" style="max-width: 500px; gap: 16px;">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <span style="font-weight: 800; font-size: 17px; display: flex; align-items: center; gap: 8px;">
+          👤 Mon Espace Profil
+        </span>
+        <span onclick="window.closeModal('userProfileModal')" style="cursor: pointer; color: #ef4444; font-size: 20px; font-weight: 800;">✕</span>
+      </div>
+
+      <!-- BADGE IDENTITÉ & STATUT -->
+      <div style="background: var(--dash); border: 1.5px solid var(--dash); border-radius: 14px; padding: 14px; display: flex; flex-direction: column; gap: 10px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <div style="width: 44px; height: 44px; border-radius: 50%; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 800;" id="profAvatarCircle">
+              🎓
+            </div>
+            <div>
+              <div style="font-weight: 800; font-size: 15px;" id="profHeaderName">Utilisateur</div>
+              <div style="font-size: 12px; color: var(--muted);" id="profHeaderEmail">email@exemple.com</div>
+            </div>
+          </div>
+          <span class="role-badge role-student" id="profRoleBadge">ÉLÈVE</span>
+        </div>
+
+        <div style="border-top: 1px solid var(--dash); padding-top: 8px; display: flex; flex-direction: column; gap: 6px; font-size: 12px;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="color: var(--muted); font-weight: 700;">🆔 ID Compte :</span>
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <code style="background: var(--card); padding: 2px 6px; border-radius: 6px; font-size: 11px;" id="profUidCode">uid_xxx</code>
+              <button class="btn-action" style="padding: 2px 8px; font-size: 11px;" onclick="window.copyMyUid()">📋 Copier</button>
+            </div>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="color: var(--muted); font-weight: 700;">Statut du compte :</span>
+            <span style="color: #15803d; font-weight: 800; background: #dcfce7; padding: 2px 8px; border-radius: 99px; font-size: 11px;" id="profStatusBadge">✅ Validé & Actif</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="color: var(--muted); font-weight: 700;">Date d'inscription :</span>
+            <span style="font-weight: 700;" id="profCreatedDate">--/--/----</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- FORMULAIRES INFOS ET MOT DE PASSE -->
+      <div style="display: flex; flex-direction: column; gap: 14px;">
+        <!-- INFORMATIONS DU COMPTE -->
+        <form onsubmit="window.handleUpdateProfileInfo(event)" style="display: flex; flex-direction: column; gap: 10px;">
+          <div style="font-weight: 800; font-size: 13.5px;">📝 Informations Personnelles</div>
+          
+          <div>
+            <label style="font-size: 11px; font-weight: 700; color: var(--muted); display: block; margin-bottom: 4px;">Nom et Prénom :</label>
+            <input type="text" id="profInputName" class="input" style="width: 100%" required />
+          </div>
+
+          <div id="profSectionGroup">
+            <label style="font-size: 11px; font-weight: 700; color: var(--muted); display: block; margin-bottom: 4px;">Section / Filière :</label>
+            <select id="profInputSection" class="input" style="width: 100%">
+              <option value="Mathematiques">📐 Baccalauréat Mathématiques</option>
+              <option value="Sciences">🔬 Baccalauréat Sciences Expérimentales</option>
+              <option value="Informatique">💻 Baccalauréat Informatique (TIC)</option>
+              <option value="Economie">📊 Baccalauréat Économie & Gestion</option>
+              <option value="Technique">⚙️ Baccalauréat Sciences Techniques</option>
+              <option value="Lettres">📖 Baccalauréat Lettres</option>
+            </select>
+          </div>
+
+          <button type="submit" class="btn-add" style="justify-content: center; padding: 10px; font-size: 13px;">
+            💾 Enregistrer les modifications
+          </button>
+        </form>
+
+        <!-- SÉCURITÉ / CHANGEMENT DU MOT DE PASSE -->
+        <form onsubmit="window.handleUpdatePassword(event)" style="border-top: 1.5px solid var(--dash); padding-top: 14px; display: flex; flex-direction: column; gap: 10px;">
+          <div style="font-weight: 800; font-size: 13.5px; display: flex; align-items: center; gap: 6px;">
+            🔒 Changer le mot de passe
+          </div>
+
+          <div id="profPassMsg" style="display: none; padding: 8px 12px; border-radius: 8px; font-size: 12px; font-weight: 700;"></div>
+
+          <div>
+            <label style="font-size: 11px; font-weight: 700; color: var(--muted); display: block; margin-bottom: 4px;">Nouveau mot de passe (min 6 caractères) :</label>
+            <input type="password" id="profNewPass" class="input" style="width: 100%" placeholder="••••••••" minlength="6" required />
+          </div>
+
+          <div>
+            <label style="font-size: 11px; font-weight: 700; color: var(--muted); display: block; margin-bottom: 4px;">Confirmer le nouveau mot de passe :</label>
+            <input type="password" id="profConfirmPass" class="input" style="width: 100%" placeholder="••••••••" minlength="6" required />
+          </div>
+
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <button type="submit" class="btn-action btn-accent" style="flex: 1; justify-content: center; padding: 10px; font-size: 13px;">
+              🔑 Modifier mon mot de passe
+            </button>
+            <button type="button" class="btn-action" style="padding: 10px; font-size: 12px;" onclick="window.sendResetPassEmail()">
+              ✉️ Lien par email
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
   <!-- SCRIPT APPLICATION -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
@@ -2059,6 +2166,8 @@
       signOut,
       onAuthStateChanged,
       updateProfile,
+      updatePassword,
+      sendPasswordResetEmail,
     } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
     import {
       getDatabase,
@@ -2461,11 +2570,149 @@
       document.getElementById("btnMyParentCode").style.display = currentUserProfile.role === "student" ? "inline-flex" : "none";
       document.getElementById("parentChildControls").style.display = currentUserProfile.role === "parent" ? "inline-flex" : "none";
       document.getElementById("btnAdminConsole").style.display = currentUserProfile.role === "admin" ? "inline-flex" : "none";
+      const btnProf = document.getElementById("btnMyProfile");
+      if (btnProf) btnProf.style.display = "inline-flex";
 
       if (currentUserProfile.role === "student" && currentUserProfile.parentLinkCode) {
         document.getElementById("myParentCodeDisplay").innerText = currentUserProfile.parentLinkCode;
       }
     }
+
+    // --- GESTION DE L'ESPACE PROFIL & MOT DE PASSE ---
+    window.openUserProfileModal = function () {
+      if (!currentUser || !currentUserProfile) {
+        window.showAuthModal();
+        return;
+      }
+
+      document.getElementById("profHeaderName").innerText = currentUserProfile.displayName || currentUser.email;
+      document.getElementById("profHeaderEmail").innerText = currentUser.email;
+      document.getElementById("profUidCode").innerText = currentUser.uid;
+
+      const roleBadges = {
+        student: { label: "ÉLÈVE", cls: "role-student", ico: "🎓" },
+        parent: { label: "PARENT", cls: "role-parent", ico: "👨‍👩‍👧" },
+        admin: { label: "ADMIN", cls: "role-admin", ico: "🛡️" },
+      };
+      const rInfo = roleBadges[currentUserProfile.role] || { label: "UTILISATEUR", cls: "role-student", ico: "👤" };
+      const roleBadge = document.getElementById("profRoleBadge");
+      roleBadge.className = `role-badge ${rInfo.cls}`;
+      roleBadge.innerText = rInfo.label;
+      document.getElementById("profAvatarCircle").innerText = rInfo.ico;
+
+      const d = currentUserProfile.createdAt ? new Date(currentUserProfile.createdAt) : null;
+      document.getElementById("profCreatedDate").innerText = d ? d.toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" }) : "Récemment";
+
+      document.getElementById("profInputName").value = currentUserProfile.displayName || "";
+      const secGroup = document.getElementById("profSectionGroup");
+      if (secGroup) secGroup.style.display = currentUserProfile.role === "student" ? "block" : "none";
+      const secSelect = document.getElementById("profInputSection");
+      if (secSelect) secSelect.value = currentUserProfile.section || "Mathematiques";
+
+      const passMsg = document.getElementById("profPassMsg");
+      if (passMsg) passMsg.style.display = "none";
+      document.getElementById("profNewPass").value = "";
+      document.getElementById("profConfirmPass").value = "";
+
+      window.openModal("userProfileModal");
+    };
+
+    window.copyMyUid = function () {
+      if (!currentUser) return;
+      navigator.clipboard.writeText(currentUser.uid);
+      alert("📋 Identifiant unique (UID) copié dans le presse-papier :\n" + currentUser.uid);
+    };
+
+    window.handleUpdateProfileInfo = async function (e) {
+      e.preventDefault();
+      if (!currentUser) return;
+
+      const newName = document.getElementById("profInputName").value.trim();
+      const newSec = document.getElementById("profInputSection")?.value || null;
+
+      if (!newName) return alert("Veuillez saisir votre nom.");
+
+      showLoading("Mise à jour du profil...");
+      try {
+        await update(ref(database, `users/${currentUser.uid}`), {
+          displayName: newName,
+          section: currentUserProfile.role === "student" ? newSec : null,
+        });
+
+        await updateProfile(currentUser, { displayName: newName });
+        currentUserProfile.displayName = newName;
+        if (currentUserProfile.role === "student") currentUserProfile.section = newSec;
+
+        renderUserProfileBar();
+        hideLoading();
+        alert("✨ Vos informations de profil ont été mises à jour avec succès !");
+      } catch (err) {
+        hideLoading();
+        alert("Erreur lors de la mise à jour : " + err.message);
+      }
+    };
+
+    window.handleUpdatePassword = async function (e) {
+      e.preventDefault();
+      if (!currentUser) return;
+
+      const newPass = document.getElementById("profNewPass").value;
+      const confirmPass = document.getElementById("profConfirmPass").value;
+      const passMsg = document.getElementById("profPassMsg");
+
+      if (newPass !== confirmPass) {
+        passMsg.style.display = "block";
+        passMsg.style.background = "#fff1f2";
+        passMsg.style.color = "#be123c";
+        passMsg.innerText = "❌ Les deux mots de passe ne correspondent pas.";
+        return;
+      }
+
+      if (newPass.length < 6) {
+        passMsg.style.display = "block";
+        passMsg.style.background = "#fff1f2";
+        passMsg.style.color = "#be123c";
+        passMsg.innerText = "❌ Le mot de passe doit contenir au moins 6 caractères.";
+        return;
+      }
+
+      showLoading("Modification du mot de passe...");
+      try {
+        await updatePassword(currentUser, newPass);
+        hideLoading();
+        passMsg.style.display = "block";
+        passMsg.style.background = "#ecfdf5";
+        passMsg.style.color = "#047857";
+        passMsg.innerText = "🎉 Mot de passe modifié avec succès !";
+        document.getElementById("profNewPass").value = "";
+        document.getElementById("profConfirmPass").value = "";
+      } catch (err) {
+        hideLoading();
+        passMsg.style.display = "block";
+        passMsg.style.background = "#fff1f2";
+        passMsg.style.color = "#be123c";
+        if (err.code === "auth/requires-recent-login") {
+          passMsg.innerHTML = "⚠️ Pour votre sécurité, veuillez vous <b>reconnecter</b> avant de pouvoir changer votre mot de passe, ou utilisez le bouton <i>'Lien par email'</i>.";
+        } else {
+          passMsg.innerText = "Erreur : " + err.message;
+        }
+      }
+    };
+
+    window.sendResetPassEmail = async function () {
+      if (!currentUser || !currentUser.email) return;
+      if (confirm(`Envoyer un lien de réinitialisation sécurisé à l'adresse : ${currentUser.email} ?`)) {
+        showLoading("Envoi du lien...");
+        try {
+          await sendPasswordResetEmail(auth, currentUser.email);
+          hideLoading();
+          alert(`✉️ Un email de réinitialisation sécurisé a été envoyé à :\n${currentUser.email}\n\nVérifiez votre boîte de réception (et vos spams).`);
+        } catch (err) {
+          hideLoading();
+          alert("Erreur d'envoi de l'email : " + err.message);
+        }
+      }
+    };
 
     function updateReadOnlyUI() {
       const isConsultation = isReadOnly;
