@@ -2688,10 +2688,15 @@
     };
 
     window.handleLogout = async function () {
-      if (confirm("Se déconnecter ?")) {
-        detachAllDataListeners();
-        await signOut(auth);
-      }
+      window.showStyledConfirm(
+        "Déconnexion",
+        "Voulez-vous vraiment vous déconnecter de votre compte ?",
+        "🚪",
+        async () => {
+          detachAllDataListeners();
+          await signOut(auth);
+        }
+      );
     };
 
     function formatAuthError(code) {
@@ -2960,17 +2965,22 @@
 
     window.sendResetPassEmail = async function () {
       if (!currentUser || !currentUser.email) return;
-      if (confirm(`Envoyer un lien de réinitialisation sécurisé à l'adresse : ${currentUser.email} ?`)) {
-        showLoading("Envoi du lien...");
-        try {
-          await sendPasswordResetEmail(auth, currentUser.email);
-          hideLoading();
-          alert(`✉️ Un email de réinitialisation sécurisé a été envoyé à :\n${currentUser.email}\n\nVérifiez votre boîte de réception (et vos spams).`);
-        } catch (err) {
-          hideLoading();
-          alert("Erreur d'envoi de l'email : " + err.message);
+      window.showStyledConfirm(
+        "Réinitialiser le mot de passe",
+        `Envoyer un lien officiel de réinitialisation à l'adresse :\n${currentUser.email} ?`,
+        "🔑",
+        async () => {
+          showLoading("Envoi du lien...");
+          try {
+            await sendPasswordResetEmail(auth, currentUser.email);
+            hideLoading();
+            alert(`✉️ Un email de réinitialisation sécurisé a été envoyé à :\n${currentUser.email}\n\nVérifiez votre boîte de réception (et vos spams).`);
+          } catch (err) {
+            hideLoading();
+            alert("Erreur d'envoi de l'email : " + err.message);
+          }
         }
-      }
+      );
     };
 
     function updateReadOnlyUI() {
@@ -3204,18 +3214,23 @@
     };
 
     window.rejectUserByAdmin = async function (uid, parentCode) {
-      if (confirm("Refuser cette demande et supprimer le compte ?")) {
-        showLoading("Suppression de la demande...");
-        try {
-          await remove(ref(database, `users/${uid}`));
-          if (parentCode) await remove(ref(database, `parent_codes/${parentCode}`));
-          hideLoading();
-          alert("Demande refusée et supprimée.");
-        } catch (e) {
-          hideLoading();
-          alert("Erreur : " + e.message);
+      window.showStyledConfirm(
+        "Refuser la demande",
+        "Refuser cette demande et supprimer le compte en attente ?",
+        "❌",
+        async () => {
+          showLoading("Suppression de la demande...");
+          try {
+            await remove(ref(database, `users/${uid}`));
+            if (parentCode) await remove(ref(database, `parent_codes/${parentCode}`));
+            hideLoading();
+            alert("Demande refusée et supprimée.");
+          } catch (e) {
+            hideLoading();
+            alert("Erreur : " + e.message);
+          }
         }
-      }
+      );
     };
 
     window.renderAdminUsersTable = function () {
@@ -3276,17 +3291,22 @@
 
     window.adminResetUserPassword = async function (email) {
       if (!email) return alert("Cet utilisateur n'a pas d'adresse email valide.");
-      if (confirm(`Envoyer un lien officiel de réinitialisation de mot de passe à l'adresse : ${email} ?`)) {
-        showLoading("Envoi du lien de réinitialisation...");
-        try {
-          await sendPasswordResetEmail(auth, email);
-          hideLoading();
-          alert(`✉️ Le lien sécurisé de réinitialisation a été envoyé avec succès à : ${email}`);
-        } catch (err) {
-          hideLoading();
-          alert("Erreur lors de l'envoi : " + err.message);
+      window.showStyledConfirm(
+        "Réinitialiser le mot de passe",
+        `Envoyer un lien officiel de réinitialisation de mot de passe à l'adresse : ${email} ?`,
+        "🔑",
+        async () => {
+          showLoading("Envoi du lien de réinitialisation...");
+          try {
+            await sendPasswordResetEmail(auth, email);
+            hideLoading();
+            alert(`✉️ Le lien sécurisé de réinitialisation a été envoyé avec succès à : ${email}`);
+          } catch (err) {
+            hideLoading();
+            alert("Erreur lors de l'envoi : " + err.message);
+          }
         }
-      }
+      );
     };
 
     window.inspectStudentByAdmin = async function (studentUid) {
@@ -3301,12 +3321,17 @@
     };
 
     window.deleteUserByAdmin = async function (uid, parentCode) {
-      if (confirm("Supprimer définitivement cet utilisateur ?")) {
-        await remove(ref(database, `users/${uid}`));
-        await remove(ref(database, `student_data/${uid}`));
-        if (parentCode) await remove(ref(database, `parent_codes/${parentCode}`));
-        alert("Utilisateur supprimé.");
-      }
+      window.showStyledConfirm(
+        "Supprimer l'utilisateur",
+        "Voulez-vous supprimer définitivement cet utilisateur et toutes ses données ?",
+        "🗑️",
+        async () => {
+          await remove(ref(database, `users/${uid}`));
+          await remove(ref(database, `student_data/${uid}`));
+          if (parentCode) await remove(ref(database, `parent_codes/${parentCode}`));
+          alert("Utilisateur supprimé.");
+        }
+      );
     };
 
     window.publishAdminAnnouncement = async function () {
@@ -3363,9 +3388,14 @@
     }
 
     window.deleteAnnouncement = function (id) {
-      if (confirm("Supprimer cette annonce ?")) {
-        remove(ref(database, `system_config/announcements/${id}`));
-      }
+      window.showStyledConfirm(
+        "Supprimer l'annonce",
+        "Voulez-vous supprimer cette annonce globale ?",
+        "📢",
+        () => {
+          remove(ref(database, `system_config/announcements/${id}`));
+        }
+      );
     };
 
     function updateBacCountdown() {
@@ -3694,7 +3724,14 @@
 
     window.deleteExam = function (id) {
       if (isReadOnly) return;
-      if (confirm("Supprimer cet examen ?")) remove(ref(database, getStudentPath("examens/" + id)));
+      window.showStyledConfirm(
+        "Supprimer l'examen",
+        "Voulez-vous supprimer ce devoir / examen ?",
+        "📝",
+        () => {
+          remove(ref(database, getStudentPath("examens/" + id)));
+        }
+      );
     };
 
     window.switchTrimester = function (trim) {
