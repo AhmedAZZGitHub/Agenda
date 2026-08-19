@@ -11,6 +11,7 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@700;800;900&display=swap"
     rel="stylesheet" />
+  <script src="bac_manifest.js"></script>
   <style>
     :root {
       --primary: #0284c7;
@@ -835,11 +836,12 @@
       filter: drop-shadow(0 0 4px #f59e0b);
     }
 
+    /* BOUTONS SUJET ET CORRIGÉ */
     .btn-pdf-action {
       display: inline-flex;
       align-items: center;
       gap: 5px;
-      padding: 5px 10px;
+      padding: 6px 12px;
       border-radius: 8px;
       font-size: 11.5px;
       font-weight: 800;
@@ -858,7 +860,7 @@
     }
 
     .btn-pdf-action.btn-corr {
-      background: rgba(16, 185, 129, 0.1);
+      background: rgba(16, 185, 129, 0.12);
       border-color: rgba(16, 185, 129, 0.3);
       color: #059669;
     }
@@ -1425,13 +1427,13 @@
     </div>
   </div>
 
-  <!-- OVERLAY ANNALES BAC (AVEC LIENS DIRECTS SUJET & CORRECTION) -->
+  <!-- OVERLAY ANNALES BAC (BOUTONS DIRECTS SUJET & CORRIGE) -->
   <div class="fullscreen-overlay" id="bacArchiveOverlay">
     <div class="overlay-header">
       <div>
         <div class="overlay-title">📚 Annales Officielles du Baccalauréat (2000 → 2026)</div>
         <div style="font-size: 13px; color: var(--muted); margin-top: 3px">
-          Section Mathématiques : Épreuves et Corrigés Session Principale
+          Section Mathématiques : Sujets & Corrigés de la Session Principale
         </div>
       </div>
       <button class="btn-close" onclick="window.closeOverlay('bacArchiveOverlay')">Fermer ✕</button>
@@ -1449,7 +1451,23 @@
         </div>
         <div
           style="background: rgba(255, 255, 255, 0.2); padding: 8px 16px; border-radius: 99px; font-weight: 800; font-size: 14px;"
-          id="bacSubjectProgressPct">0% Complété</div>
+          id="bacSubjectProgressPct">0.0% Complété</div>
+      </div>
+
+      <!-- BARRE DE RECHERCHE ET FILTRES DES ANNALES -->
+      <div style="display: flex; gap: 10px; align-items: center; justify-content: space-between; flex-wrap: wrap; background: var(--bg); border: 1.5px solid var(--dash); padding: 10px 14px; border-radius: 14px;">
+        <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+          <input type="text" id="bacYearFilterInput" class="input" placeholder="🔍 Filtrer par année (ex: 2024)..." style="width: 220px; padding: 7px 12px; font-size: 12.5px;" oninput="window.renderBacArchiveGrid()" />
+          <div class="switch-mode" style="padding: 2px;">
+            <button class="btn-toggle active" id="bacFilterAll" onclick="window.setBacFilter('all')">Tous</button>
+            <button class="btn-toggle" id="bacFilterStarred" onclick="window.setBacFilter('starred')">🌟 Favoris</button>
+            <button class="btn-toggle" id="bacFilterDone" onclick="window.setBacFilter('done')">✅ Révisés</button>
+            <button class="btn-toggle" id="bacFilterTodo" onclick="window.setBacFilter('todo')">⏳ À faire</button>
+          </div>
+        </div>
+        <div style="font-size: 12px; color: var(--muted); font-weight: 800; display: flex; align-items: center; gap: 6px;" id="bacLocalFilesCounter">
+          📁 142 Fichiers PDF Locaux Prêts (2009 → 2026)
+        </div>
       </div>
 
       <div class="bac-archive-grid" id="bacExamsGrid"></div>
@@ -2564,8 +2582,20 @@
     }
     initBacArchiveTabs();
 
-    window.searchBacOnline = function (subjectName, year) {
-      const query = encodeURIComponent(`bac tunisie ${year} ${subjectName} section mathematiques principale sujet corrige pdf`);
+    let currentBacFilter = "all";
+
+    window.setBacFilter = function (filter) {
+      currentBacFilter = filter;
+      document.querySelectorAll("#bacArchiveOverlay .switch-mode .btn-toggle").forEach((btn) => btn.classList.remove("active"));
+      const btnId = filter === "all" ? "bacFilterAll" : filter === "starred" ? "bacFilterStarred" : filter === "done" ? "bacFilterDone" : "bacFilterTodo";
+      const activeBtn = document.getElementById(btnId);
+      if (activeBtn) activeBtn.classList.add("active");
+      renderBacArchiveGrid();
+    };
+
+    window.searchBacOnline = function (subjectName, year, type = "sujet") {
+      const typeTerm = type === "corrige" ? "corrige correction bareme" : "epreuve examen sujet";
+      const query = encodeURIComponent(`bac tunisie ${year} ${subjectName} section mathematiques principale ${typeTerm} pdf`);
       window.open(`https://www.google.com/search?q=${query}`, "_blank");
     };
 
@@ -2575,23 +2605,75 @@
       if (titleEl) titleEl.innerText = `${subObj.ico} Annales : ${subObj.name} (Section Math - Session Principale)`;
 
       const subData = bacArchiveData[currentBacSubjectId] || {};
+      const manifest = window.BAC_LOCAL_MANIFEST || {};
+      const subManifest = manifest[currentBacSubjectId] || {};
+
       let doneCount = 0;
+      let localFilesCount = 0;
       const totalYears = 27;
 
       const grid = document.getElementById("bacExamsGrid");
       if (!grid) return;
       grid.innerHTML = "";
 
+      const yearQuery = (document.getElementById("bacYearFilterInput")?.value || "").trim().toLowerCase();
+
       for (let year = 2026; year >= 2000; year--) {
         const yKey = `bac_${year}`;
         const examItem = subData[yKey] || { done: false, starred: false, comment: "", pdfUrl: "" };
         if (examItem.done) doneCount++;
 
-        const defaultSujetPath = `Bac_Math_2009_2026_Principale/${subObj.folder}/Bac_${year}_Sujet.pdf`;
-        const defaultCorrPath = `Bac_Math_2009_2026_Principale/${subObj.folder}/Bac_${year}_Correction.pdf`;
+        // Vérification de la présence des fichiers locaux dans le manifest
+        const hasLocalSujet = subManifest[year]?.sujet || null;
+        const hasLocalCorr = subManifest[year]?.correction || null;
+        if (hasLocalSujet) localFilesCount++;
+        if (hasLocalCorr) localFilesCount++;
+
+        // Filtre par statut
+        if (currentBacFilter === "starred" && !examItem.starred) continue;
+        if (currentBacFilter === "done" && !examItem.done) continue;
+        if (currentBacFilter === "todo" && examItem.done) continue;
+
+        // Filtre par année
+        if (yearQuery && !year.toString().includes(yearQuery)) continue;
+
+        const defaultSujetPath = hasLocalSujet || `Bac_Math_2009_2026_Principale/${subObj.folder}/Bac_${year}_Sujet.pdf`;
+        const defaultCorrPath = hasLocalCorr || `Bac_Math_2009_2026_Principale/${subObj.folder}/Bac_${year}_Correction.pdf`;
 
         const box = document.createElement("div");
         box.className = `bac-exam-box ${examItem.done ? "is-done" : ""} ${examItem.starred ? "is-starred" : ""}`;
+
+        // Bouton Sujet
+        let sujetBtnHtml = "";
+        if (hasLocalSujet) {
+          sujetBtnHtml = `
+            <a href="${defaultSujetPath}" target="_blank" class="btn-pdf-action" style="background:var(--primary-light); color:var(--primary); border-color:var(--primary);">
+              📄 Sujet ${year} <span style="font-size:9px; background:var(--primary); color:white; padding:1px 4px; border-radius:4px;">Local</span>
+            </a>
+          `;
+        } else {
+          sujetBtnHtml = `
+            <button class="btn-pdf-action" onclick="window.searchBacOnline('${subObj.name}', ${year}, 'sujet')">
+              🔍 Sujet ${year}
+            </button>
+          `;
+        }
+
+        // Bouton Corrigé
+        let corrBtnHtml = "";
+        if (hasLocalCorr) {
+          corrBtnHtml = `
+            <a href="${defaultCorrPath}" target="_blank" class="btn-pdf-action btn-corr" style="font-weight:900;">
+              📑 Corrigé ${year} <span style="font-size:9px; background:#059669; color:white; padding:1px 4px; border-radius:4px;">Local</span>
+            </a>
+          `;
+        } else {
+          corrBtnHtml = `
+            <button class="btn-pdf-action btn-corr" style="opacity:0.7;" onclick="window.searchBacOnline('${subObj.name}', ${year}, 'corrige')">
+              🔍 Corrigé ${year}
+            </button>
+          `;
+        }
 
         box.innerHTML = `
             <div style="display:flex; justify-content:space-between; align-items:center;">
@@ -2605,14 +2687,10 @@
               </div>
             </div>
 
-            <!-- BOUTONS DIRECTS VERS LES DOSSIERS RANGÉS -->
-            <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:2px;">
-              <a href="${defaultSujetPath}" target="_blank" class="btn-pdf-action">
-                📄 Sujet ${year}
-              </a>
-              <a href="${defaultCorrPath}" target="_blank" class="btn-pdf-action btn-corr">
-                📑 Corrigé ${year}
-              </a>
+            <!-- BOUTONS SUJET ET CORRIGÉ AVEC DÉTECTION LOCALE -->
+            <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:4px;">
+              ${sujetBtnHtml}
+              ${corrBtnHtml}
               ${examItem.pdfUrl ? `<a href="${examItem.pdfUrl}" target="_blank" class="btn-pdf-action" style="background:var(--primary); color:white;">🔗 Lien Web</a>` : ""}
             </div>
 
@@ -2625,8 +2703,15 @@
       }
 
       const pct = ((doneCount / totalYears) * 100).toFixed(1);
-      document.getElementById("bacSubjectProgressCount").innerText = `${doneCount} / ${totalYears} Sujets Réalisés`;
-      document.getElementById("bacSubjectProgressPct").innerText = `${pct}% Complété`;
+      const progressEl = document.getElementById("bacSubjectProgressCount");
+      if (progressEl) progressEl.innerText = `${doneCount} / ${totalYears} Sujets Réalisés`;
+      const pctEl = document.getElementById("bacSubjectProgressPct");
+      if (pctEl) pctEl.innerText = `${pct}% Complété`;
+
+      const counterEl = document.getElementById("bacLocalFilesCounter");
+      if (counterEl) {
+        counterEl.innerHTML = `📁 <b>${localFilesCount}</b> fichiers PDF locaux prêts pour cette matière (2009 → 2026)`;
+      }
     }
 
     window.toggleBacDone = function (subId, yKey, isDone) {
