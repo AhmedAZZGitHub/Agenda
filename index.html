@@ -1171,16 +1171,80 @@
       font-weight: 800;
     }
 
-    @keyframes fadeIn {
-      from {
-        opacity: 0;
-        transform: translateY(6px);
-      }
+    /* ASSISTANT VOCAL & IA MULTILINGUE */
+    .ai-mic-btn {
+      width: 76px;
+      height: 76px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #0284c7, #2563eb);
+      color: white;
+      border: none;
+      font-size: 32px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 8px 24px rgba(2, 132, 199, 0.35);
+    }
 
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+    .ai-mic-btn:hover {
+      transform: scale(1.06);
+      box-shadow: 0 12px 28px rgba(2, 132, 199, 0.45);
+    }
+
+    .ai-mic-btn.listening {
+      background: linear-gradient(135deg, #ef4444, #dc2626) !important;
+      animation: micPulse 1.2s infinite;
+      box-shadow: 0 0 28px rgba(239, 68, 68, 0.65) !important;
+    }
+
+    @keyframes micPulse {
+      0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+      70% { transform: scale(1.12); box-shadow: 0 0 0 18px rgba(239, 68, 68, 0); }
+      100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+    }
+
+    .lang-chip {
+      background: var(--dash);
+      border: 1.5px solid var(--dash);
+      padding: 6px 12px;
+      border-radius: 99px;
+      font-size: 11.5px;
+      font-weight: 800;
+      cursor: pointer;
+      color: var(--text);
+      transition: all 0.2s;
+    }
+
+    .lang-chip:hover {
+      border-color: var(--primary);
+    }
+
+    .lang-chip.active {
+      background: var(--primary-light);
+      border-color: var(--primary);
+      color: var(--primary);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .example-chip {
+      background: var(--dash);
+      padding: 5px 10px;
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.15s;
+      border: 1px solid transparent;
+    }
+
+    .example-chip:hover {
+      background: var(--primary-light);
+      color: var(--primary);
+      border-color: var(--primary);
     }
   </style>
 </head>
@@ -1919,6 +1983,69 @@
         style="width: 100%; margin-top: 6px; padding: 10px; justify-content: center;">
         Enregistrer l'examen
       </button>
+    </div>
+  </div>
+
+  <!-- MODALE ASSISTANT VOCAL & IA MULTILINGUE (TUNISIEN / ARABE / FRANÇAIS / ANGLAIS) -->
+  <div class="modal" id="aiAssistantModal">
+    <div class="modal-box" style="max-width: 520px; gap: 14px;">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <span style="font-weight: 800; font-size: 16px; display: flex; align-items: center; gap: 6px;">
+          🎙️ Assistant Vocal & IA Baccalauréat
+        </span>
+        <span onclick="window.closeAiModal()" style="cursor: pointer; color: #ef4444; font-size: 18px">✕</span>
+      </div>
+
+      <!-- SÉLECTEUR DE LANGUE VOCALE (TUNISIEN / ARABE / FRANÇAIS / ANGLAIS) -->
+      <div>
+        <label style="font-size: 11px; font-weight: 800; color: var(--muted); display: block; margin-bottom: 6px;">
+          🗣️ Langue de dictée vocale :
+        </label>
+        <div style="display: flex; gap: 6px; flex-wrap: wrap;" id="aiLangSelector">
+          <button type="button" class="lang-chip active" id="langOpt_ar_tn" onclick="window.setAiDictationLang('ar-TN')">🇹🇳 Tounsi / Derja (ar-TN)</button>
+          <button type="button" class="lang-chip" id="langOpt_fr_fr" onclick="window.setAiDictationLang('fr-FR')">🇫🇷 Français (fr-FR)</button>
+          <button type="button" class="lang-chip" id="langOpt_ar_sa" onclick="window.setAiDictationLang('ar-SA')">🇸🇦 Arabe (ar-SA)</button>
+          <button type="button" class="lang-chip" id="langOpt_en_us" onclick="window.setAiDictationLang('en-US')">🇬🇧 Anglais (en-US)</button>
+        </div>
+      </div>
+
+      <!-- BOUTON MICROPHONE ET ANIMATION -->
+      <div style="text-align: center; padding: 12px 0;">
+        <button type="button" class="ai-mic-btn" id="aiModalMicBtn" onclick="window.toggleAiSpeechRecording()">
+          🎙️
+        </button>
+        <div id="aiMicStatusText" style="font-size: 12px; font-weight: 700; color: var(--muted); margin-top: 10px;">
+          Cliquez sur le micro et parlez naturellement en Tunisien, Français ou Arabe.
+        </div>
+      </div>
+
+      <!-- TRANSCRIPTION ET TEXTE SAISI -->
+      <div>
+        <label style="font-size: 11px; font-weight: 700; color: var(--muted); display: block; margin-bottom: 4px;">
+          Texte dicté ou message personnalisé :
+        </label>
+        <textarea id="aiTranscriptInput" class="input" style="width: 100%; height: 75px; resize: none; font-size: 13px;"
+          placeholder="Ex: Zidli seance math ghodwa m3a 14h / Devoir physique vendredi 10h / أضف حصة فيزياء غدا"></textarea>
+      </div>
+
+      <!-- EXEMPLES RAPIDES EN TUNISIEN / FRANÇAIS / ARABE -->
+      <div>
+        <div style="font-size: 11px; font-weight: 700; color: var(--muted); margin-bottom: 6px;">💡 Exemples de commandes rapides :</div>
+        <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+          <span class="example-chip" onclick="window.useAiExample('Zidli seance Math ghodwa m3a 14h')">🇹🇳 Zidli seance Math ghodwa 14h</span>
+          <span class="example-chip" onclick="window.useAiExample('Devoir Physique nhar larba3a 10h')">🇹🇳 Devoir Physique nhar larba3a</span>
+          <span class="example-chip" onclick="window.useAiExample('أضف حصة فلسفة يوم الجمعة من 16 إلى 18')">🇸🇦 أضف حصة فلسفة الجمعة 16h</span>
+          <span class="example-chip" onclick="window.useAiExample('Séance SVT samedi de 9h à 11h à la maison')">🇫🇷 Séance SVT samedi 9h</span>
+        </div>
+      </div>
+
+      <div id="aiFeedbackBox" style="display: none; padding: 12px; border-radius: 12px; font-size: 13px; font-weight: 700; line-height: 1.4;"></div>
+
+      <div style="display: flex; gap: 8px;">
+        <button type="button" class="btn-add" style="flex: 1; justify-content: center; padding: 12px;" onclick="window.executeAiCommand()">
+          ✨ Analyser & Ajouter au Planning
+        </button>
+      </div>
     </div>
   </div>
 
@@ -3577,14 +3704,382 @@
       document.getElementById("loadingOverlay").style.display = "none";
     }
 
-    window.handleImageUpload = function (e) {
-      if (isReadOnly) return alert("Accès en lecture seule.");
-      alert("Scanner IA : activez votre clé via '🔑 Clé IA'.");
+    // --- ASSISTANT VOCAL & IA MULTILINGUE (TUNISIEN / ARABE / FRANÇAIS / ANGLAIS) ---
+    let selectedAiSpeechLang = "ar-TN";
+    let aiSpeechRecognition = null;
+    let isAiSpeechRecording = false;
+
+    window.setAiDictationLang = function (lang) {
+      selectedAiSpeechLang = lang;
+      document.querySelectorAll(".lang-chip").forEach((btn) => btn.classList.remove("active"));
+      const chip = document.getElementById(
+        lang === "ar-TN" ? "langOpt_ar_tn" :
+        lang === "fr-FR" ? "langOpt_fr_fr" :
+        lang === "ar-SA" ? "langOpt_ar_sa" : "langOpt_en_us"
+      );
+      if (chip) chip.classList.add("active");
+
+      if (isAiSpeechRecording && aiSpeechRecognition) {
+        aiSpeechRecognition.stop();
+        setTimeout(() => window.startAiSpeechRecording(), 300);
+      }
     };
 
     window.voiceInput = function () {
       if (isReadOnly) return alert("Accès en lecture seule.");
-      alert("Micro IA : activez votre clé via '🔑 Clé IA'.");
+      const feedback = document.getElementById("aiFeedbackBox");
+      if (feedback) feedback.style.display = "none";
+      window.openModal("aiAssistantModal");
+    };
+
+    window.closeAiModal = function () {
+      if (isAiSpeechRecording && aiSpeechRecognition) {
+        try { aiSpeechRecognition.stop(); } catch (e) {}
+      }
+      isAiSpeechRecording = false;
+      const micBtn = document.getElementById("aiModalMicBtn");
+      if (micBtn) micBtn.classList.remove("listening");
+      window.closeModal("aiAssistantModal");
+    };
+
+    window.useAiExample = function (txt) {
+      const input = document.getElementById("aiTranscriptInput");
+      if (input) input.value = txt;
+    };
+
+    window.toggleAiSpeechRecording = function () {
+      if (isAiSpeechRecording) {
+        if (aiSpeechRecognition) {
+          try { aiSpeechRecognition.stop(); } catch (e) {}
+        }
+        isAiSpeechRecording = false;
+        const micBtn = document.getElementById("aiModalMicBtn");
+        if (micBtn) micBtn.classList.remove("listening");
+        document.getElementById("aiMicStatusText").innerText = "Enregistrement arrêté. Cliquez sur 'Analyser & Ajouter'.";
+      } else {
+        window.startAiSpeechRecording();
+      }
+    };
+
+    window.startAiSpeechRecording = function () {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRecognition) {
+        alert("La reconnaissance vocale n'est pas supportée par votre navigateur actuel. Vous pouvez saisir votre commande au clavier.");
+        return;
+      }
+
+      try {
+        aiSpeechRecognition = new SpeechRecognition();
+        aiSpeechRecognition.lang = selectedAiSpeechLang;
+        aiSpeechRecognition.interimResults = true;
+        aiSpeechRecognition.continuous = false;
+
+        const micBtn = document.getElementById("aiModalMicBtn");
+        const statusText = document.getElementById("aiMicStatusText");
+        const transcriptInput = document.getElementById("aiTranscriptInput");
+
+        aiSpeechRecognition.onstart = function () {
+          isAiSpeechRecording = true;
+          if (micBtn) micBtn.classList.add("listening");
+          const langNames = { "ar-TN": "🇹🇳 Tounsi (Derja)", "fr-FR": "🇫🇷 Français", "ar-SA": "🇸🇦 Arabe", "en-US": "🇬🇧 Anglais" };
+          statusText.innerText = `🎙️ En écoute en ${langNames[selectedAiSpeechLang] || "Tounsi"}... Parlez maintenant !`;
+          statusText.style.color = "#0284c7";
+        };
+
+        aiSpeechRecognition.onresult = function (event) {
+          let currentTranscript = "";
+          for (let i = event.resultIndex; i < event.results.length; i++) {
+            currentTranscript += event.results[i][0].transcript;
+          }
+          if (transcriptInput) transcriptInput.value = currentTranscript;
+        };
+
+        aiSpeechRecognition.onerror = function (event) {
+          console.warn("Speech recognition error:", event.error);
+          isAiSpeechRecording = false;
+          if (micBtn) micBtn.classList.remove("listening");
+          statusText.innerText = "Micro arrêté. Vous pouvez cliquer pour réessayer ou taper du texte.";
+          statusText.style.color = "var(--muted)";
+        };
+
+        aiSpeechRecognition.onend = function () {
+          isAiSpeechRecording = false;
+          if (micBtn) micBtn.classList.remove("listening");
+          statusText.innerText = "✅ Dictée terminée ! Cliquez sur 'Analyser & Ajouter'.";
+          statusText.style.color = "#059669";
+        };
+
+        aiSpeechRecognition.start();
+      } catch (err) {
+        console.error("Speech recognition start failed:", err);
+      }
+    };
+
+    window.executeAiCommand = async function () {
+      const input = document.getElementById("aiTranscriptInput");
+      const text = input ? input.value.trim() : "";
+      const feedback = document.getElementById("aiFeedbackBox");
+
+      if (!text) {
+        alert("Veuillez d'abord dicter ou écrire une phrase (ex: Zidli seance Math ghodwa 14h).");
+        return;
+      }
+
+      showLoading("Analyse IA en cours (Tunisien / Arabe / Français)...");
+
+      const geminiKey = localStorage.getItem("gemini_api_key") || "";
+      let parsedResult = null;
+
+      if (geminiKey) {
+        try {
+          parsedResult = await callGeminiTunisianParser(text, geminiKey);
+        } catch (e) {
+          console.warn("Gemini API call failed, fallback to native multilingual parser:", e);
+        }
+      }
+
+      if (!parsedResult) {
+        parsedResult = parseTunisianNaturalLanguageLocally(text);
+      }
+
+      hideLoading();
+
+      if (!parsedResult || !parsedResult.subject) {
+        feedback.style.display = "block";
+        feedback.style.background = "#fff1f2";
+        feedback.style.color = "#be123c";
+        feedback.style.border = "1.5px solid #fecdd3";
+        feedback.innerHTML = `⚠️ <b>Non compris</b> : L'IA n'a pas pu identifier la matière ou l'horaire.<br>Essayez par exemple : <i>"Zidli seance Math ghodwa m3a 14h"</i> ou <i>"Devoir physique vendredi 10h"</i>.`;
+        return;
+      }
+
+      const dayNamesFr = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"];
+      const sH = parsedResult.startHour ?? 14;
+      const sM = parsedResult.startMinute ?? 0;
+      const eH = parsedResult.endHour ?? (sH + 2);
+      const eM = parsedResult.endMinute ?? sM;
+      const dayIdx = (parsedResult.dayIndex !== undefined && parsedResult.dayIndex !== null) ? parsedResult.dayIndex : ((new Date().getDay() + 6) % 7);
+
+      const newId = Date.now().toString();
+
+      if (parsedResult.action === "add_exam") {
+        const examObj = {
+          id: newId,
+          sub: parsedResult.subject,
+          type: parsedResult.examType || "Devoir de Contrôle (DC)",
+          date: parsedResult.dateStr || new Date().toISOString().split("T")[0],
+          desc: "Planifié automatiquement par Assistant IA",
+        };
+        await set(ref(database, getStudentPath("examens/" + newId)), examObj);
+      } else {
+        const sessionObj = {
+          id: newId,
+          sub: parsedResult.subject,
+          day: dayIdx,
+          s: sH * 60 + sM,
+          e: eH * 60 + eM,
+          type: parsedResult.type || "À la maison",
+          freq: "Chaque semaine",
+        };
+        await set(ref(database, getStudentPath("seances/" + newId)), sessionObj);
+      }
+
+      playBeep();
+      feedback.style.display = "block";
+      feedback.style.background = "#ecfdf5";
+      feedback.style.color = "#047857";
+      feedback.style.border = "1.5px solid #a7f3d0";
+      const timeFmt = `${sH < 10 ? "0" + sH : sH}:${sM < 10 ? "0" + sM : sM} - ${eH < 10 ? "0" + eH : eH}:${eM < 10 ? "0" + eM : eM}`;
+      feedback.innerHTML = `🎉 <b>Ajouté avec succès !</b><br>📚 <b>${parsedResult.subject}</b> planifié pour <b>${dayNamesFr[dayIdx]}</b> (${timeFmt})<br>${parsedResult.replyMessage ? `<i>💬 ${parsedResult.replyMessage}</i>` : ""}`;
+    };
+
+    async function callGeminiTunisianParser(userText, apiKey) {
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+      const now = new Date();
+      const currentDayName = ["Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi"][now.getDay()];
+
+      const systemPrompt = `Tu es un assistant IA spécialisé pour les élèves du Baccalauréat tunisien.
+Tu comprends parfaitement le dialecte tunisien (Derja en lettres arabes ou arabizi 3=ع, 7=ح, 9=ق, 5=خ), l'arabe classique et le français.
+Aujourd'hui nous sommes ${currentDayName} ${now.toISOString().split("T")[0]}.
+Analyse la phrase de l'élève et extrait les données en JSON STRICT sans formatage markdown :
+{
+  "action": "add_session" ou "add_exam",
+  "subject": "Mathématiques" | "Sciences Physiques" | "Sciences SVT" | "Informatique" | "Philosophie" | "Arabe" | "Français" | "Anglais" | "Option",
+  "dayIndex": nombre de 0 (Lundi) à 6 (Dimanche),
+  "startHour": nombre de 8 à 22,
+  "startMinute": nombre 0 ou 30,
+  "endHour": nombre de 9 à 24,
+  "endMinute": nombre 0 ou 30,
+  "type": "À la maison" | "En ligne" | "Lycée",
+  "replyMessage": "Message de confirmation court et amical bilingue français/tunisien"
+}`;
+
+      const res = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: `${systemPrompt}\n\nCommande élève : "${userText}"` }] }],
+        }),
+      });
+
+      if (!res.ok) throw new Error("Gemini API HTTP Error " + res.status);
+      const data = await res.json();
+      const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
+      const cleanJson = rawText.replace(/```json/g, "").replace(/```/g, "").trim();
+      return JSON.parse(cleanJson);
+    }
+
+    function parseTunisianNaturalLanguageLocally(rawText) {
+      const text = rawText.toLowerCase();
+
+      // Matières (Tunisien, Arabe, Français, Anglais)
+      let subject = null;
+      if (/math|mathematique|رياضيات|مات|alg|geometrie/i.test(text)) subject = "Mathématiques";
+      else if (/phys|physique|chimie|فيزياء|فيزيك|chim/i.test(text)) subject = "Sciences Physiques";
+      else if (/svt|science|3ouloum|علوم|nature|bio/i.test(text)) subject = "Sciences SVT";
+      else if (/info|informatique|tic|algo|python|انفورماتيك|اعلامية/i.test(text)) subject = "Informatique";
+      else if (/philo|philosophie|falsafa|فلسفة/i.test(text)) subject = "Philosophie";
+      else if (/arabe|3arbi|3arabia|عربية|نصوص|ادب/i.test(text)) subject = "Arabe";
+      else if (/franc|french|فرنسية/i.test(text)) subject = "Français";
+      else if (/angl|english|انقليزية/i.test(text)) subject = "Anglais";
+      else if (/espagnol|italien|allemand|option|اسبانية/i.test(text)) subject = "Option";
+      else if (/sport|رياضة/i.test(text)) subject = "Sport";
+
+      if (!subject) return null;
+
+      // Jours (Tunisien Derja, Arabe, Français)
+      const now = new Date();
+      let todayIdx = (now.getDay() + 6) % 7; // 0=Lundi, 6=Dimanche
+      let dayIndex = todayIdx;
+
+      if (/ghodwa|demain|غدا|غدوة/i.test(text)) {
+        dayIndex = (todayIdx + 1) % 7;
+      } else if (/ba3d ghodwa|apres demain|après-demain|بعد غد/i.test(text)) {
+        dayIndex = (todayIdx + 2) % 7;
+      } else if (/lundi|ethnin|ithnin|الاثنين/i.test(text)) {
+        dayIndex = 0;
+      } else if (/mardi|thletha|tleta|الثلاثاء/i.test(text)) {
+        dayIndex = 1;
+      } else if (/mercredi|arba3a|lerba3|الأربعاء|الاربعاء/i.test(text)) {
+        dayIndex = 2;
+      } else if (/jeudi|khmis|elkhmis|الخميس/i.test(text)) {
+        dayIndex = 3;
+      } else if (/vendredi|jem3a|jom3a|الجمعة/i.test(text)) {
+        dayIndex = 4;
+      } else if (/samedi|sebt|essebt|السبت/i.test(text)) {
+        dayIndex = 5;
+      } else if (/dimanche|a7ad|elahad|الأحد|الاحد/i.test(text)) {
+        dayIndex = 6;
+      }
+
+      // Horaires
+      let startHour = 14;
+      let startMinute = 0;
+      let endHour = 16;
+      let endMinute = 0;
+
+      const matchTime = text.match(/(?:m3a|a|à|fi|ساعة|مع)?\s*(\d{1,2})(?:h|:|\s*heures?)(\d{2})?/i);
+      if (matchTime) {
+        startHour = parseInt(matchTime[1]);
+        if (matchTime[2]) startMinute = parseInt(matchTime[2]);
+        if (startHour < 8) startHour += 12; // Ex: m3a el 2 -> 14h
+        endHour = Math.min(24, startHour + 2);
+      } else {
+        if (/se3tin|zousta3ech/i.test(text)) startHour = 14;
+        else if (/tlatha|tletata3ech/i.test(text)) startHour = 15;
+        else if (/arba3ata3ech/i.test(text)) startHour = 16;
+        else if (/3achiya|après-midi/i.test(text)) startHour = 15;
+        else if (/lil|soir/i.test(text)) startHour = 20;
+        else if (/sbe7|matin/i.test(text)) startHour = 9;
+        endHour = Math.min(24, startHour + 2);
+      }
+
+      const isExam = /devoir|examen|ds|dc|test|امتحان|فرض/i.test(text);
+
+      return {
+        action: isExam ? "add_exam" : "add_session",
+        subject: subject,
+        dayIndex: dayIndex,
+        startHour: startHour,
+        startMinute: startMinute,
+        endHour: endHour,
+        endMinute: endMinute,
+        type: /dar|maison|دار/i.test(text) ? "À la maison" : /ligne|zoom|meet|اونلاين/i.test(text) ? "En ligne" : "À la maison",
+        replyMessage: "فهمتك بالباهي ! تم تسجيل الحصة في جدول أوقاتك بنجاح.",
+      };
+    }
+
+    window.handleImageUpload = async function (e) {
+      if (isReadOnly) return alert("Accès en lecture seule.");
+      const file = e.target.files?.[0];
+      if (!file) return;
+
+      const apiKey = localStorage.getItem("gemini_api_key");
+      if (!apiKey) {
+        alert("📸 Pour scanner un emploi du temps ou des devoirs par photo, veuillez d'abord renseigner votre clé gratuite via le bouton '🔑 Clé IA'.");
+        return;
+      }
+
+      showLoading("Analyse de l'image par Vision IA...");
+
+      try {
+        const reader = new FileReader();
+        reader.onload = async function () {
+          const base64Data = reader.result.split(",")[1];
+          const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+
+          const res = await fetch(url, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              contents: [
+                {
+                  parts: [
+                    {
+                      text: "Analyse cet emploi du temps ou cette liste de séances tunisienne et extrait la liste des séances en JSON : [{\"sub\": \"Mathématiques\", \"day\": 0, \"s\": 480, \"e\": 600, \"type\": \"Lycée\"}]. Réponds STRICTEMENT en JSON sans markdown."
+                    },
+                    {
+                      inlineData: {
+                        mimeType: file.type || "image/jpeg",
+                        data: base64Data
+                      }
+                    }
+                  ]
+                }
+              ]
+            })
+          });
+
+          hideLoading();
+          if (!res.ok) throw new Error("Erreur Gemini Vision " + res.status);
+          const data = await res.json();
+          const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
+          const cleanJson = rawText.replace(/```json/g, "").replace(/```/g, "").trim();
+          const items = JSON.parse(cleanJson);
+
+          if (Array.isArray(items) && items.length > 0) {
+            for (let it of items) {
+              const id = Date.now().toString() + Math.random().toString(36).substring(2, 5);
+              await set(ref(database, getStudentPath("seances/" + id)), {
+                id,
+                sub: it.sub || "Mathématiques",
+                day: it.day || 0,
+                s: it.s || 480,
+                e: it.e || 600,
+                type: it.type || "Lycée",
+                freq: "Chaque semaine"
+              });
+            }
+            alert(`🎉 ${items.length} séances ont été scannées et ajoutées à votre planning !`);
+          } else {
+            alert("Aucune séance lisible n'a été détectée sur la photo.");
+          }
+        };
+        reader.readAsDataURL(file);
+      } catch (err) {
+        hideLoading();
+        alert("Erreur d'analyse photo : " + err.message);
+      }
     };
 
     // Premier affichage immédiat
