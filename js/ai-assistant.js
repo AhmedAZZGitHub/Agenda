@@ -1,8 +1,8 @@
 // js/ai-assistant.js
 // Assistant Vocal Multilingue (Tounsi / Arabe / Français), Gemini Pro 3.1 & Vision Scanner
 
-import { database, ref, set } from "./firebase-config.js?v=15.7";
-import { state, getStudentPath, showLoading, hideLoading, playBeep } from "./state.js?v=15.7";
+import { database, ref, set } from "./firebase-config.js?v=15.8";
+import { state, getStudentPath, showLoading, hideLoading, playBeep } from "./state.js?v=15.8";
 
 let selectedAiSpeechLang = "ar-TN";
 let aiSpeechRecognition = null;
@@ -18,8 +18,8 @@ export function getAiApiKey() {
 
 export function getAiModelName() {
   const saved = localStorage.getItem("gemini_model_name");
-  if (saved && saved.trim() && !saved.includes("3.1") && !saved.includes("3.0")) return saved.trim();
-  return "gemini-1.5-flash"; // Modèle Google Gemini Vision officiel par défaut
+  if (saved && saved.trim() && !saved.includes("1.5") && !saved.includes("2.5-flash")) return saved.trim();
+  return "gemini-3.6-flash"; // Modèle Google Gemini Vision officiel recommandé par Google
 }
 
 export function openAiSettingsModal() {
@@ -34,12 +34,11 @@ export function openAiSettingsModal() {
   const customInput = document.getElementById("aiCustomModelInput");
 
   const standardModels = [
-    "gemini-3.7-flash",
     "gemini-3.6-flash",
+    "gemini-3.7-flash",
     "gemini-3.1-pro",
-    "gemini-3.0-pro",
     "gemini-2.5-pro",
-    "gemini-2.5-flash"
+    "gemini-2.0-flash",
   ];
   if (standardModels.includes(currentModel)) {
     if (modelSelect) modelSelect.value = currentModel;
@@ -522,10 +521,11 @@ export async function handleImageUpload(e) {
         const primaryModel = getAiModelName();
         const fallbackModels = [
           primaryModel,
-          "gemini-1.5-flash",
+          "gemini-3.6-flash",
+          "gemini-3.7-flash",
+          "gemini-3.1-pro",
+          "gemini-2.5-pro",
           "gemini-2.0-flash",
-          "gemini-1.5-pro",
-          "gemini-2.5-flash",
         ].filter((m, i, arr) => arr.indexOf(m) === i);
 
         let responseData = null;
