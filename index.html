@@ -3005,13 +3005,30 @@
             <td><span style="font-size:12px;">${details}</span></td>
             <td style="font-size:12px; color:var(--muted);">${dateStr}</td>
             <td style="display:flex; gap:5px; flex-wrap:wrap;">
+              <button class="btn-action" style="padding:4px 8px; font-size:11px;" title="Copier l'UID" onclick="navigator.clipboard.writeText('${u.uid}'); alert('📋 UID copié : ${u.uid}')">📋 UID</button>
               ${status === "pending" ? `<button class="btn-add" style="padding:4px 8px; font-size:11px;" onclick="window.approveUserByAdmin('${u.uid}')">✅ Valider</button>` : ""}
               ${u.role === "student" && status === "approved" ? `<button class="btn-action" style="padding:4px 8px; font-size:11px;" onclick="window.inspectStudentByAdmin('${u.uid}')">👁️ Inspecter</button>` : ""}
+              <button class="btn-action" style="padding:4px 8px; font-size:11px;" title="Envoyer email de réinitialisation" onclick="window.adminResetUserPassword('${u.email}')">🔑 Réinit Pass</button>
               <button class="btn-action" style="padding:4px 8px; font-size:11px; color:#ef4444;" onclick="window.deleteUserByAdmin('${u.uid}', '${u.parentLinkCode || ""}')">🗑️</button>
             </td>
           `;
         tbody.appendChild(tr);
       });
+    };
+
+    window.adminResetUserPassword = async function (email) {
+      if (!email) return alert("Cet utilisateur n'a pas d'adresse email valide.");
+      if (confirm(`Envoyer un lien officiel de réinitialisation de mot de passe à l'adresse : ${email} ?`)) {
+        showLoading("Envoi du lien de réinitialisation...");
+        try {
+          await sendPasswordResetEmail(auth, email);
+          hideLoading();
+          alert(`✉️ Le lien sécurisé de réinitialisation a été envoyé avec succès à : ${email}`);
+        } catch (err) {
+          hideLoading();
+          alert("Erreur lors de l'envoi : " + err.message);
+        }
+      }
     };
 
     window.inspectStudentByAdmin = async function (studentUid) {
