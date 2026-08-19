@@ -18,6 +18,8 @@ import {
 } from "./firebase-config.js";
 import { state, getStudentPath, showLoading, hideLoading } from "./state.js";
 import { loadAdminKPIs, listenToAnnouncements } from "./admin.js";
+import { render } from "./calendar.js";
+import { switchTrimester, selectBacSubject } from "./grades.js";
 
 export function showAuthModal() {
   const el = document.getElementById("authOverlay");
@@ -155,8 +157,11 @@ export async function handleLogin(e) {
 
   try {
     showLoading("Connexion en cours...");
-    await signInWithEmailAndPassword(auth, email, pass);
-    hideLoading();
+    const userCredential = await signInWithEmailAndPassword(auth, email, pass);
+    if (userCredential && userCredential.user) {
+      state.currentUser = userCredential.user;
+      await loadUserProfile(userCredential.user.uid);
+    }
   } catch (err) {
     hideLoading();
     if (errDiv) {
@@ -312,11 +317,12 @@ export async function loadUserProfile(uid) {
     }
 
     listenToAnnouncements();
+    render();
+  } catch (e) {
+    console.error("Erreur chargement profil:", e);
+  } finally {
     window.closeOverlay("authOverlay");
     hideLoading();
-  } catch (e) {
-    hideLoading();
-    console.error("Erreur chargement profil:", e);
   }
 }
 
@@ -660,7 +666,7 @@ export function attachStudentDataListeners(sUid) {
     snapshot.forEach((child) => {
       state.db.push(child.val());
     });
-    window.render();
+    render();
   });
   state.activeDataListeners.push({ refPath: seancesRef, callback: onSeances });
 
@@ -670,21 +676,21 @@ export function attachStudentDataListeners(sUid) {
     snapshot.forEach((child) => {
       state.examsDb.push(child.val());
     });
-    window.render();
+    render();
   });
   state.activeDataListeners.push({ refPath: examsRef, callback: onExams });
 
   const notesRef = ref(database, `student_data/${sUid}/notes_trimestrielles`);
   const onNotes = onValue(notesRef, (snapshot) => {
     state.userGrades = snapshot.val() || {};
-    window.switchTrimester(state.currentTrimester);
+    switchTrimester(state.currentTrimester);
   });
   state.activeDataListeners.push({ refPath: notesRef, callback: onNotes });
 
   const bacArchiveRef = ref(database, `student_data/${sUid}/bac_archive`);
   const onBac = onValue(bacArchiveRef, (snapshot) => {
     state.bacArchiveData = snapshot.val() || {};
-    window.selectBacSubject(state.currentBacSubjectId);
+    selectBacSubject(state.currentBacSubjectId);
   });
   state.activeDataListeners.push({ refPath: bacArchiveRef, callback: onBac });
 }
