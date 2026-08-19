@@ -40,7 +40,26 @@ RÈGLES STRICTES ET NON NÉGOCIABLES :
    - Tu comprends parfaitement le français, l'arabe classique et le dialecte tunisien (Derja / Arabizi). Tu peux répondre en français soigné ou adapter tes explications bilingues selon le besoin de l'élève.`;
 
 export function getTutorModelName() {
-  return "gemini-3.7-flash"; // Modèle d'élite Gemini 3.7 Flash High
+  const saved = localStorage.getItem("gemini_model_name");
+  if (saved && (saved === "gemini-1.5-pro" || saved === "gemini-1.5-flash")) return saved;
+  return "gemini-2.0-flash"; // Modèle Google Generative Language officiel le plus performant
+}
+
+export function promptSetAiApiKey() {
+  const currentKey = localStorage.getItem("gemini_api_key") || "";
+  const key = prompt(
+    "🔑 Clé API Google Gemini (AI Studio) :\n\nPour connecter directement votre compte Gemini en direct sans restriction, collez votre clé API Google (obtenue gratuitement sur https://aistudio.google.com/app/apikey) :",
+    currentKey
+  );
+  if (key !== null) {
+    if (key.trim()) {
+      localStorage.setItem("gemini_api_key", key.trim());
+      alert("✅ Clé API Google Gemini enregistrée avec succès ! Vos questions recevront les réponses en direct de l'IA.");
+    } else {
+      localStorage.removeItem("gemini_api_key");
+      alert("ℹ️ Clé personnalisée réinitialisée.");
+    }
+  }
 }
 
 export function openTutorChat() {
@@ -289,20 +308,45 @@ function generateBuiltInPedagogicalResponse(text, hasImage, section = "Toutes se
   const query = (text || "").toLowerCase().trim();
 
   // 1. Salutations et Derja / Arabizi
-  if (!query || query.match(/^(ahla|ahlan|salam|salut|bonjour|coucou|hi|hello|3aslema|aslema|labes|cv|sbe7|sbah|sba7)/i)) {
+  if (!query || query.match(/^(ahla|ahlan|salam|salut|bonjour|coucou|hi|hello|3aslema|aslema|labes|cv|sbe7|sbah|sba7)$/i)) {
     const name = state.currentUserProfile?.displayName || "futur bachelier";
     return `**3aslema ${name} ! Ahla bik !** 🎓✨
 
 Je suis ton **Tuteur IA Éducatif** dédié à ta réussite au **Baccalauréat (${section})**.
 
 Voici comment je peux t'aider dès maintenant :
-* 📐 **Mathématiques & Physique** : pose une question sur un théorème, une formule ou un calcul.
+* 📐 **Mathématiques & Physique** : pose une question sur un théorème, une formule ou un calcul (ex: *"e en math représente quoi"*).
 * 📸 **Correction de devoir** : clique sur **📷** pour m'envoyer un exercice ou ton brouillon manuscrit !
 * 💻 **Informatique & Python** : algorithmes de tri, récursivité, requêtes SQL.
 * 🧠 **Philosophie & SVT** : méthodes de dissertation, schémas bilan et synthèses.
 * ⚡ **Quiz d'entraînement** : teste tes connaissances avec des questions types Bac.
 
 Quelle notion ou exercice souhaites-tu travailler aujourd'hui ?`;
+  }
+
+  // Question spécifique sur le nombre e / exponentielle
+  if (query.includes("e en math") || query.includes("nombre e") || query.includes("c'est quoi e") || query.includes("valeur de e")) {
+    return `### 📐 Le Nombre $e$ (Constante d'Euler) en Mathématiques
+
+En mathématiques, **$e$** est une constante fondamentale irrationnelle dont la valeur approchée est :
+$$e \\approx 2{,}71828...$$
+
+#### 🔹 1. Définition et Origine :
+* **Base du logarithme népérien** : C'est le nombre unique tel que $\\ln(e) = 1$.
+* **Fonction Exponentielle** : C'est la base de la fonction exponentielle notée $\\exp(x) = e^x$.
+
+#### 🔹 2. Propriété Fondamentale :
+La fonction exponentielle $f(x) = e^x$ est la seule fonction dérivable sur $\\mathbb{R}$ qui est **égale à sa propre dérivée** avec $f(0) = 1$ :
+$$(e^x)' = e^x \\quad \\text{et} \\quad e^0 = 1$$
+
+#### 🔹 3. Propriétés Algébriques Clés au Bac :
+* $e^{a+b} = e^a \\cdot e^b$
+* $e^{-a} = \\frac{1}{e^a}$
+* $e^{a-b} = \\frac{e^a}{e^b}$
+* $(e^a)^n = e^{n \\cdot a}$
+* Pour tout $x \\in \\mathbb{R}$, $e^x > 0$ (toujours strictement positif).
+
+Souhaites-tu un exemple de calcul de limite ou d'étude de fonction avec $e^x$ ?`;
   }
 
   // 2. Correction d'exercice par photo ou texte
@@ -546,3 +590,4 @@ window.clearTutorAttachedPhoto = clearTutorAttachedPhoto;
 window.clearTutorChatHistory = clearTutorChatHistory;
 window.useTutorQuickPrompt = useTutorQuickPrompt;
 window.toggleTutorVoice = toggleTutorVoice;
+window.promptSetAiApiKey = promptSetAiApiKey;
