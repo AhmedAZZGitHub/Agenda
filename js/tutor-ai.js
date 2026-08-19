@@ -1,8 +1,8 @@
 // js/tutor-ai.js
 // Tuteur IA Éducatif Gemini Pro (Baccalauréat Tunisien) & Correction d'Exercices par Photo
 
-import { getAiModelName, getAiApiKey } from "./ai-assistant.js?v=13.0";
-import { state, showLoading, hideLoading, playBeep } from "./state.js?v=13.0";
+import { getAiModelName, getAiApiKey } from "./ai-assistant.js?v=14.0";
+import { state, showLoading, hideLoading, playBeep } from "./state.js?v=14.0";
 
 let tutorChatHistory = [];
 let tutorAttachedImageBase64 = null;
@@ -246,8 +246,9 @@ export async function sendTutorMessage() {
   let botReply = "";
 
   try {
-    const modelName = getTutorModelName();
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
+    const candidateModels = ["gemini-1.5-pro", "gemini-2.0-flash", "gemini-1.5-flash"];
+    let apiSuccess = false;
+    let lastErrorStatus = null;
 
     const parts = [];
 
@@ -272,18 +273,31 @@ MESSAGE / QUESTION DE L'ÉLÈVE :
 
     parts.push({ text: fullPrompt });
 
-    const res = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ contents: [{ parts }] }),
-    });
+    for (const mName of candidateModels) {
+      try {
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/${mName}:generateContent?key=${apiKey}`;
+        const res = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ contents: [{ parts }] }),
+        });
 
-    if (res.ok) {
-      const data = await res.json();
-      botReply = data.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (res.ok) {
+          const data = await res.json();
+          botReply = data.candidates?.[0]?.content?.parts?.[0]?.text;
+          if (botReply) {
+            apiSuccess = true;
+            break;
+          }
+        } else {
+          lastErrorStatus = res.status;
+        }
+      } catch (err) {
+        console.warn(`Erreur lors de l'appel modèle ${mName}:`, err);
+      }
     }
   } catch (e) {
-    console.warn("API Gemini non accessible, basculement vers le Moteur Pédagogique Bac intégré:", e);
+    console.warn("API Gemini non accessible:", e);
   }
 
   const loadingEl = document.getElementById(loadingMsgId);
@@ -292,7 +306,19 @@ MESSAGE / QUESTION DE L'ÉLÈVE :
   }
 
   if (!botReply) {
-    botReply = generateBuiltInPedagogicalResponse(userText, attachedBase64, state.currentUserProfile?.section);
+    const hasCustomKey = Boolean(localStorage.getItem("gemini_api_key"));
+    if (!hasCustomKey) {
+      botReply = `⚠️ **Connexion à Google Gemini Pro requise pour les réponses libres en direct**
+
+Pour poser n'importe quelle question et recevoir les explications complètes générées en direct par **Google Gemini Pro** :
+1. Cliquez sur le bouton bleu **🔑 Clé IA** en haut à droite.
+2. Collez votre clé gratuite obtenue sur **[aistudio.google.com/app/apikey](https://aistudio.google.com/app/apikey)**.
+
+---
+` + generateBuiltInPedagogicalResponse(userText, attachedBase64, state.currentUserProfile?.section);
+    } else {
+      botReply = generateBuiltInPedagogicalResponse(userText, attachedBase64, state.currentUserProfile?.section);
+    }
   }
 
   tutorChatHistory.push({ role: "user", text: userText });
