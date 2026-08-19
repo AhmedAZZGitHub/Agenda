@@ -39,6 +39,12 @@ RÈGLES STRICTES ET NON NÉGOCIABLES :
    - Sois encourageant, clair, pédagogique et structuré (titres en gras, puces, étapes numérotées, blocs de code avec syntaxe claire).
    - Tu comprends parfaitement le français, l'arabe classique et le dialecte tunisien (Derja / Arabizi). Tu peux répondre en français soigné ou adapter tes explications bilingues selon le besoin de l'élève.`;
 
+export function getTutorModelName() {
+  const saved = localStorage.getItem("gemini_model_name");
+  if (saved && (saved.includes("pro") || saved.includes("3.1"))) return saved.trim();
+  return "gemini-1.5-pro"; // Modèle Gemini Pro par défaut pour le tuteur
+}
+
 export function openTutorChat() {
   if (state.currentUserProfile && state.currentUserProfile.role === "student" && state.currentUserProfile.tutorAiEnabled === false) {
     alert("🔒 Accès Tuteur IA Désactivé\n\nCette option n'a pas été activée pour votre compte par l'administrateur. Veuillez contacter votre administrateur pour débloquer l'accès au Tuteur IA et à la correction par photo.");
@@ -50,8 +56,8 @@ export function openTutorChat() {
 
   const modelBadge = document.getElementById("tutorModelBadge");
   if (modelBadge) {
-    const currentModel = getAiModelName();
-    modelBadge.innerText = `🤖 ${currentModel}`;
+    const currentModel = getTutorModelName();
+    modelBadge.innerText = `✨ ${currentModel === "gemini-1.5-pro" ? "Gemini 1.5 Pro" : currentModel}`;
   }
 
   if (tutorChatHistory.length === 0) {
@@ -218,7 +224,7 @@ export async function sendTutorMessage() {
   );
 
   try {
-    const modelName = getAiModelName();
+    const modelName = getTutorModelName();
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
 
     const parts = [];
