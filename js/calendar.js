@@ -1,7 +1,7 @@
 // js/calendar.js
 // Gestion du Planning (Grille PC & Vue Mobile), Détails & Modification de Séance, Examens et Minuteur
 
-import { database, ref, set, remove, update } from "./firebase-config.js?v=15.4";
+import { database, ref, set, remove, update } from "./firebase-config.js?v=15.5";
 import {
   state,
   getStudentPath,
@@ -12,8 +12,8 @@ import {
   showLoading,
   hideLoading,
   playBeep,
-} from "./state.js?v=15.4";
-import { renderDetailSessionMap, initEditPickerMap } from "./maps.js?v=15.4";
+} from "./state.js?v=15.5";
+import { renderDetailSessionMap, initEditPickerMap } from "./maps.js?v=15.5";
 
 let activeDetailSessionId = null;
 let activeDetailSessionDate = null;
@@ -29,6 +29,7 @@ export function getSessionDateKey(dayIdx, refMonday = state.currentMonday) {
 
 let timerInterval = null;
 let timerSeconds = 90 * 60; // 1h 30m par défaut
+let timerInitialSeconds = 90 * 60;
 let timerRunning = false;
 
 export function setLayout(l) {
@@ -740,22 +741,55 @@ export function renderTimer() {
   const s = timerSeconds % 60;
   const disp = document.getElementById("timerDisplay");
   if (disp) {
-    disp.innerText = `${h < 10 ? "0" + h : h}:${m < 10 ? "0" + m : m}:${s < 10 ? "0" + s : s}`;
+    if (h > 0) {
+      disp.innerText = `${h < 10 ? "0" + h : h}:${m < 10 ? "0" + m : m}:${s < 10 ? "0" + s : s}`;
+    } else {
+      disp.innerText = `${m < 10 ? "0" + m : m}:${s < 10 ? "0" + s : s}`;
+    }
   }
 }
 
 export function openTimer() {
   window.openOverlay("timerOverlay");
-  renderTimer();
+  if (!timerRunning) {
+    setCustomTimer();
+  } else {
+    renderTimer();
+  }
+}
+
+export function setTimerPreset(h, m) {
+  const hInp = document.getElementById("tHours");
+  const mInp = document.getElementById("tMinutes");
+  if (hInp) hInp.value = h;
+  if (mInp) mInp.value = m;
+  setCustomTimer();
 }
 
 export function setCustomTimer() {
+  if (timerRunning) {
+    clearInterval(timerInterval);
+    timerRunning = false;
+    const btn = document.getElementById("btnTimerStart") || document.getElementById("btnTimerToggle");
+    if (btn) {
+      btn.innerText = "Lancer ▶️";
+      btn.style.background = "#10b981";
+    }
+  }
+
   const hInp = document.getElementById("tHours");
   const mInp = document.getElementById("tMinutes");
-  const h = parseInt(hInp ? hInp.value : "1") || 0;
-  const m = parseInt(mInp ? mInp.value : "30") || 0;
-  timerSeconds = (h * 60 + m) * 60;
-  if (timerSeconds <= 0) timerSeconds = 25 * 60;
+  const h = parseInt(hInp ? hInp.value : "1", 10) || 0;
+  const m = parseInt(mInp ? mInp.value : "30", 10) || 0;
+
+  let total = (h * 60 + m) * 60;
+  if (total <= 0) {
+    total = 25 * 60;
+    if (mInp) mInp.value = "25";
+  }
+
+  timerInitialSeconds = total;
+  timerSeconds = total;
   renderTimer();
 }
 
@@ -765,10 +799,13 @@ export function toggleTimer() {
     clearInterval(timerInterval);
     timerRunning = false;
     if (btn) {
-      btn.innerText = "Lancer ▶️";
+      btn.innerText = "Reprendre ▶️";
       btn.style.background = "#10b981";
     }
   } else {
+    if (timerSeconds <= 0) {
+      setCustomTimer();
+    }
     timerRunning = true;
     if (btn) {
       btn.innerText = "Pause ⏸️";
@@ -787,6 +824,8 @@ export function toggleTimer() {
           btn.innerText = "Lancer ▶️";
           btn.style.background = "#10b981";
         }
+        timerSeconds = timerInitialSeconds;
+        renderTimer();
       }
     }, 1000);
   }
@@ -804,7 +843,6 @@ export function resetTimer() {
 }
 
 export function updateBacCountdown() {
-  // Date officielle approximative des épreuves nationales du Baccalauréat
   const now = new Date();
   let bacYear = now.getFullYear();
   let bacDate = new Date(`${bacYear}-06-10T08:00:00`);
@@ -867,6 +905,7 @@ window.renderExams = renderExams;
 window.renderStatsData = renderStatsData;
 window.openStats = openStats;
 window.openTimer = openTimer;
+window.setTimerPreset = setTimerPreset;
 window.setCustomTimer = setCustomTimer;
 window.toggleTimer = toggleTimer;
 window.resetTimer = resetTimer;

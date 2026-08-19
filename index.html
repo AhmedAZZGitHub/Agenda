@@ -36,7 +36,7 @@
       }
     } catch (e) {}
   </script>
-  <link rel="stylesheet" href="css/styles.css?v=15.4" />
+  <link rel="stylesheet" href="css/styles.css?v=15.5" />
 </head>
 
 <body>
@@ -491,20 +491,29 @@
       <button class="btn-close" onclick="window.closeOverlay('timerOverlay')">Fermer ✕</button>
     </div>
     <div class="timer-container">
-      <div class="timer-display" id="timerDisplay">00:00:00</div>
+      <div class="timer-display" id="timerDisplay">01:30:00</div>
+      
+      <!-- PRESETS RAPIDES -->
+      <div style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-bottom: 14px;">
+        <button type="button" class="btn-action" style="font-size: 12px; padding: 6px 12px; font-weight: 700;" onclick="window.setTimerPreset(0, 25)">🍅 25 min (Pomodoro)</button>
+        <button type="button" class="btn-action" style="font-size: 12px; padding: 6px 12px; font-weight: 700;" onclick="window.setTimerPreset(0, 45)">⚡ 45 min (Cours)</button>
+        <button type="button" class="btn-action" style="font-size: 12px; padding: 6px 12px; font-weight: 700;" onclick="window.setTimerPreset(1, 30)">📝 1h 30m (Synthèse)</button>
+        <button type="button" class="btn-action" style="font-size: 12px; padding: 6px 12px; font-weight: 700;" onclick="window.setTimerPreset(2, 0)">🎓 2h 00m (Épreuve Bac)</button>
+      </div>
+
       <div class="timer-controls">
         <div
-          style="display: flex; align-items: center; gap: 8px; background: var(--dash); padding: 6px 12px; border-radius: 99px;">
-          <input type="number" id="tHours" class="input" style="width: 60px; text-align: center; padding: 6px" min="0"
-            max="23" value="1" /> h
-          <input type="number" id="tMinutes" class="input" style="width: 60px; text-align: center; padding: 6px" min="0"
-            max="59" value="30" /> m
-          <button class="btn-action" style="padding: 6px 12px" onclick="window.setCustomTimer()">Définir</button>
+          style="display: flex; align-items: center; gap: 8px; background: var(--dash); padding: 6px 14px; border-radius: 99px;">
+          <input type="number" id="tHours" class="input" style="width: 60px; text-align: center; font-weight: 800; padding: 6px" min="0"
+            max="23" value="1" oninput="window.setCustomTimer()" onchange="window.setCustomTimer()" /> h
+          <input type="number" id="tMinutes" class="input" style="width: 60px; text-align: center; font-weight: 800; padding: 6px" min="0"
+            max="59" value="30" oninput="window.setCustomTimer()" onchange="window.setCustomTimer()" /> m
+          <button type="button" class="btn-action" style="padding: 6px 12px; font-weight: 800;" onclick="window.setCustomTimer()">Définir</button>
         </div>
-        <button class="btn-timer" id="btnTimerStart" style="background: #10b981; color: white"
-          onclick="window.toggleTimer()">Lancer</button>
-        <button class="btn-timer" style="background: #ef4444; color: white"
-          onclick="window.resetTimer()">Réinitialiser</button>
+        <button type="button" class="btn-timer" id="btnTimerStart" style="background: #10b981; color: white; font-weight: 800;"
+          onclick="window.toggleTimer()">Lancer ▶️</button>
+        <button type="button" class="btn-timer" style="background: #ef4444; color: white; font-weight: 800;"
+          onclick="window.resetTimer()">Réinitialiser 🔄</button>
       </div>
     </div>
   </div>
@@ -1293,7 +1302,7 @@
   </div>
 
   <!-- SCRIPT APPLICATION -->
-  <script type="module" src="js/app.js?v=15.4"></script>
+  <script type="module" src="js/app.js?v=15.5"></script>
 </body>
 
 </html>
