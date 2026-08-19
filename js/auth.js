@@ -155,13 +155,17 @@ export async function handleLogin(e) {
   if (errDiv) errDiv.style.display = "none";
   if (successDiv) successDiv.style.display = "none";
 
+  if (!email || !pass) {
+    if (errDiv) {
+      errDiv.innerText = "Veuillez saisir votre adresse email et votre mot de passe.";
+      errDiv.style.display = "block";
+    }
+    return;
+  }
+
   try {
     showLoading("Connexion en cours...");
-    const userCredential = await signInWithEmailAndPassword(auth, email, pass);
-    if (userCredential && userCredential.user) {
-      state.currentUser = userCredential.user;
-      await loadUserProfile(userCredential.user.uid);
-    }
+    await signInWithEmailAndPassword(auth, email, pass);
   } catch (err) {
     hideLoading();
     if (errDiv) {
@@ -253,23 +257,35 @@ export function formatAuthError(code = "") {
 
 export async function loadUserProfile(uid) {
   try {
-    const userSnap = await get(ref(database, `users/${uid}`));
-    if (!userSnap.exists()) {
+    showLoading("Chargement de votre profil...");
+    let userSnap = null;
+    try {
+      userSnap = await get(ref(database, `users/${uid}`));
+    } catch (dbErr) {
+      console.warn("Erreur lecture Firebase Database profil:", dbErr);
+    }
+
+    if (!userSnap || !userSnap.exists()) {
       state.currentUserProfile = {
         uid: uid,
-        email: state.currentUser.email,
-        displayName: state.currentUser.displayName || "Élève",
+        email: state.currentUser?.email || "",
+        displayName: state.currentUser?.displayName || state.currentUser?.email?.split("@")[0] || "Élève",
         role: "student",
         status: "approved",
         parentLinkCode: "BAC-" + Math.random().toString(36).substring(2, 6).toUpperCase(),
         createdAt: Date.now(),
       };
-      await set(ref(database, `users/${uid}`), state.currentUserProfile);
-      await set(ref(database, `parent_codes/${state.currentUserProfile.parentLinkCode}`), uid);
+      try {
+        await set(ref(database, `users/${uid}`), state.currentUserProfile);
+        await set(ref(database, `parent_codes/${state.currentUserProfile.parentLinkCode}`), uid);
+      } catch (e) {}
     } else {
-      state.currentUserProfile = userSnap.val();
+      state.currentUserProfile = userSnap.val() || {};
       if (!state.currentUserProfile.status) {
         state.currentUserProfile.status = "approved";
+      }
+      if (!state.currentUserProfile.role) {
+        state.currentUserProfile.role = "student";
       }
     }
 
@@ -325,8 +341,12 @@ export async function loadUserProfile(uid) {
       loadAdminKPIs();
     }
 
-    listenToAnnouncements();
-    render();
+    try {
+      listenToAnnouncements();
+    } catch (e) {}
+    try {
+      render();
+    } catch (e) {}
 
     const authOverlay = document.getElementById("authOverlay");
     const mainApp = document.getElementById("mainAppWrap");
