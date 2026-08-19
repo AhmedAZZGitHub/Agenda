@@ -2496,6 +2496,7 @@
         document.getElementById("authActionBtn").style.color = "var(--primary)";
         document.getElementById("authActionBtn").onclick = window.showAuthModal;
         document.getElementById("userNameLabel").innerText = "Non connecté";
+        if (document.getElementById("btnMyProfile")) document.getElementById("btnMyProfile").style.display = "none";
         // L'écran de connexion reste toujours affiché au lancement et masque complètement l'app
         document.getElementById("authOverlay").style.display = "flex";
         if (document.getElementById("mainAppWrap")) document.getElementById("mainAppWrap").style.display = "none";
