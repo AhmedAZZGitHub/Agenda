@@ -202,8 +202,20 @@ export function renderMob() {
 }
 
 export function shift(d) {
-  if (state.layout === "pc") state.currentMonday.setDate(state.currentMonday.getDate() + d * 7);
-  else state.curDayIdx = (state.curDayIdx + d + 7) % 7;
+  if (state.layout === "pc") {
+    state.currentMonday = new Date(state.currentMonday.getTime() + d * 7 * 86400000);
+  } else {
+    let newDay = state.curDayIdx + d;
+    if (newDay > 6) {
+      state.currentMonday = new Date(state.currentMonday.getTime() + 7 * 86400000);
+      state.curDayIdx = 0;
+    } else if (newDay < 0) {
+      state.currentMonday = new Date(state.currentMonday.getTime() - 7 * 86400000);
+      state.curDayIdx = 6;
+    } else {
+      state.curDayIdx = newDay;
+    }
+  }
   render();
 }
 
@@ -429,6 +441,19 @@ export async function saveQuickSessionTodo(explicitDoneStatus = null) {
     state.sessionDateTodos[key] = todoObj;
     await set(ref(database, getStudentPath(`seances_todos/${key}`)), todoObj);
   }
+
+  // Purge de l'ancien champ global todo sur la séance pour éviter qu'il n'apparaisse sur d'autres semaines
+  try {
+    const ev = state.db.find((s) => s.id === activeDetailSessionId);
+    if (ev && (ev.todo || ev.todoDone)) {
+      delete ev.todo;
+      delete ev.todoDone;
+      await update(ref(database, getStudentPath(`seances/${activeDetailSessionId}`)), {
+        todo: null,
+        todoDone: null,
+      });
+    }
+  } catch (e) {}
 
   render();
 }
