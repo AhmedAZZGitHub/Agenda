@@ -1,8 +1,8 @@
 // js/tutor-ai.js
 // Tuteur IA Éducatif Gemini Pro (Baccalauréat Tunisien) & Correction d'Exercices par Photo
 
-import { getAiModelName, getAiApiKey } from "./ai-assistant.js?v=10.0";
-import { state, showLoading, hideLoading, playBeep } from "./state.js?v=10.0";
+import { getAiModelName, getAiApiKey } from "./ai-assistant.js?v=13.0";
+import { state, showLoading, hideLoading, playBeep } from "./state.js?v=13.0";
 
 let tutorChatHistory = [];
 let tutorAttachedImageBase64 = null;
@@ -41,20 +41,20 @@ RÈGLES STRICTES ET NON NÉGOCIABLES :
 
 export function getTutorModelName() {
   const saved = localStorage.getItem("gemini_model_name");
-  if (saved && (saved === "gemini-1.5-pro" || saved === "gemini-1.5-flash")) return saved;
-  return "gemini-2.0-flash"; // Modèle Google Generative Language officiel le plus performant
+  if (saved && saved.trim()) return saved.trim();
+  return "gemini-3.1-pro"; // Modèle d'élite Google Gemini 3.1 Pro
 }
 
 export function promptSetAiApiKey() {
   const currentKey = localStorage.getItem("gemini_api_key") || "";
   const key = prompt(
-    "🔑 Clé API Google Gemini (AI Studio) :\n\nPour connecter directement votre compte Gemini en direct sans restriction, collez votre clé API Google (obtenue gratuitement sur https://aistudio.google.com/app/apikey) :",
+    "🔑 Clé API Google Gemini (AI Studio) :\n\nPour connecter directement votre compte Gemini 3.1 Pro en direct sans restriction, collez votre clé API Google (obtenue gratuitement sur https://aistudio.google.com/app/apikey) :",
     currentKey
   );
   if (key !== null) {
     if (key.trim()) {
       localStorage.setItem("gemini_api_key", key.trim());
-      alert("✅ Clé API Google Gemini enregistrée avec succès ! Vos questions recevront les réponses en direct de l'IA.");
+      alert("✅ Clé API Google Gemini 3.1 Pro enregistrée avec succès ! Vos questions recevront les réponses en direct de Gemini 3.1 Pro.");
     } else {
       localStorage.removeItem("gemini_api_key");
       alert("ℹ️ Clé personnalisée réinitialisée.");
@@ -73,7 +73,7 @@ export function openTutorChat() {
 
   const modelBadge = document.getElementById("tutorModelBadge");
   if (modelBadge) {
-    modelBadge.innerText = "⚡ Gemini 3.7 Flash High";
+    modelBadge.innerText = "✨ Gemini 3.1 Pro";
   }
 
   // Nettoyage automatique des anciens messages d'erreur résiduels

@@ -20,7 +20,7 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
     try {
-      localStorage.setItem("gemini_model_name", "gemini-3.7-flash");
+      localStorage.setItem("gemini_model_name", "gemini-3.1-pro");
       if ("serviceWorker" in navigator) {
         navigator.serviceWorker.getRegistrations().then(function (registrations) {
           for (var registration of registrations) {
@@ -37,7 +37,7 @@
       }
     } catch (e) {}
   </script>
-  <link rel="stylesheet" href="css/styles.css?v=11.0" />
+  <link rel="stylesheet" href="css/styles.css?v=13.0" />
 </head>
 
 <body>
@@ -1218,7 +1218,7 @@
           <div>
             <div style="font-weight: 800; font-size: 15px; display: flex; align-items: center; gap: 8px;">
               <span>Tuteur Bac IA</span>
-              <span style="font-size: 10.5px; font-weight: 800; background: linear-gradient(135deg, rgba(6,182,212,0.15), rgba(59,130,246,0.15)); color: #0284c7; border: 1px solid rgba(2,132,199,0.3); padding: 3px 9px; border-radius: 99px;" id="tutorModelBadge">⚡ Gemini 3.7 Flash High</span>
+              <span style="font-size: 10.5px; font-weight: 800; background: linear-gradient(135deg, rgba(99,102,241,0.15), rgba(168,85,247,0.15)); color: #6366f1; border: 1px solid rgba(99,102,241,0.3); padding: 3px 9px; border-radius: 99px;" id="tutorModelBadge">✨ Gemini 3.1 Pro</span>
             </div>
             <div style="font-size: 11px; color: var(--muted);">Spécialisé exclusivement dans le programme du Baccalauréat</div>
           </div>
@@ -1292,7 +1292,7 @@
   </div>
 
   <!-- SCRIPT APPLICATION -->
-  <script type="module" src="js/app.js?v=11.0"></script>
+  <script type="module" src="js/app.js?v=13.0"></script>
 </body>
 
 </html>
