@@ -1,8 +1,8 @@
-// js/tutor-bot.js
+// js/tutor-ai.js
 // Tuteur IA Éducatif Gemini Pro (Baccalauréat Tunisien) & Correction d'Exercices par Photo
 
-import { getAiModelName, getAiApiKey } from "./ai-assistant.js?v=6.0";
-import { state, showLoading, hideLoading, playBeep } from "./state.js?v=6.0";
+import { getAiModelName, getAiApiKey } from "./ai-assistant.js?v=7.0";
+import { state, showLoading, hideLoading, playBeep } from "./state.js?v=7.0";
 
 let tutorChatHistory = [];
 let tutorAttachedImageBase64 = null;

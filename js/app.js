@@ -8,10 +8,10 @@ import { render, updateBacCountdown, updateHomeStreak } from "./calendar.js?v=6.
 import { initBacArchiveTabs, switchTrimester } from "./grades.js?v=6.0";
 
 // Import modules to register window bindings
-import "./maps.js?v=6.0";
-import "./ai-assistant.js?v=6.0";
-import "./admin.js?v=6.0";
-import "./tutor-bot.js?v=6.0";
+import "./maps.js?v=7.0";
+import "./ai-assistant.js?v=7.0";
+import "./admin.js?v=7.0";
+import "./tutor-ai.js?v=7.0";
 
 // Nettoyage automatique des modèles obsolètes
 if (localStorage.getItem("gemini_model_name") && !["gemini-1.5-pro", "gemini-2.0-flash", "gemini-1.5-flash"].includes(localStorage.getItem("gemini_model_name"))) {

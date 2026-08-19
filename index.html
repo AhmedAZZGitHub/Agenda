@@ -21,9 +21,23 @@
   <script>
     try {
       localStorage.setItem("gemini_model_name", "gemini-1.5-pro");
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.getRegistrations().then(function (registrations) {
+          for (var registration of registrations) {
+            registration.unregister();
+          }
+        });
+      }
+      if ("caches" in window) {
+        caches.keys().then(function (names) {
+          for (var name of names) {
+            caches.delete(name);
+          }
+        });
+      }
     } catch (e) {}
   </script>
-  <link rel="stylesheet" href="css/styles.css?v=6.0" />
+  <link rel="stylesheet" href="css/styles.css?v=7.0" />
 </head>
 
 <body>
@@ -1275,7 +1289,7 @@
   </div>
 
   <!-- SCRIPT APPLICATION -->
-  <script type="module" src="js/app.js?v=6.0"></script>
+  <script type="module" src="js/app.js?v=7.0"></script>
 </body>
 
 </html>
