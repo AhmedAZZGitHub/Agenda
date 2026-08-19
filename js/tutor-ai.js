@@ -1,8 +1,8 @@
 // js/tutor-ai.js
 // Tuteur IA Éducatif Gemini Pro (Baccalauréat Tunisien) & Correction d'Exercices par Photo
 
-import { getAiModelName, getAiApiKey } from "./ai-assistant.js?v=15.2";
-import { state, showLoading, hideLoading, playBeep } from "./state.js?v=15.2";
+import { getAiModelName, getAiApiKey } from "./ai-assistant.js?v=15.3";
+import { state, showLoading, hideLoading, playBeep } from "./state.js?v=15.3";
 
 let tutorChatHistory = [];
 let tutorAttachedImageBase64 = null;
@@ -75,23 +75,27 @@ export async function promptSetAiApiKey() {
     let lastError = "";
 
     for (const m of candidateModels) {
-      try {
-        const testUrl = `https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent?key=${trimmed}`;
-        const resp = await fetch(testUrl, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ contents: [{ parts: [{ text: "Bonjour" }] }] }),
-        });
-        if (resp.ok) {
-          testSuccess = true;
-          break;
-        } else {
-          const errData = await resp.json().catch(() => ({}));
-          lastError = errData.error?.message || `Erreur HTTP ${resp.status}`;
+      const endpoints = ["v1beta", "v1"];
+      for (const apiVer of endpoints) {
+        try {
+          const testUrl = `https://generativelanguage.googleapis.com/${apiVer}/models/${m}:generateContent?key=${trimmed}`;
+          const resp = await fetch(testUrl, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ contents: [{ parts: [{ text: "Bonjour" }] }] }),
+          });
+          if (resp.ok) {
+            testSuccess = true;
+            break;
+          } else {
+            const errData = await resp.json().catch(() => ({}));
+            lastError = errData.error?.message || `Erreur HTTP ${resp.status}`;
+          }
+        } catch (err) {
+          lastError = err.message;
         }
-      } catch (err) {
-        lastError = err.message;
       }
+      if (testSuccess) break;
     }
 
     hideLoading();
@@ -100,7 +104,12 @@ export async function promptSetAiApiKey() {
       alert("🎉 Clé Google Gemini validée avec succès !\n\nLe Tuteur IA et le Micro IA sont désormais connectés en direct aux serveurs de Google pour répondre à toutes vos questions.");
       renderTutorWelcomeMessage();
     } else {
-      alert(`⚠️ Erreur de validation de la clé :\n${lastError}\n\nVérifiez que la clé a bien été créée sur https://aistudio.google.com/app/apikey`);
+      const forceSave = confirm(`⚠️ Erreur de validation de la clé :\n${lastError}\n\nGoogle n'arrive pas à valider les modèles avec cette clé. Voulez-vous forcer l'enregistrement de cette clé quand même ?`);
+      if (forceSave) {
+        localStorage.setItem("gemini_api_key", trimmed);
+        alert("✅ Clé enregistrée de force.");
+        renderTutorWelcomeMessage();
+      }
     }
   } catch (e) {
     hideLoading();
@@ -328,27 +337,31 @@ MESSAGE / QUESTION DE L'ÉLÈVE :
     parts.push({ text: fullPrompt });
 
     for (const mName of candidateModels) {
-      try {
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/${mName}:generateContent?key=${apiKey}`;
-        const res = await fetch(url, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ contents: [{ parts }] }),
-        });
+      const endpoints = ["v1beta", "v1"];
+      for (const apiVer of endpoints) {
+        try {
+          const url = `https://generativelanguage.googleapis.com/${apiVer}/models/${mName}:generateContent?key=${apiKey}`;
+          const res = await fetch(url, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ contents: [{ parts }] }),
+          });
 
-        if (res.ok) {
-          const data = await res.json();
-          botReply = data.candidates?.[0]?.content?.parts?.[0]?.text;
-          if (botReply) {
-            apiSuccess = true;
-            break;
+          if (res.ok) {
+            const data = await res.json();
+            botReply = data.candidates?.[0]?.content?.parts?.[0]?.text;
+            if (botReply) {
+              apiSuccess = true;
+              break;
+            }
+          } else {
+            lastErrorStatus = res.status;
           }
-        } else {
-          lastErrorStatus = res.status;
+        } catch (err) {
+          console.warn(`Erreur lors de l'appel modèle ${mName} (${apiVer}):`, err);
         }
-      } catch (err) {
-        console.warn(`Erreur lors de l'appel modèle ${mName}:`, err);
       }
+      if (apiSuccess) break;
     }
   } catch (e) {
     console.warn("API Gemini non accessible:", e);
