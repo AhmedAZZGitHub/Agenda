@@ -1,17 +1,17 @@
 // js/app.js
 // Point d'Entrée Principal de l'Application
 
-import { auth, onAuthStateChanged } from "./firebase-config.js";
-import { state } from "./state.js";
-import { loadUserProfile, detachAllDataListeners, renderUserProfileBar, updateReadOnlyUI } from "./auth.js";
-import { render, updateBacCountdown, updateHomeStreak } from "./calendar.js";
-import { initBacArchiveTabs, switchTrimester } from "./grades.js";
+import { auth, onAuthStateChanged } from "./firebase-config.js?v=6.0";
+import { state } from "./state.js?v=6.0";
+import { loadUserProfile, detachAllDataListeners, renderUserProfileBar, updateReadOnlyUI } from "./auth.js?v=6.0";
+import { render, updateBacCountdown, updateHomeStreak } from "./calendar.js?v=6.0";
+import { initBacArchiveTabs, switchTrimester } from "./grades.js?v=6.0";
 
 // Import modules to register window bindings
-import "./maps.js";
-import "./ai-assistant.js";
-import "./admin.js";
-import "./tutor-bot.js";
+import "./maps.js?v=6.0";
+import "./ai-assistant.js?v=6.0";
+import "./admin.js?v=6.0";
+import "./tutor-bot.js?v=6.0";
 
 // Nettoyage automatique des modèles obsolètes
 if (localStorage.getItem("gemini_model_name") && !["gemini-1.5-pro", "gemini-2.0-flash", "gemini-1.5-flash"].includes(localStorage.getItem("gemini_model_name"))) {
