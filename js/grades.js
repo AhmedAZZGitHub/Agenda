@@ -348,6 +348,7 @@ export function buildAnnualSummaryTable() {
 window.selectBacSubject = selectBacSubject;
 window.setBacFilter = setBacFilter;
 window.searchBacOnline = searchBacOnline;
+window.renderBacArchiveGrid = renderBacArchiveGrid;
 window.toggleBacDone = toggleBacDone;
 window.toggleBacStar = toggleBacStar;
 window.saveBacPdf = saveBacPdf;

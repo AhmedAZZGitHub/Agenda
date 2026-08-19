@@ -265,6 +265,31 @@ export async function loadUserProfile(uid) {
       state.currentUserProfile = userSnap.val();
     }
 
+    // Vérification du statut en attente
+    if (state.currentUserProfile.status === "pending") {
+      await signOut(auth);
+      hideLoading();
+      const errDiv = document.getElementById("authErrorMsg");
+      if (errDiv) {
+        errDiv.innerHTML = "⏳ <b>Compte en attente</b> : Votre inscription doit être validée par l'administrateur.";
+        errDiv.style.display = "block";
+      }
+      window.openOverlay("authOverlay");
+      return;
+    }
+
+    if (state.currentUserProfile.status === "rejected") {
+      await signOut(auth);
+      hideLoading();
+      const errDiv = document.getElementById("authErrorMsg");
+      if (errDiv) {
+        errDiv.innerHTML = "❌ <b>Accès refusé</b> : Cette demande a été refusée par l'administrateur.";
+        errDiv.style.display = "block";
+      }
+      window.openOverlay("authOverlay");
+      return;
+    }
+
     renderUserProfileBar();
 
     if (state.currentUserProfile.role === "student") {
@@ -287,7 +312,10 @@ export async function loadUserProfile(uid) {
     }
 
     listenToAnnouncements();
+    window.closeOverlay("authOverlay");
+    hideLoading();
   } catch (e) {
+    hideLoading();
     console.error("Erreur chargement profil:", e);
   }
 }
