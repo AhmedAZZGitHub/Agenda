@@ -321,9 +321,26 @@ export function deleteEvent(id) {
   const todoKey = `${id}_${dateKey}`;
   const dateTodo = (state.sessionDateTodos && state.sessionDateTodos[todoKey]) || {};
 
-  if (todoInp) todoInp.value = dateTodo.todo || "";
+  if (todoInp) {
+    todoInp.value = dateTodo.todo || "";
+    todoInp.readOnly = state.isReadOnly;
+    todoInp.placeholder = state.isReadOnly
+      ? "Aucun exercice spécifié pour cette séance."
+      : "Ex: Exercices 1, 2 et 4 p.85 (Série Continuité et Limites) / Apprendre le cours...";
+  }
   if (todoDoneInp) todoDoneInp.checked = dateTodo.todoDone === true;
   updateSdTodoStatusButton(dateTodo.todoDone === true);
+
+  const todoStatusBtn = document.getElementById("sdTodoStatusToggleBtn");
+  if (todoStatusBtn) {
+    todoStatusBtn.style.pointerEvents = state.isReadOnly ? "none" : "auto";
+    todoStatusBtn.title = state.isReadOnly ? "Consultation parent (Lecture seule)" : "Cliquer pour basculer le statut";
+  }
+
+  const editTabBtn = document.getElementById("sdTabEditBtn");
+  if (editTabBtn) {
+    editTabBtn.style.display = state.isReadOnly ? "none" : "block";
+  }
 
   const isPart = ev.type && ev.type.includes("Particulier");
   const mapSec = document.getElementById("sdParticularMapSection");
