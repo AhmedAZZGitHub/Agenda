@@ -8,6 +8,14 @@ let selectedAiSpeechLang = "ar-TN";
 let aiSpeechRecognition = null;
 let isAiSpeechRecording = false;
 
+export const DEFAULT_AI_KEY = "AIzaSyBsC9bjxuhysJ6AyouCS1kcyHNg0Dpic1c";
+
+export function getAiApiKey() {
+  const saved = localStorage.getItem("gemini_api_key");
+  if (saved && saved.trim()) return saved.trim();
+  return DEFAULT_AI_KEY; // Clé intégrée par défaut dans l'application
+}
+
 export function getAiModelName() {
   const saved = localStorage.getItem("gemini_model_name");
   if (saved && saved.trim()) return saved.trim();
@@ -15,7 +23,7 @@ export function getAiModelName() {
 }
 
 export function openAiSettingsModal() {
-  const currentKey = localStorage.getItem("gemini_api_key") || "";
+  const currentKey = localStorage.getItem("gemini_api_key") || DEFAULT_AI_KEY;
   const currentModel = getAiModelName();
 
   const keyInput = document.getElementById("aiApiKeyInput");
@@ -250,7 +258,7 @@ export async function executeAiCommand() {
   }
 
   showLoading("Analyse intelligente par l'Assistant IA...");
-  const geminiKey = localStorage.getItem("gemini_api_key") || "";
+  const geminiKey = getAiApiKey();
   let parsedResult = null;
 
   if (geminiKey) {
@@ -490,12 +498,7 @@ export async function handleImageUpload(e) {
   const file = e.target.files?.[0];
   if (!file) return;
 
-  const apiKey = localStorage.getItem("gemini_api_key");
-  if (!apiKey) {
-    alert("📸 Pour scanner un emploi du temps ou des devoirs par photo, veuillez d'abord renseigner votre clé gratuite via le bouton '🤖 Modèle IA'.");
-    return;
-  }
-
+  const apiKey = getAiApiKey();
   showLoading("Analyse de l'image par Vision IA...");
 
   try {

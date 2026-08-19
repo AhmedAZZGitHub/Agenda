@@ -1,7 +1,7 @@
 // js/tutor-bot.js
 // Tuteur IA Éducatif Gemini Pro (Baccalauréat Tunisien) & Correction d'Exercices par Photo
 
-import { getAiModelName } from "./ai-assistant.js";
+import { getAiModelName, getAiApiKey } from "./ai-assistant.js";
 import { state, showLoading, hideLoading, playBeep } from "./state.js";
 
 let tutorChatHistory = [];
@@ -186,14 +186,7 @@ export async function sendTutorMessage() {
 
   if (!userText && !attachedBase64) return;
 
-  const apiKey = localStorage.getItem("gemini_api_key") || "";
-  if (!apiKey) {
-    appendTutorMessage(
-      "bot",
-      `⚠️ <b>Clé API requise</b> : Pour discuter avec votre Tuteur IA et corriger vos exercices par photo, veuillez d'abord renseigner votre clé gratuite via le bouton <b>🤖 Modèle IA</b> dans la barre supérieure.`
-    );
-    return;
-  }
+  const apiKey = getAiApiKey();
 
   let userDisplayImg = null;
   if (attachedBase64) {
