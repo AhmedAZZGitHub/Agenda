@@ -16,6 +16,16 @@ import {
 import { renderDetailSessionMap, initEditPickerMap } from "./maps.js?v=6.0";
 
 let activeDetailSessionId = null;
+let activeDetailSessionDate = null;
+
+export function getSessionDateKey(dayIdx, refMonday = state.currentMonday) {
+  const d = new Date(refMonday);
+  d.setDate(d.getDate() + dayIdx);
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const date = String(d.getDate()).padStart(2, "0");
+  return `${year}-${month}-${date}`;
+}
 
 let timerInterval = null;
 let timerSeconds = 25 * 60;
@@ -89,9 +99,11 @@ export function renderPc() {
     const col = document.createElement("div");
     col.className = "col-day";
     for (let h = 8; h <= 24; h++) {
-      col.innerHTML += `<div class="h-slot" onclick="${state.isReadOnly ? "" : `window.openModal('addModal', ${day}, ${h === 24 ? 23 : h})`}"></div>`;
+      const clickAttr = state.isReadOnly ? "" : `onclick="window.openModal('addModal', ${day}, ${h === 24 ? 23 : h})"`;
+      col.innerHTML += `<div class="h-slot" ${clickAttr}></div>`;
     }
 
+    const dateKey = getSessionDateKey(day);
     state.db
       .filter((e) => e.day === day)
       .forEach((ev) => {
@@ -104,6 +116,11 @@ export function renderPc() {
         const isHome = ev.type && ev.type.includes("maison");
         const isOnline = ev.type && ev.type.includes("ligne");
         const isPart = ev.type && ev.type.includes("Particulier");
+
+        const todoKey = `${ev.id}_${dateKey}`;
+        const todoObj = state.sessionDateTodos && state.sessionDateTodos[todoKey];
+        const hasTodo = Boolean(todoObj && todoObj.todo && todoObj.todo.trim());
+        const isDone = todoObj && todoObj.todoDone === true;
 
         const c = document.createElement("div");
         c.className = `event-card ${meta.cls} ${status.class}`;
@@ -118,7 +135,7 @@ export function renderPc() {
             <div style="margin-top:1px; display:flex; gap:2px; flex-wrap:wrap;">
               ${isPart ? `<span class="tag-meta" style="background:#7c3aed; color:white; cursor:pointer;" onclick="event.stopPropagation(); window.openMapViewer('${ev.id}')" title="Voir l'emplacement sur la carte">📍 ${ev.location?.address ? (ev.location.address.length > 12 ? ev.location.address.substring(0, 12) + "..." : ev.location.address) : "Particulier"}</span>` : ev.type ? `<span class="tag-meta" style="${isHome ? "background:#059669; color:white;" : isOnline ? "background:#0891b2; color:white;" : ""}">${ev.type}</span>` : ""}
               ${isQuin ? `<span class="tag-meta" style="background:#f59e0b; color:white;">1/2</span>` : ""}
-              ${ev.todo ? `<span class="tag-meta" style="${ev.todoDone === true ? "background:#059669; color:white; font-weight:800;" : "background:#ea580c; color:white; font-weight:800;"}" onclick="event.stopPropagation(); window.toggleSessionTodoDone('${ev.id}', event)" title="Exercices : ${ev.todo.replace(/"/g, '&quot;')} (Cliquer pour basculer Fait/Non fait)">${ev.todoDone === true ? "✅ Ex. Fait" : "⏳ Ex. À faire"}</span>` : ""}
+              ${hasTodo ? `<span class="tag-meta" style="${isDone ? "background:#059669; color:white; font-weight:800;" : "background:#ea580c; color:white; font-weight:800;"}" onclick="event.stopPropagation(); window.toggleSessionTodoDone('${ev.id}', '${dateKey}', event)" title="Exercices pour le ${dateKey} : ${todoObj.todo.replace(/"/g, '&quot;')} (Cliquer pour basculer Fait/Non fait)">${isDone ? "✅ Ex. Fait" : "⏳ Ex. À faire"}</span>` : ""}
             </div>
           </div>
           <div style="font-size:9px; opacity:0.85; font-weight:700;">${formatM(ev.s)} - ${formatM(ev.e)}</div>
@@ -127,7 +144,7 @@ export function renderPc() {
         c.style.cursor = "pointer";
         c.onclick = (e) => {
           e.stopPropagation();
-          window.openSessionDetails(ev.id);
+          window.openSessionDetails(ev.id, dateKey);
         };
         col.appendChild(c);
       });
@@ -152,6 +169,7 @@ export function renderMob() {
     ml.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted);font-size:13px;">☕ Aucune séance prévue ce jour-là.</div>';
     return;
   }
+  const curDateKey = getSessionDateKey(state.curDayIdx);
   dayEvs.forEach((ev) => {
     const meta = getSubjectMeta(ev.sub);
     const status = getEventStatus(ev.day, ev.s, ev.e);
@@ -160,19 +178,24 @@ export function renderMob() {
     const isOnline = ev.type && ev.type.includes("ligne");
     const isPart = ev.type && ev.type.includes("Particulier");
 
+    const todoKey = `${ev.id}_${curDateKey}`;
+    const todoObj = state.sessionDateTodos && state.sessionDateTodos[todoKey];
+    const hasTodo = Boolean(todoObj && todoObj.todo && todoObj.todo.trim());
+    const isDone = todoObj && todoObj.todoDone === true;
+
     ml.innerHTML += `
-      <div class="mob-card ${meta.cls} ${status.class}" style="cursor: pointer;" onclick="window.openSessionDetails('${ev.id}')">
+      <div class="mob-card ${meta.cls} ${status.class}" style="cursor: pointer;" onclick="window.openSessionDetails('${ev.id}', '${curDateKey}')">
         <div>
           ${status.text}
           <div style="font-size:14px;font-weight:800;">${meta.ico} ${ev.sub}</div>
           <div style="margin:3px 0; display:flex; gap:3px; flex-wrap:wrap;">
             ${isPart ? `<span class="tag-meta" style="background:#7c3aed; color:white; font-weight:800;">📍 ${ev.location?.address || "Cours Particulier"}</span>` : ev.type ? `<span class="tag-meta" style="${isHome ? "background:#059669; color:white;" : isOnline ? "background:#0891b2; color:white;" : ""}">${ev.type}</span>` : ""}
             ${isQuin ? `<span class="tag-meta" style="background:#f59e0b; color:white;">1/2 quinzaine</span>` : ""}
-            ${ev.todo ? `<span class="tag-meta" style="${ev.todoDone === true ? "background:#059669; color:white; font-weight:800;" : "background:#ea580c; color:white; font-weight:800;"}" onclick="event.stopPropagation(); window.toggleSessionTodoDone('${ev.id}', event)" title="Cliquer pour basculer Fait/Non fait">${ev.todoDone === true ? "✅ Exercices Faits" : "⏳ Exercices À faire"}</span>` : ""}
+            ${hasTodo ? `<span class="tag-meta" style="${isDone ? "background:#059669; color:white; font-weight:800;" : "background:#ea580c; color:white; font-weight:800;"}" onclick="event.stopPropagation(); window.toggleSessionTodoDone('${ev.id}', '${curDateKey}', event)" title="Cliquer pour basculer Fait/Non fait">${isDone ? "✅ Exercices Faits" : "⏳ Exercices À faire"}</span>` : ""}
           </div>
           <div style="font-size:12px;opacity:0.85;font-weight:600;">🕒 ${formatM(ev.s)} - ${formatM(ev.e)}</div>
         </div>
-        <button onclick="event.stopPropagation(); window.openSessionDetails('${ev.id}')" style="border:none;background:none;font-size:18px;cursor:pointer;" title="Détails & Modification">ℹ️</button>
+        <button onclick="event.stopPropagation(); window.openSessionDetails('${ev.id}', '${curDateKey}')" style="border:none;background:none;font-size:18px;cursor:pointer;" title="Détails & Modification">ℹ️</button>
       </div>
     `;
   });
@@ -247,16 +270,17 @@ export function deleteEvent(id) {
       remove(ref(database, getStudentPath("seances/" + id)));
     }
   );
-}
-
-// --- DÉTAILS ET MODIFICATION DE SÉANCE ---
-export function openSessionDetails(sessionId) {
-  const ev = state.db.find((e) => e.id === sessionId);
+}export function openSessionDetails(id, explicitDateKey = null) {
+  const ev = state.db.find((e) => e.id === id);
   if (!ev) return;
-  activeDetailSessionId = sessionId;
+  activeDetailSessionId = id;
+
+  const dateKey = explicitDateKey || getSessionDateKey(ev.day);
+  activeDetailSessionDate = dateKey;
 
   const meta = getSubjectMeta(ev.sub);
-  const durHours = ((ev.e - ev.s) / 60).toFixed(1);
+  const durMin = ev.e - ev.s;
+  const durHours = (durMin / 60).toFixed(1).replace(".0", "");
 
   const icoEl = document.getElementById("sdIco");
   const subEl = document.getElementById("sdSubTitle");
@@ -266,14 +290,28 @@ export function openSessionDetails(sessionId) {
   const todoInp = document.getElementById("sdTodoText");
   const todoDoneInp = document.getElementById("sdTodoDone");
 
+  let formattedDateHeader = `🗓️ ${state.days[ev.day]}`;
+  if (dateKey) {
+    const parts = dateKey.split("-").map(Number);
+    if (parts.length === 3) {
+      const dObj = new Date(parts[0], parts[1] - 1, parts[2]);
+      formattedDateHeader = `🗓️ ${state.days[ev.day]} ${dObj.getDate()} ${state.months[dObj.getMonth()]}`;
+    }
+  }
+
   if (icoEl) icoEl.innerText = meta.ico;
   if (subEl) subEl.innerText = `${ev.sub} (Coef ${meta.coef || 1})`;
-  if (timeEl) timeEl.innerText = `🗓️ ${state.days[ev.day]} • ${formatM(ev.s)} - ${formatM(ev.e)} (${durHours}h)`;
+  if (timeEl) timeEl.innerText = `${formattedDateHeader} • ${formatM(ev.s)} - ${formatM(ev.e)} (${durHours}h)`;
   if (typeEl) typeEl.innerText = ev.type || "À la maison";
   if (freqEl) freqEl.innerText = ev.freq || "Chaque semaine";
-  if (todoInp) todoInp.value = ev.todo || "";
-  if (todoDoneInp) todoDoneInp.checked = ev.todoDone === true;
-  updateSdTodoStatusButton(ev.todoDone === true);
+
+  // Récupération des devoirs/exercices isolés pour CETTE date précise
+  const todoKey = `${id}_${dateKey}`;
+  const dateTodo = (state.sessionDateTodos && state.sessionDateTodos[todoKey]) || {};
+
+  if (todoInp) todoInp.value = dateTodo.todo || "";
+  if (todoDoneInp) todoDoneInp.checked = dateTodo.todoDone === true;
+  updateSdTodoStatusButton(dateTodo.todoDone === true);
 
   const isPart = ev.type && ev.type.includes("Particulier");
   const mapSec = document.getElementById("sdParticularMapSection");
@@ -362,7 +400,7 @@ export function onEditSessionTypeChange(val) {
 }
 
 export async function saveQuickSessionTodo(explicitDoneStatus = null) {
-  if (state.isReadOnly || !activeDetailSessionId) return;
+  if (state.isReadOnly || !activeDetailSessionId || !activeDetailSessionDate) return;
   const textEl = document.getElementById("sdTodoText");
   const todo = textEl ? textEl.value.trim() : "";
   const checkbox = document.getElementById("sdTodoDone");
@@ -375,16 +413,22 @@ export async function saveQuickSessionTodo(explicitDoneStatus = null) {
 
   updateSdTodoStatusButton(todoDone);
 
-  const ev = state.db.find((s) => s.id === activeDetailSessionId);
-  if (ev) {
-    ev.todo = todo;
-    ev.todoDone = todoDone;
-  }
+  const key = `${activeDetailSessionId}_${activeDetailSessionDate}`;
+  if (!state.sessionDateTodos) state.sessionDateTodos = {};
 
-  await update(ref(database, getStudentPath("seances/" + activeDetailSessionId)), {
-    todo: todo,
-    todoDone: todoDone,
-  });
+  if (!todo && !todoDone) {
+    delete state.sessionDateTodos[key];
+    await remove(ref(database, getStudentPath(`seances_todos/${key}`)));
+  } else {
+    const todoObj = {
+      todo,
+      todoDone,
+      date: activeDetailSessionDate,
+      sessionId: activeDetailSessionId,
+    };
+    state.sessionDateTodos[key] = todoObj;
+    await set(ref(database, getStudentPath(`seances_todos/${key}`)), todoObj);
+  }
 
   render();
 }
@@ -423,15 +467,23 @@ export function askTutorAboutSessionTodo() {
   window.useTutorQuickPrompt(prompt);
 }
 
-export async function toggleSessionTodoDone(sessionId, e) {
+export async function toggleSessionTodoDone(sessionId, dateKey, e) {
   if (e) e.stopPropagation();
   if (state.isReadOnly) return;
-  const ev = state.db.find((s) => s.id === sessionId);
-  if (!ev) return;
-  const newDone = !ev.todoDone;
-  ev.todoDone = newDone;
-  await update(ref(database, getStudentPath("seances/" + sessionId)), {
+  const key = `${sessionId}_${dateKey}`;
+  const currentObj = (state.sessionDateTodos && state.sessionDateTodos[key]) || {};
+  const newDone = !currentObj.todoDone;
+  if (!state.sessionDateTodos) state.sessionDateTodos = {};
+  state.sessionDateTodos[key] = {
+    ...currentObj,
     todoDone: newDone,
+    date: dateKey,
+    sessionId: sessionId,
+  };
+  await update(ref(database, getStudentPath(`seances_todos/${key}`)), {
+    todoDone: newDone,
+    date: dateKey,
+    sessionId: sessionId,
   });
   render();
 }
@@ -727,6 +779,7 @@ window.deleteEvent = deleteEvent;
 window.openSessionDetails = openSessionDetails;
 window.switchSdTab = switchSdTab;
 window.onEditSessionTypeChange = onEditSessionTypeChange;
+window.getSessionDateKey = getSessionDateKey;
 window.saveQuickSessionTodo = saveQuickSessionTodo;
 window.updateSdTodoStatusButton = updateSdTodoStatusButton;
 window.toggleSdTodoStatus = toggleSdTodoStatus;

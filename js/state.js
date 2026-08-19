@@ -19,6 +19,7 @@ export const state = {
   examsDb: [],
   userGrades: {},
   bacArchiveData: {},
+  sessionDateTodos: {},
   currentTrimester: "trim1",
   currentBacSubjectId: "math",
 };

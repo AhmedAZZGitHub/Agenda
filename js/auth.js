@@ -738,6 +738,13 @@ export function attachStudentDataListeners(sUid) {
     selectBacSubject(state.currentBacSubjectId);
   });
   state.activeDataListeners.push({ refPath: bacArchiveRef, callback: onBac });
+
+  const seancesTodosRef = ref(database, `student_data/${sUid}/seances_todos`);
+  const onSeancesTodos = onValue(seancesTodosRef, (snapshot) => {
+    state.sessionDateTodos = snapshot.val() || {};
+    render();
+  });
+  state.activeDataListeners.push({ refPath: seancesTodosRef, callback: onSeancesTodos });
 }
 
 // Global Window Bindings
