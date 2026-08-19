@@ -4,6 +4,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
   <title>Planning & Tableau de Bord Baccalauréat Pro</title>
   <meta name="theme-color" content="#0284c7" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -2435,6 +2438,12 @@
       messagingSenderId: "105039555180",
       appId: "1:105039555180:web:38478ee7d4c2a1f6330649",
       measurementId: "G-V4447X9MD5",
+    };
+
+    // Blocage absolu de toute boîte de confirmation grise native du navigateur
+    window.confirm = function (msg) {
+      console.warn("Native confirm blocked:", msg);
+      return false;
     };
 
     const app = initializeApp(firebaseConfig);
