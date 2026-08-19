@@ -13,6 +13,11 @@ import "./ai-assistant.js";
 import "./admin.js";
 import "./tutor-bot.js";
 
+// Nettoyage automatique des modèles obsolètes
+if (localStorage.getItem("gemini_model_name") && !["gemini-1.5-pro", "gemini-2.0-flash", "gemini-1.5-flash"].includes(localStorage.getItem("gemini_model_name"))) {
+  localStorage.setItem("gemini_model_name", "gemini-1.5-pro");
+}
+
 // Gestion de l'état d'authentification Firebase
 onAuthStateChanged(auth, async (user) => {
   const authOverlay = document.getElementById("authOverlay");

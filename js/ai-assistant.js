@@ -18,8 +18,8 @@ export function getAiApiKey() {
 
 export function getAiModelName() {
   const saved = localStorage.getItem("gemini_model_name");
-  if (saved && saved.trim()) return saved.trim();
-  return "gemini-1.5-pro"; // Modèle Gemini Pro par défaut
+  if (saved && (saved === "gemini-1.5-pro" || saved === "gemini-2.0-flash" || saved === "gemini-1.5-flash")) return saved;
+  return "gemini-1.5-pro"; // Modèle Gemini 1.5 Pro officiel par défaut
 }
 
 export function openAiSettingsModal() {
