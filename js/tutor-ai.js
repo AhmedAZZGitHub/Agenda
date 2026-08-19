@@ -1,8 +1,8 @@
 // js/tutor-ai.js
 // Tuteur IA Éducatif Gemini Pro (Baccalauréat Tunisien) & Correction d'Exercices par Photo
 
-import { getAiModelName, getAiApiKey } from "./ai-assistant.js?v=14.0";
-import { state, showLoading, hideLoading, playBeep } from "./state.js?v=14.0";
+import { getAiModelName, getAiApiKey } from "./ai-assistant.js?v=15.0";
+import { state, showLoading, hideLoading, playBeep } from "./state.js?v=15.0";
 
 let tutorChatHistory = [];
 let tutorAttachedImageBase64 = null;
@@ -45,20 +45,58 @@ export function getTutorModelName() {
   return "gemini-3.1-pro"; // Modèle d'élite Google Gemini 3.1 Pro
 }
 
-export function promptSetAiApiKey() {
+export async function promptSetAiApiKey() {
   const currentKey = localStorage.getItem("gemini_api_key") || "";
   const key = prompt(
-    "🔑 Clé API Google Gemini (AI Studio) :\n\nPour connecter directement votre compte Gemini 3.1 Pro en direct sans restriction, collez votre clé API Google (obtenue gratuitement sur https://aistudio.google.com/app/apikey) :",
+    "🔑 Clé API Google Gemini (AI Studio) :\n\nPour connecter directement l'Intelligence Artificielle en direct, collez votre clé API Google (obtenue gratuitement sur https://aistudio.google.com/app/apikey) :",
     currentKey
   );
-  if (key !== null) {
-    if (key.trim()) {
-      localStorage.setItem("gemini_api_key", key.trim());
-      alert("✅ Clé API Google Gemini 3.1 Pro enregistrée avec succès ! Vos questions recevront les réponses en direct de Gemini 3.1 Pro.");
-    } else {
-      localStorage.removeItem("gemini_api_key");
-      alert("ℹ️ Clé personnalisée réinitialisée.");
+  if (key === null) return;
+
+  const trimmed = key.trim();
+  if (!trimmed) {
+    localStorage.removeItem("gemini_api_key");
+    alert("ℹ️ Clé réinitialisée.");
+    return;
+  }
+
+  showLoading("Vérification de votre clé auprès des serveurs Google Gemini...");
+  try {
+    const candidateModels = ["gemini-1.5-pro", "gemini-2.0-flash", "gemini-1.5-flash"];
+    let testSuccess = false;
+    let lastError = "";
+
+    for (const m of candidateModels) {
+      try {
+        const testUrl = `https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent?key=${trimmed}`;
+        const resp = await fetch(testUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ contents: [{ parts: [{ text: "Bonjour" }] }] }),
+        });
+        if (resp.ok) {
+          testSuccess = true;
+          break;
+        } else {
+          const errData = await resp.json().catch(() => ({}));
+          lastError = errData.error?.message || `Erreur HTTP ${resp.status}`;
+        }
+      } catch (err) {
+        lastError = err.message;
+      }
     }
+
+    hideLoading();
+    if (testSuccess) {
+      localStorage.setItem("gemini_api_key", trimmed);
+      alert("🎉 Clé Google Gemini validée avec succès !\n\nLe Tuteur IA et le Micro IA sont désormais connectés en direct aux serveurs de Google pour répondre à toutes vos questions.");
+      renderTutorWelcomeMessage();
+    } else {
+      alert(`⚠️ Erreur de validation de la clé :\n${lastError}\n\nVérifiez que la clé a bien été créée sur https://aistudio.google.com/app/apikey`);
+    }
+  } catch (e) {
+    hideLoading();
+    alert("Erreur de connexion : " + e.message);
   }
 }
 
@@ -329,7 +367,7 @@ Pour poser n'importe quelle question et recevoir les explications complètes gé
   playBeep();
 }
 
-// Moteur Pédagogique Spécialisé Baccalauréat (Garantie de réponse 100%)
+// Moteur Pédagogique Spécialisé Baccalauréat (Réponses précises par notion)
 function generateBuiltInPedagogicalResponse(text, hasImage, section = "Toutes sections") {
   const query = (text || "").toLowerCase().trim();
 
@@ -340,18 +378,11 @@ function generateBuiltInPedagogicalResponse(text, hasImage, section = "Toutes se
 
 Je suis ton **Tuteur IA Éducatif** dédié à ta réussite au **Baccalauréat (${section})**.
 
-Voici comment je peux t'aider dès maintenant :
-* 📐 **Mathématiques & Physique** : pose une question sur un théorème, une formule ou un calcul (ex: *"e en math représente quoi"*).
-* 📸 **Correction de devoir** : clique sur **📷** pour m'envoyer un exercice ou ton brouillon manuscrit !
-* 💻 **Informatique & Python** : algorithmes de tri, récursivité, requêtes SQL.
-* 🧠 **Philosophie & SVT** : méthodes de dissertation, schémas bilan et synthèses.
-* ⚡ **Quiz d'entraînement** : teste tes connaissances avec des questions types Bac.
-
-Quelle notion ou exercice souhaites-tu travailler aujourd'hui ?`;
+Pose-moi une question sur ton cours de Maths, Physique, SVT, Info ou Philo, ou clique sur **📷** pour corriger un exercice !`;
   }
 
-  // Question spécifique sur le nombre e / exponentielle
-  if (query.includes("e en math") || query.includes("nombre e") || query.includes("c'est quoi e") || query.includes("valeur de e")) {
+  // 2. Question sur le nombre e / exponentielle
+  if (query.includes("e en math") || query.includes("nombre e") || query.includes("c'est quoi e") || query.includes("valeur de e") || query.includes("exponentiel") || query.includes("exp(")) {
     return `### 📐 Le Nombre $e$ (Constante d'Euler) en Mathématiques
 
 En mathématiques, **$e$** est une constante fondamentale irrationnelle dont la valeur approchée est :
@@ -362,167 +393,120 @@ $$e \\approx 2{,}71828...$$
 * **Fonction Exponentielle** : C'est la base de la fonction exponentielle notée $\\exp(x) = e^x$.
 
 #### 🔹 2. Propriété Fondamentale :
-La fonction exponentielle $f(x) = e^x$ est la seule fonction dérivable sur $\\mathbb{R}$ qui est **égale à sa propre dérivée** avec $f(0) = 1$ :
+La fonction $f(x) = e^x$ est la seule fonction dérivable sur $\\mathbb{R}$ qui est **égale à sa propre dérivée** avec $f(0) = 1$ :
 $$(e^x)' = e^x \\quad \\text{et} \\quad e^0 = 1$$
 
-#### 🔹 3. Propriétés Algébriques Clés au Bac :
+#### 🔹 3. Propriétés Algébriques au Bac :
 * $e^{a+b} = e^a \\cdot e^b$
 * $e^{-a} = \\frac{1}{e^a}$
 * $e^{a-b} = \\frac{e^a}{e^b}$
-* $(e^a)^n = e^{n \\cdot a}$
-* Pour tout $x \\in \\mathbb{R}$, $e^x > 0$ (toujours strictement positif).
-
-Souhaites-tu un exemple de calcul de limite ou d'étude de fonction avec $e^x$ ?`;
+* Pour tout $x \\in \\mathbb{R}$, $e^x > 0$ (strictement positif).`;
   }
 
-  // 2. Correction d'exercice par photo ou texte
-  if (hasImage || query.includes("corrige") || query.includes("exercice") || query.includes("devoir") || query.includes("solution") || query.includes("brouillon")) {
-    return `### 📝 Correction & Démarche de Résolution Type Bac
+  // 3. Logarithme népérien
+  if (query.includes("log") || query.includes("ln(") || query.includes("ln ") || query.includes("neperien")) {
+    return `### 📐 Fonction Logarithme Népérien $\\ln(x)$
 
-Voici la méthode rigoureuse exigée par les inspecteurs et correcteurs du Baccalauréat :
-
-#### 1️⃣ Analyse de l'Énoncé & Hypothèses Clés :
-* **Identification du Chapitre** : Repère précisément le cadre théorique (ex: Continuité et dérivabilité en Maths, Circuit RLC en Physique, Algorithme récursif en Info).
-* **Données & Conditions initiales** : Note toutes les valeurs numériques avec leurs unités SI et le domaine de définition ($D_f = \\mathbb{R}$, $t \\ge 0$, etc.).
-
-#### 2️⃣ Points de Vigilance & Pièges Classiques :
-* ⚠️ **En Mathématiques** : Ne jamais oublier de justifier la continuité et la stricte monotonie avant d'appliquer le **Théorème des Valeurs Intermédiaires (TVI)**.
-* ⚠️ **En Physique** : Bien orienter le circuit pour la loi des mailles et vérifier les conventions récepteur ($u = +L \\frac{di}{dt}$ ou $u = -L \\frac{di}{dt}$).
-* ⚠️ **En Informatique** : Gérer les cas limites (liste vide, indice hors borne, condition d'arrêt de la récursivité).
-
-#### 3️⃣ Rédaction Modèle Étape par Étape :
-* **Étape 1** : Énoncer la loi ou le théorème utilisé : *"D'après le théorème..."*
-* **Étape 2** : Poser l'équation littérale avant toute application numérique.
-* **Étape 3** : Encadrer clairement le résultat final avec son unité.
-
-💡 **Conseil Barème Bac** : 40% des points sont attribués à la clarté de la justification et à la rigueur de la rédaction !`;
+* **Domaine de définition** : $\\left]0, +\\infty\\right[$.
+* **Valeurs clés** : $\\ln(1) = 0$ et $\\ln(e) = 1$.
+* **Dérivée** : $(\\ln(x))' = \\frac{1}{x}$ et $(\\ln(u))' = \\frac{u'}{u}$.
+* **Propriétés algébriques** :
+  * $\\ln(a \\cdot b) = \\ln(a) + \\ln(b)$
+  * $\\ln\\left(\\frac{a}{b}\\right) = \\ln(a) - \\ln(b)$
+  * $\\ln(a^n) = n \\ln(a)$
+* **Limites usuelles** :
+  * $\\lim_{x \\to 0^+} \\ln(x) = -\\infty$
+  * $\\lim_{x \\to +\\infty} \\frac{\\ln(x)}{x} = 0$ (Croissance comparée)`;
   }
 
-  // 3. Mathématiques
-  if (query.includes("math") || query.includes("derive") || query.includes("limite") || query.includes("integrale") || query.includes("complexe") || query.includes("tvi") || query.includes("log") || query.includes("exp")) {
-    return `### 📐 Fiche Pédagogique : Mathématiques Bac
+  // 4. Nombres complexes
+  if (query.includes("complexe") || query.includes("forme trigo") || query.includes("affixe") || query.includes("module") || query.includes("argument")) {
+    return `### 📐 Nombres Complexes au Bac
 
-#### 🔹 1. Théorème des Valeurs Intermédiaires (TVI) & Corollaire :
-Si $f$ est continue et strictement monotone sur $[a, b]$, alors pour tout réel $k$ compris entre $f(a)$ et $f(b)$, l'équation $f(x) = k$ admet une **unique solution** $\\alpha \\in [a, b]$.
-
-#### 🔹 2. Nombres Complexes :
-* **Forme algébrique** : $z = a + ib$ avec $|z| = \\sqrt{a^2 + b^2}$.
-* **Forme exponentielle** : $z = r e^{i\\theta}$ avec $\\cos(\\theta) = \\frac{a}{r}$ et $\\sin(\\theta) = \\frac{b}{r}$.
-* **Géométrie** : L'affixe du vecteur $\\vec{AB}$ est $z_B - z_A$. La distance $AB = |z_B - z_A|$.
-
-#### 🔹 3. Dérivées Usuelles Clés :
-* $(\\ln(u))' = \\frac{u'}{u}$
-* $(e^u)' = u' e^u$
-* $(u^n)' = n u' u^{n-1}$
-
-Pose-moi une question précise sur un calcul ou un exercice pour que nous le résolvions ensemble !`;
+* **Forme algébrique** : $z = a + ib$ (avec $i^2 = -1$).
+* **Module** : $|z| = \\sqrt{a^2 + b^2}$.
+* **Forme trigonométrique / exponentielle** :
+  $$z = r(\\cos\\theta + i\\sin\\theta) = r e^{i\\theta}$$
+  où $r = |z|$ et $\\cos\\theta = \\frac{a}{r}$, $\\sin\\theta = \\frac{b}{r}$.
+* **Interprétation géométrique** :
+  * Affixe du vecteur $\\vec{AB}$ : $z_{\\vec{AB}} = z_B - z_A$.
+  * Distance : $AB = |z_B - z_A|$.
+  * Angle : $(\\vec{u}, \\vec{AB}) \\equiv \\arg(z_B - z_A) \\pmod{2\\pi}$.`;
   }
 
-  // 4. Physique - Chimie
-  if (query.includes("physique") || query.includes("chimie") || query.includes("newton") || query.includes("rlc") || query.includes("onde") || query.includes("acide") || query.includes("pile")) {
-    return `### 🔬 Fiche Pédagogique : Sciences Physiques & Chimie Bac
+  // 5. Théorème des Valeurs Intermédiaires (TVI)
+  if (query.includes("tvi") || query.includes("valeur intermediaire") || query.includes("bijection") || query.includes("unique solution")) {
+    return `### 📐 Théorème des Valeurs Intermédiaires (TVI) & Corollaire
 
-#### ⚡ 1. Circuit RLC Série en Oscillations Libres Amorties :
-* **Équation différentielle en tension $u_C$** :
+#### 📌 Énoncé du Corollaire (Stricte Monotonie) :
+Soit $f$ une fonction définie sur un intervalle $[a, b]$. Si :
+1. $f$ est **continue** sur $[a, b]$.
+2. $f$ est **strictement monotone** (croissante ou décroissante) sur $[a, b]$.
+
+Alors, pour tout réel $k$ compris entre $f(a)$ et $f(b)$, l'équation $f(x) = k$ admet une **unique solution** $\\alpha \\in [a, b]$.
+
+💡 **Rédaction Type Bac** : Toujours vérifier et mentionner explicitement les deux hypothèses (Continuité + Stricte monotonie) sur votre copie !`;
+  }
+
+  // 6. Dérivées et Primitives
+  if (query.includes("derive") || query.includes("primitive") || query.includes("integrale")) {
+    return `### 📐 Dérivées et Primitives Usuelles
+
+| Fonction $f(x)$ | Dérivée $f'(x)$ | Primitive $F(x)$ |
+| :--- | :--- | :--- |
+| $x^n$ ($n \\neq -1$) | $n x^{n-1}$ | $\\frac{x^{n+1}}{n+1}$ |
+| $\\frac{1}{x}$ | $-\\frac{1}{x^2}$ | $\\ln|x|$ |
+| $e^u$ | $u' e^u$ | $e^u$ (si $u'e^u$) |
+| $\\ln(u)$ | $\\frac{u'}{u}$ | $u\\ln(u) - u$ |
+| $\\sqrt{u}$ | $\\frac{u'}{2\\sqrt{u}}$ | $\\frac{2}{3}u\\sqrt{u}$ (si $u'\\sqrt{u}$) |`;
+  }
+
+  // 7. Physique : Circuit RLC / RC / RL
+  if (query.includes("rlc") || query.includes("circuit rc") || query.includes("condensateur") || query.includes("bobine") || query.includes("energie")) {
+    return `### 🔬 Sciences Physiques : Dipôles $RC$, $RL$ et $RLC$
+
+* **Dipôle RC (Charge)** : $\\tau = RC$, $u_C(t) = E(1 - e^{-t/\\tau})$. À $t = \\tau$, $u_C = 0{,}63 E$.
+* **Dipôle RL (Établissement)** : $\\tau = \\frac{L}{R_t}$, $i(t) = I_0(1 - e^{-t/\\tau})$.
+* **Circuit RLC libre amorti** :
   $$\\frac{d^2 u_C}{dt^2} + \\frac{R_t}{L} \\frac{du_C}{dt} + \\frac{1}{LC} u_C = 0$$
-* **Énergie totale** : $E = E_e + E_m = \\frac{1}{2} C u_C^2 + \\frac{1}{2} L i^2$.
-* **Non-conservation de l'énergie** : $\\frac{dE}{dt} = -R_t i^2 < 0$ (dissipation par effet Joule).
-
-#### 🧪 2. Chimie - Équilibre Acido-Basique :
-* Constante d'acidité : $K_a = \\frac{[A^-]_{eq} \\cdot [H_3O^+]_{eq}}{[AH]_{eq}}$
-* Relation fondamentale : $\\text{pH} = \\text{p}K_a + \\log\\left(\\frac{[A^-]}{[AH]}\\right)$
-* **Point d'équivalence** : $C_A V_A = C_B V_{BE}$.
-
-Quelle loi ou expérience souhaites-tu approfondir ?`;
+  * Période propre : $T_0 = 2\\pi\\sqrt{LC}$.
+  * Énergie totale : $E_{tot} = \\frac{1}{2} C u_C^2 + \\frac{1}{2} L i^2$.`;
   }
 
-  // 5. Informatique / Python
-  if (query.includes("info") || query.includes("python") || query.includes("algo") || query.includes("sql") || query.includes("tri") || query.includes("recursiv")) {
-    return `### 💻 Fiche Pédagogique : Informatique & Algorithmique Python Bac
+  // 8. Informatique / Python
+  if (query.includes("python") || query.includes("algo") || query.includes("tri") || query.includes("recursiv") || query.includes("sql")) {
+    return `### 💻 Informatique & Algorithmique Bac
 
-#### 🔹 Algorithme de Tri à Bulles (Type Épreuve Pratique) :
+#### 🔹 Tri à Bulles (Python) :
 \`\`\`python
 def tri_bulles(T):
     n = len(T)
     for i in range(n - 1):
         for j in range(n - 1 - i):
             if T[j] > T[j + 1]:
-                # Échange des éléments
                 T[j], T[j + 1] = T[j + 1], T[j]
     return T
-
-# Exemple d'exécution
-tableau = [15, 3, 9, 1, 12]
-print("Tableau trié :", tri_bulles(tableau))
 \`\`\`
 
-#### 🔹 Requête SQL Type Examen :
+#### 🔹 Requête SQL Type :
 \`\`\`sql
--- Sélectionner les élèves ayant une moyenne >= 10 groupés par section
-SELECT section, COUNT(*) as nb_admis, AVG(moyenne) as moy_section
+SELECT nom, section, moyenne
 FROM Eleves
 WHERE moyenne >= 10
-GROUP BY section
-HAVING COUNT(*) >= 5;
-\`\`\`
-
-As-tu besoin d'un algorithme récursif ou d'une fonction Python spécifique ?`;
+ORDER BY moyenne DESC;
+\`\`\``;
   }
 
-  // 6. Philosophie
-  if (query.includes("philo") || query.includes("dissertation") || query.includes("morale") || query.includes("etat") || query.includes("verite") || query.includes("bonheur")) {
-    return `### 🧠 Méthodologie & Concepts Clés : Philosophie Bac
-
-#### 🏛️ Structure Modèle de la Dissertation :
-1. **Introduction** :
-   * **Amorce** : Partir d'une idée reçue ou d'un constat universel.
-   * **Définition conceptuelle** : Préciser le sens des notions du sujet.
-   * **Problématisation** : Mettre en tension deux vérités contradictoires.
-   * **Question directrice** : Formuler l'énigme philosophique.
-2. **Développement (Thèse - Antithèse - Dépassement)** :
-   * Chaque paragraphe = **1 Argument + 1 Référence d'auteur + 1 Exemple précis + 1 Transition**.
-3. **Conclusion** :
-   * Bilan sans ambiguïté et ouverture vers un enjeu éthique contemporain.
-
-Donne-moi ton sujet de dissertation ou une notion du programme (ex: *L'État*, *La Science*, *Le Devoir*) pour bâtir un plan détaillé !`;
-  }
-
-  // 7. Quiz & Questions d'entraînement
-  if (query.includes("quiz") || query.includes("question") || query.includes("entrainement") || query.includes("test")) {
-    return `### ⚡ Mini-Quiz d'Entraînement Rapide Bac (${section})
-
-Teste tes réflexes sur ces 3 questions classiques :
-
-1. **Maths** : Quelle est la primitive de $f(x) = \\frac{2x}{x^2 + 1}$ ?
-   * *A)* $\\frac{1}{x^2+1}$
-   * *B)* $\\ln(x^2 + 1) + c$
-   * *C)* $e^{x^2+1}$
-
-2. **Physique** : Dans un dipôle $RC$ en charge, que vaut la tension $u_C$ à $t = \\tau$ ?
-   * *A)* $0.37 \\cdot E$
-   * *B)* $0.63 \\cdot E$
-   * *C)* $E$
-
-3. **Informatique / Algo** : Quelle est la complexité d'une recherche dichotomique sur un tableau trié de taille $N$ ?
-   * *A)* $O(N)$
-   * *B)* $O(N^2)$
-   * *C)* $O(\\log_2(N))$
-
-✍️ Envoie-moi tes 3 réponses (ex: *1B, 2B, 3C*) et je te donne la correction détaillée !`;
-  }
-
-  // 8. Réponse générale pédagogique
-  return `### 🎓 Tuteur Bac IA : Réponse Pédagogique
+  // 9. Réponse d'accompagnement générale
+  return `### 🎓 Tuteur Bac IA
 
 Concernant votre question sur **"${text}"** :
 
-1. **Rappel Pédagogique** : Cette notion fait partie intégrante du programme officiel du Baccalauréat.
-2. **Méthode Recommandée** :
-   * Commencez toujours par définir le cadre d'étude et les hypothèses de base.
-   * Appliquez les propriétés fondamentales et les formules standard.
-   * Justifiez chaque étape de calcul ou de rédaction avec rigueur.
+* Cette notion est au programme officiel du Baccalauréat.
+* Pour une démonstration complète, un calcul d'exercice ou une résolution pas-à-pas en direct :
+  👉 Cliquez sur **[🔑 Clé IA]** en haut à droite pour connecter votre clé gratuite Google Gemini !
 
-💡 **Astuce Bac** : N'hésitez pas à m'envoyer une photo d'un exercice précis avec l'icône **📷** ou à me demander un exemple d'application étape par étape !`;
+Avez-vous une formule ou un énoncé précis sur cette notion ?`;
 }
 
 export function toggleTutorVoice() {

@@ -1,8 +1,8 @@
 // js/ai-assistant.js
 // Assistant Vocal Multilingue (Tounsi / Arabe / Français), Gemini Pro 3.1 & Vision Scanner
 
-import { database, ref, set } from "./firebase-config.js?v=14.0";
-import { state, getStudentPath, showLoading, hideLoading, playBeep } from "./state.js?v=14.0";
+import { database, ref, set } from "./firebase-config.js?v=15.0";
+import { state, getStudentPath, showLoading, hideLoading, playBeep } from "./state.js?v=15.0";
 
 let selectedAiSpeechLang = "ar-TN";
 let aiSpeechRecognition = null;
