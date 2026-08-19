@@ -54,11 +54,14 @@ export function openTutorChat() {
 
   const modelBadge = document.getElementById("tutorModelBadge");
   if (modelBadge) {
-    const currentModel = getTutorModelName();
-    modelBadge.innerText = `✨ ${currentModel === "gemini-1.5-pro" ? "Gemini 1.5 Pro" : currentModel}`;
+    modelBadge.innerText = "✨ Gemini 1.5 Pro";
   }
 
-  if (tutorChatHistory.length === 0) {
+  // Nettoyage automatique des anciens messages d'erreur résiduels
+  const msgContainer = document.getElementById("tutorChatMessages");
+  if (msgContainer && (msgContainer.innerHTML.includes("404") || msgContainer.innerHTML.includes("gemini-3.1") || tutorChatHistory.length === 0)) {
+    tutorChatHistory = [];
+    msgContainer.innerHTML = "";
     renderTutorWelcomeMessage();
   }
 
