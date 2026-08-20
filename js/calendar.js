@@ -11,7 +11,6 @@ import {
   getEventStatus,
   showLoading,
   hideLoading,
-  playBeep,
 } from "./state.js?v=16.5";
 import { renderDetailSessionMap, initEditPickerMap } from "./maps.js?v=16.5";
 
@@ -637,7 +636,6 @@ export async function handleSaveEditedSession(e) {
     });
     hideLoading();
     window.closeModal("sessionDetailModal");
-    playBeep();
     alert("✨ Séance modifiée avec succès !");
   } catch (err) {
     hideLoading();
@@ -902,7 +900,6 @@ export function toggleTimer() {
       } else {
         clearInterval(timerInterval);
         timerRunning = false;
-        playBeep();
         alert("⏰ Session de travail terminée ! Bravo pour votre concentration.");
         if (btn) {
           btn.innerText = "Lancer ▶️";
@@ -1071,7 +1068,6 @@ export async function importScheduleWithCode() {
 
           hideLoading();
           window.closeModal("shareScheduleModal");
-          playBeep();
           alert(`🎉 Succès ! ${count} séances de ${friendName} ont été copiées dans votre planning !`);
         } catch (err) {
           hideLoading();

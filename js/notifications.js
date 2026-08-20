@@ -1,7 +1,7 @@
 // js/notifications.js
 // Système de Notifications et Rappels Intelligents pour les Cours et Séances d'Étude
 
-import { state, formatM, getSubjectMeta, playBeep } from "./state.js?v=16.5";
+import { state, formatM, getSubjectMeta } from "./state.js?v=16.5";
 
 const sentNotifications = new Set();
 
@@ -99,25 +99,7 @@ export function sendAppNotification(title, body, icon = "🔔", tag = null) {
 }
 
 export function playNotificationSound() {
-  try {
-    const ctx = new (window.AudioContext || window.webkitAudioContext)();
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-
-    osc.type = "sine";
-    osc.frequency.setValueAtTime(587.33, ctx.currentTime); // D5
-    osc.frequency.setValueAtTime(880, ctx.currentTime + 0.15); // A5
-    osc.frequency.setValueAtTime(1174.66, ctx.currentTime + 0.3); // D6
-
-    gain.gain.setValueAtTime(0.3, ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.8);
-
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-
-    osc.start();
-    osc.stop(ctx.currentTime + 0.8);
-  } catch (e) {}
+  // Tous les sons et alertes sonores sont désactivés dans l'application
 }
 
 export function showInAppToast(title, body, icon = "🔔") {

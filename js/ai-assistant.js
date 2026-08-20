@@ -1,12 +1,14 @@
 // js/ai-assistant.js
-// Assistant Vocal Multilingue (Tounsi / Arabe / Français), Gemini Pro 3.1 & Vision Scanner
+// Assistant Vocal Multilingue Continu (Tounsi / Arabe / Français), Gemini Pro & Vision Scanner
 
 import { database, ref, set } from "./firebase-config.js?v=16.5";
-import { state, getStudentPath, showLoading, hideLoading, playBeep } from "./state.js?v=16.5";
+import { state, getStudentPath, showLoading, hideLoading } from "./state.js?v=16.5";
+import { getSessionDateKey, render } from "./calendar.js?v=16.5";
 
 let selectedAiSpeechLang = "ar-TN";
 let aiSpeechRecognition = null;
 let isAiSpeechRecording = false;
+let accumulatedTranscript = "";
 
 export const DEFAULT_AI_KEY = "";
 
@@ -146,7 +148,9 @@ export function setAiDictationLang(lang) {
   if (chip) chip.classList.add("active");
 
   if (isAiSpeechRecording && aiSpeechRecognition) {
-    aiSpeechRecognition.stop();
+    try {
+      aiSpeechRecognition.stop();
+    } catch (e) {}
     setTimeout(() => startAiSpeechRecording(), 300);
   }
 }
@@ -156,17 +160,14 @@ export function voiceInput() {
   const feedback = document.getElementById("aiFeedbackBox");
   if (feedback) feedback.style.display = "none";
   window.openModal("aiAssistantModal");
+  // Démarrage automatique de l'écoute continue à l'ouverture
+  setTimeout(() => {
+    startAiSpeechRecording();
+  }, 250);
 }
 
 export function closeAiModal() {
-  if (isAiSpeechRecording && aiSpeechRecognition) {
-    try {
-      aiSpeechRecognition.stop();
-    } catch (e) {}
-  }
-  isAiSpeechRecording = false;
-  const micBtn = document.getElementById("aiModalMicBtn");
-  if (micBtn) micBtn.classList.remove("listening");
+  stopAiSpeechRecording();
   window.closeModal("aiAssistantModal");
 }
 
@@ -175,20 +176,47 @@ export function useAiExample(txt) {
   if (input) input.value = txt;
 }
 
+function updateMicUiState(isRecording) {
+  const micBtn = document.getElementById("aiModalMicBtn");
+  const finishBtn = document.getElementById("btnAiFinishRecording");
+  const startBtn = document.getElementById("btnAiStartRecording");
+
+  if (micBtn) {
+    if (isRecording) {
+      micBtn.classList.add("listening");
+      micBtn.innerHTML = "⏹️";
+      micBtn.title = "Enregistrement en cours... Cliquez pour arrêter";
+    } else {
+      micBtn.classList.remove("listening");
+      micBtn.innerHTML = "🎙️";
+      micBtn.title = "Cliquez pour commencer à parler";
+    }
+  }
+
+  if (finishBtn) finishBtn.style.display = isRecording ? "inline-flex" : "none";
+  if (startBtn) startBtn.style.display = isRecording ? "none" : "inline-flex";
+}
+
 export function toggleAiSpeechRecording() {
   if (isAiSpeechRecording) {
-    if (aiSpeechRecognition) {
-      try {
-        aiSpeechRecognition.stop();
-      } catch (e) {}
-    }
-    isAiSpeechRecording = false;
-    const micBtn = document.getElementById("aiModalMicBtn");
-    if (micBtn) micBtn.classList.remove("listening");
-    const st = document.getElementById("aiMicStatusText");
-    if (st) st.innerText = "Enregistrement arrêté. Cliquez sur 'Analyser & Ajouter'.";
+    stopAiSpeechRecording();
   } else {
     startAiSpeechRecording();
+  }
+}
+
+export function stopAiSpeechRecording() {
+  isAiSpeechRecording = false;
+  if (aiSpeechRecognition) {
+    try {
+      aiSpeechRecognition.stop();
+    } catch (e) {}
+  }
+  updateMicUiState(false);
+  const st = document.getElementById("aiMicStatusText");
+  if (st) {
+    st.innerHTML = "✅ <b>Dictée terminée !</b> Cliquez sur <b>'✨ Analyser & Ajouter'</b> pour insérer la séance et le travail à faire.";
+    st.style.color = "#059669";
   }
 }
 
@@ -200,60 +228,97 @@ export function startAiSpeechRecording() {
   }
 
   try {
+    if (aiSpeechRecognition) {
+      try {
+        aiSpeechRecognition.stop();
+      } catch (e) {}
+    }
+
     aiSpeechRecognition = new SpeechRecognition();
     aiSpeechRecognition.lang = selectedAiSpeechLang;
     aiSpeechRecognition.interimResults = true;
-    aiSpeechRecognition.continuous = false;
+    aiSpeechRecognition.continuous = true; // Écoute continue sans coupure automatique
 
-    const micBtn = document.getElementById("aiModalMicBtn");
     const statusText = document.getElementById("aiMicStatusText");
     const transcriptInput = document.getElementById("aiTranscriptInput");
 
+    accumulatedTranscript = transcriptInput ? transcriptInput.value.trim() : "";
+    let sessionFinalTranscript = "";
+
     aiSpeechRecognition.onstart = function () {
       isAiSpeechRecording = true;
-      if (micBtn) micBtn.classList.add("listening");
-      const langNames = { "ar-TN": "🇹🇳 Tounsi (Derja)", "fr-FR": "🇫🇷 Français", "ar-SA": "🇸🇦 Arabe", "en-US": "🇬🇧 Anglais" };
+      updateMicUiState(true);
+      const langNames = {
+        "ar-TN": "🇹🇳 Tounsi (Derja)",
+        "fr-FR": "🇫🇷 Français",
+        "ar-SA": "🇸🇦 Arabe",
+        "en-US": "🇬🇧 Anglais",
+      };
       if (statusText) {
-        statusText.innerText = `🎙️ En écoute en ${langNames[selectedAiSpeechLang] || "Tounsi"}... Parlez maintenant !`;
+        statusText.innerHTML = `🔴 <b>Écoute continue active (${langNames[selectedAiSpeechLang] || "Tounsi"})...</b><br><span style="font-size:11.5px; opacity:0.9;">Parlez à votre rythme (Séance, Heure, Type, Travail à faire). Cliquez sur <b>⏹️</b> ou <b>'Terminer'</b> quand vous avez fini.</span>`;
         statusText.style.color = "#0284c7";
       }
     };
 
     aiSpeechRecognition.onresult = function (event) {
-      let currentTranscript = "";
+      let interim = "";
+      sessionFinalTranscript = "";
       for (let i = 0; i < event.results.length; i++) {
-        currentTranscript += event.results[i][0].transcript;
+        if (event.results[i].isFinal) {
+          sessionFinalTranscript += event.results[i][0].transcript + " ";
+        } else {
+          interim += event.results[i][0].transcript;
+        }
       }
-      if (transcriptInput) transcriptInput.value = currentTranscript;
+      const combined = (accumulatedTranscript ? accumulatedTranscript + " " : "") + sessionFinalTranscript + interim;
+      if (transcriptInput) {
+        transcriptInput.value = combined.trim();
+      }
     };
 
     aiSpeechRecognition.onerror = function (event) {
-      console.warn("Speech recognition error:", event.error);
-      isAiSpeechRecording = false;
-      if (micBtn) micBtn.classList.remove("listening");
-      if (statusText) {
-        statusText.innerText = "⚠️ Erreur ou micro silencieux. Réessayez ou tapez au clavier.";
-        statusText.style.color = "#ef4444";
+      console.warn("Speech recognition notice/error:", event.error);
+      if (event.error === "no-speech" && isAiSpeechRecording) {
+        // En mode continu, ignorer les silences naturels
+        return;
+      }
+      if (event.error === "not-allowed" || event.error === "service-not-allowed") {
+        isAiSpeechRecording = false;
+        updateMicUiState(false);
+        if (statusText) {
+          statusText.innerText = "⚠️ Accès au micro refusé. Veuillez autoriser le microphone dans votre navigateur.";
+          statusText.style.color = "#ef4444";
+        }
       }
     };
 
     aiSpeechRecognition.onend = function () {
-      isAiSpeechRecording = false;
-      if (micBtn) micBtn.classList.remove("listening");
-      if (statusText) {
-        statusText.innerText = "✅ Dictée captée ! Cliquez sur '⚡ Analyser & Ajouter'.";
-        statusText.style.color = "#059669";
+      // Auto-reprise si l'utilisateur n'a pas appuyé lui-même sur Arrêter
+      if (isAiSpeechRecording) {
+        try {
+          accumulatedTranscript = transcriptInput ? transcriptInput.value.trim() : "";
+          aiSpeechRecognition.start();
+          return;
+        } catch (restartErr) {
+          console.warn("SpeechRecognition auto-restart:", restartErr);
+        }
       }
+      isAiSpeechRecording = false;
+      updateMicUiState(false);
     };
 
     aiSpeechRecognition.start();
   } catch (err) {
     console.error("SpeechRecognition start exception:", err);
+    isAiSpeechRecording = false;
+    updateMicUiState(false);
   }
 }
 
 export async function executeAiCommand() {
   if (state.isReadOnly) return alert("Accès en lecture seule.");
+  stopAiSpeechRecording();
+
   const input = document.getElementById("aiTranscriptInput");
   const text = input ? input.value.trim() : "";
   const feedback = document.getElementById("aiFeedbackBox");
@@ -287,18 +352,19 @@ export async function executeAiCommand() {
       feedback.style.background = "#fff1f2";
       feedback.style.color = "#be123c";
       feedback.style.border = "1.5px solid #fecdd3";
-      feedback.innerHTML = `⚠️ <b>Non compris</b> : L'IA n'a pas pu identifier la matière ou l'horaire.<br>Essayez par exemple : <i>"Zidli seance Math ghodwa m3a 14h"</i> ou <i>"Devoir physique vendredi 10h"</i>.`;
+      feedback.innerHTML = `⚠️ <b>Non compris</b> : L'IA n'a pas pu identifier la matière ou l'horaire.<br>Essayez par exemple : <i>"Zidli seance Math ghodwa 14h particulier w khedma serie 3"</i> ou <i>"Séance SVT samedi 9h au lycée travail à faire TP génétique"</i>.`;
     }
     return;
   }
 
   const dayNamesFr = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"];
-  const sH = parsedResult.startHour ?? 14;
-  const sM = parsedResult.startMinute ?? 0;
-  const eH = parsedResult.endHour ?? sH + 2;
-  const eM = parsedResult.endMinute ?? sM;
-  const dayIdx = parsedResult.dayIndex !== undefined && parsedResult.dayIndex !== null ? parsedResult.dayIndex : (new Date().getDay() + 6) % 7;
+  const sH = typeof parsedResult.startHour === "number" ? parsedResult.startHour : 14;
+  const sM = typeof parsedResult.startMinute === "number" ? parsedResult.startMinute : 0;
+  const eH = typeof parsedResult.endHour === "number" ? parsedResult.endHour : Math.min(24, sH + 2);
+  const eM = typeof parsedResult.endMinute === "number" ? parsedResult.endMinute : sM;
+  const dayIdx = parsedResult.dayIndex !== undefined && parsedResult.dayIndex !== null ? Math.max(0, Math.min(6, parsedResult.dayIndex)) : (new Date().getDay() + 6) % 7;
 
+  const targetDateKey = parsedResult.dateStr || getSessionDateKey(dayIdx);
   const newId = Date.now().toString();
 
   if (parsedResult.action === "add_exam") {
@@ -306,8 +372,8 @@ export async function executeAiCommand() {
       id: newId,
       sub: parsedResult.subject,
       type: parsedResult.examType || "Devoir de Contrôle (DC)",
-      date: parsedResult.dateStr || new Date().toISOString().split("T")[0],
-      desc: "Planifié automatiquement par Assistant IA",
+      date: parsedResult.dateStr || targetDateKey,
+      desc: parsedResult.todo || parsedResult.desc || "Planifié automatiquement par Assistant IA",
     };
     await set(ref(database, getStudentPath("examens/" + newId)), examObj);
   } else {
@@ -318,21 +384,50 @@ export async function executeAiCommand() {
       s: sH * 60 + sM,
       e: eH * 60 + eM,
       type: parsedResult.type || "À la maison",
-      freq: "Chaque semaine",
+      freq: parsedResult.freq || (parsedResult.dateStr ? "Ce jour seulement" : "Chaque semaine"),
+      singleDate: parsedResult.singleDate || (parsedResult.freq === "Ce jour seulement" ? targetDateKey : null),
       location: parsedResult.location || null,
     };
     await set(ref(database, getStudentPath("seances/" + newId)), sessionObj);
+
+    // Enregistrement du travail à faire / devoirs s'il est spécifié
+    if (parsedResult.todo && parsedResult.todo.trim()) {
+      const todoKey = `${newId}_${targetDateKey}`;
+      const todoObj = {
+        todo: parsedResult.todo.trim(),
+        todoDone: false,
+        date: targetDateKey,
+        sessionId: newId,
+      };
+      await set(ref(database, getStudentPath(`seances_todos/${todoKey}`)), todoObj);
+      if (!state.sessionDateTodos) state.sessionDateTodos = {};
+      state.sessionDateTodos[todoKey] = todoObj;
+    }
   }
 
-  playBeep();
+  if (render) render();
+
   if (feedback) {
     feedback.style.display = "block";
     feedback.style.background = "#ecfdf5";
     feedback.style.color = "#047857";
     feedback.style.border = "1.5px solid #a7f3d0";
     const timeFmt = `${sH < 10 ? "0" + sH : sH}:${sM < 10 ? "0" + sM : sM} - ${eH < 10 ? "0" + eH : eH}:${eM < 10 ? "0" + eM : eM}`;
-    const locNotice = parsedResult.location?.address ? `<br>📍 <i>Lieu : ${parsedResult.location.address}</i>` : "";
-    feedback.innerHTML = `🎉 <b>Ajouté avec succès !</b><br>📚 <b>${parsedResult.subject}</b> planifié pour <b>${dayNamesFr[dayIdx]}</b> (${timeFmt})${locNotice}<br>${parsedResult.replyMessage ? `<i>💬 ${parsedResult.replyMessage}</i>` : ""}`;
+    const locNotice = parsedResult.location?.address ? `<br>📍 <b>Lieu :</b> ${parsedResult.location.address}` : "";
+    const todoNotice = parsedResult.todo
+      ? `<div style="background:#fff7ed; border:1px solid #fdba74; padding:8px 12px; border-radius:8px; color:#c2410c; margin-top:6px; font-size:12.5px;">📝 <b>Travail à faire :</b> ${parsedResult.todo} <span style="font-size:11px; font-weight:800; color:#ea580c; display:block; margin-top:2px;">(Badge orange '⏳ Ex. À faire' actif sur la séance)</span></div>`
+      : "";
+
+    feedback.innerHTML = `
+      <div style="display:flex; flex-direction:column; gap:4px;">
+        <div style="font-size:14px; font-weight:800; color:#065f46;">🎉 Séance ajoutée avec succès au planning !</div>
+        <div>📚 <b>Matière :</b> ${parsedResult.subject}</div>
+        <div>🗓️ <b>Jour & Heure :</b> ${dayNamesFr[dayIdx]} (${targetDateKey}) • 🕒 ${timeFmt}</div>
+        <div>🏷️ <b>Type / Modalité :</b> ${parsedResult.type || "À la maison"}${locNotice}</div>
+        ${todoNotice}
+        ${parsedResult.replyMessage ? `<div style="font-style:italic; opacity:0.9; margin-top:4px; font-size:12px; border-top:1px dashed #a7f3d0; padding-top:4px;">💬 ${parsedResult.replyMessage}</div>` : ""}
+      </div>
+    `;
   }
 }
 
@@ -341,22 +436,29 @@ export async function callGeminiTunisianParser(userText, apiKey) {
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
   const now = new Date();
   const currentDayName = ["Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi"][now.getDay()];
+  const todayIso = now.toISOString().split("T")[0];
 
-  const systemPrompt = `Tu es un assistant IA spécialisé pour les élèves du Baccalauréat tunisien.
-Tu comprends parfaitement le dialecte tunisien (Derja en lettres arabes ou arabizi 3=ع, 7=ح, 9=ق, 5=خ), l'arabe classique et le français.
-Aujourd'hui nous sommes ${currentDayName} ${now.toISOString().split("T")[0]}.
-Analyse la phrase de l'élève et extrait les données en JSON STRICT sans formatage markdown :
+  const systemPrompt = `Tu es un assistant IA spécialisé pour les élèves du Baccalauréat tunisien (toutes sections : Math, Sciences, Informatique, Éco-Gestion, Technique, Lettres, Sport).
+Tu comprends parfaitement le dialecte tunisien (Derja en lettres arabes ou arabizi : 3=ع, 7=ح, 9=ق, 5=خ, 2=ء), l'arabe classique et le français.
+Aujourd'hui nous sommes ${currentDayName} ${todayIso}.
+
+Extrais TOUTES les informations de la demande de l'élève (Matière, Horaires début/fin, Jour/Date, Type de cours/Lieu, et le Travail à faire / Devoirs / Exercices).
+Réponds STRICTEMENT avec un JSON valide sans formatage markdown, respectant ce schéma exact :
 {
   "action": "add_session" ou "add_exam",
-  "subject": "Mathématiques" | "Sciences Physiques" | "Sciences SVT" | "Informatique" | "Philosophie" | "Arabe" | "Français" | "Anglais" | "Option",
+  "subject": "Mathématiques" | "Sciences Physiques" | "Sciences SVT" | "Informatique" | "Philosophie" | "Arabe" | "Français" | "Anglais" | "Économie & Gestion" | "Histoire-Géo" | "Sport" | "Option",
   "dayIndex": nombre de 0 (Lundi) à 6 (Dimanche),
-  "startHour": nombre de 8 à 22,
-  "startMinute": nombre 0 ou 30,
-  "endHour": nombre de 9 à 24,
-  "endMinute": nombre 0 ou 30,
-  "type": "À la maison" | "En ligne" | "Lycée" | "Particulier",
-  "location": { "address": "nom du lieu ou ville (ex: Ennasr 2)", "lat": 36.8065, "lng": 10.1815 },
-  "replyMessage": "Message de confirmation court et amical bilingue français/tunisien"
+  "dateStr": "YYYY-MM-DD" (date exacte de la séance),
+  "startHour": nombre de 8 à 23 (ex: 14 pour 14h),
+  "startMinute": nombre de 0 à 59 (ex: 0 ou 30),
+  "endHour": nombre de 8 à 24 (si non précisé, calcule début + 2h),
+  "endMinute": nombre de 0 à 59,
+  "type": "À la maison" | "Lycée" | "Particulier" | "En ligne",
+  "location": { "address": "Nom du lieu ou ville", "lat": 36.8065, "lng": 10.1815 },
+  "todo": "Texte complet du travail à faire, devoirs, exercices ou chapitres demandés (ex: Série 3 analyse exercices 1 et 4), ou null si aucun travail mentionné",
+  "freq": "Chaque semaine" ou "Ce jour seulement",
+  "examType": "Devoir de Contrôle (DC)" ou "Devoir de Synthèse (DS)" ou "Examen Blanc",
+  "replyMessage": "Message de confirmation amical et motivant bilingue tunisien/français récapitulant la séance, l'horaire, le type et les exercices enregistrés"
 }`;
 
   const res = await fetch(url, {
@@ -364,6 +466,9 @@ Analyse la phrase de l'élève et extrait les données en JSON STRICT sans forma
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       contents: [{ parts: [{ text: `${systemPrompt}\n\nCommande élève : "${userText}"` }] }],
+      generationConfig: {
+        temperature: 0.1,
+      },
     }),
   });
 
@@ -378,67 +483,93 @@ export function parseTunisianNaturalLanguageLocally(rawText) {
   const text = rawText.toLowerCase();
 
   let subject = null;
-  if (/math|mathematique|رياضيات|مات|alg|geometrie/i.test(text)) subject = "Mathématiques";
+  if (/math|mathematique|رياضيات|مات|alg|geometrie|analyse/i.test(text)) subject = "Mathématiques";
   else if (/phys|physique|chimie|فيزياء|فيزيك|chim/i.test(text)) subject = "Sciences Physiques";
-  else if (/svt|science|3ouloum|علوم|nature|bio/i.test(text)) subject = "Sciences SVT";
-  else if (/info|informatique|tic|algo|python|انفورماتيك|اعلامية/i.test(text)) subject = "Informatique";
+  else if (/svt|science|3ouloum|علوم|nature|bio|genetique/i.test(text)) subject = "Sciences SVT";
+  else if (/info|informatique|tic|algo|python|sql|انفورماتيك|اعلامية/i.test(text)) subject = "Informatique";
   else if (/philo|philosophie|falsafa|فلسفة/i.test(text)) subject = "Philosophie";
   else if (/arabe|3arbi|3arabia|عربية|نصوص|ادب/i.test(text)) subject = "Arabe";
   else if (/franc|french|فرنسية/i.test(text)) subject = "Français";
   else if (/angl|english|انقليزية/i.test(text)) subject = "Anglais";
+  else if (/eco|gestion|compta|اقتصاد|تصرف/i.test(text)) subject = "Économie & Gestion";
+  else if (/histoire|geo|hg|تاريخ|جغرافيا/i.test(text)) subject = "Histoire-Géo";
   else if (/espagnol|italien|allemand|option|اسبانية/i.test(text)) subject = "Option";
-  else if (/sport|رياضة/i.test(text)) subject = "Sport";
+  else if (/sport|eps|رياضة/i.test(text)) subject = "Sport";
 
   if (!subject) return null;
 
   const now = new Date();
   let todayIdx = (now.getDay() + 6) % 7;
   let dayIndex = todayIdx;
+  let dayOffset = 0;
 
   if (/ghodwa|demain|غدا|غدوة/i.test(text)) {
     dayIndex = (todayIdx + 1) % 7;
+    dayOffset = 1;
   } else if (/ba3d ghodwa|apres demain|après-demain|بعد غد/i.test(text)) {
     dayIndex = (todayIdx + 2) % 7;
+    dayOffset = 2;
   } else if (/lundi|ethnin|ithnin|الاثنين/i.test(text)) {
     dayIndex = 0;
+    dayOffset = (7 + 0 - todayIdx) % 7;
   } else if (/mardi|thletha|tleta|الثلاثاء/i.test(text)) {
     dayIndex = 1;
+    dayOffset = (7 + 1 - todayIdx) % 7;
   } else if (/mercredi|arba3a|lerba3|الأربعاء|الاربعاء/i.test(text)) {
     dayIndex = 2;
+    dayOffset = (7 + 2 - todayIdx) % 7;
   } else if (/jeudi|khmis|elkhmis|الخميس/i.test(text)) {
     dayIndex = 3;
+    dayOffset = (7 + 3 - todayIdx) % 7;
   } else if (/vendredi|jem3a|jom3a|الجمعة/i.test(text)) {
     dayIndex = 4;
+    dayOffset = (7 + 4 - todayIdx) % 7;
   } else if (/samedi|sebt|essebt|السبت/i.test(text)) {
     dayIndex = 5;
+    dayOffset = (7 + 5 - todayIdx) % 7;
   } else if (/dimanche|a7ad|elahad|الأحد|الاحد/i.test(text)) {
     dayIndex = 6;
+    dayOffset = (7 + 6 - todayIdx) % 7;
   }
+
+  const targetDateObj = new Date(now.getTime() + dayOffset * 86400000);
+  const targetDateStr = `${targetDateObj.getFullYear()}-${String(targetDateObj.getMonth() + 1).padStart(2, "0")}-${String(targetDateObj.getDate()).padStart(2, "0")}`;
 
   let startHour = 14;
   let startMinute = 0;
   let endHour = 16;
   let endMinute = 0;
 
-  const matchTime = text.match(/(?:m3a|a|à|fi|ساعة|مع)?\s*(\d{1,2})(?:h|:|\s*heures?)(\d{2})?/i);
-  if (matchTime) {
-    startHour = parseInt(matchTime[1]);
-    if (matchTime[2]) startMinute = parseInt(matchTime[2]);
-    if (startHour < 8) startHour += 12;
-    endHour = Math.min(24, startHour + 2);
+  // Détection des horaires "de Xh à Yh" ou "m3a Xh"
+  const matchRange = text.match(/(?:de|men|من)\s*(\d{1,2})(?:h|:|\s*heures?)(\d{2})?\s*(?:a|à|hatta|ila|حتى|إلى)\s*(\d{1,2})(?:h|:|\s*heures?)(\d{2})?/i);
+  if (matchRange) {
+    startHour = parseInt(matchRange[1]);
+    if (matchRange[2]) startMinute = parseInt(matchRange[2]);
+    endHour = parseInt(matchRange[3]);
+    if (matchRange[4]) endMinute = parseInt(matchRange[4]);
+    if (startHour < 7) startHour += 12;
+    if (endHour < startHour && endHour < 12) endHour += 12;
   } else {
-    if (/se3tin|zousta3ech/i.test(text)) startHour = 14;
-    else if (/tlatha|tletata3ech/i.test(text)) startHour = 15;
-    else if (/arba3ata3ech/i.test(text)) startHour = 16;
-    else if (/3achiya|après-midi/i.test(text)) startHour = 15;
-    else if (/lil|soir/i.test(text)) startHour = 20;
-    else if (/sbe7|matin/i.test(text)) startHour = 9;
-    endHour = Math.min(24, startHour + 2);
+    const matchTime = text.match(/(?:m3a|a|à|fi|ساعة|مع)?\s*(\d{1,2})(?:h|:|\s*heures?)(\d{2})?/i);
+    if (matchTime) {
+      startHour = parseInt(matchTime[1]);
+      if (matchTime[2]) startMinute = parseInt(matchTime[2]);
+      if (startHour < 8 && !/sbe7|matin/i.test(text)) startHour += 12;
+      endHour = Math.min(24, startHour + 2);
+    } else {
+      if (/se3tin|zousta3ech/i.test(text)) startHour = 14;
+      else if (/tlatha|tletata3ech/i.test(text)) startHour = 15;
+      else if (/arba3ata3ech/i.test(text)) startHour = 16;
+      else if (/3achiya|après-midi/i.test(text)) startHour = 15;
+      else if (/lil|soir/i.test(text)) startHour = 20;
+      else if (/sbe7|matin/i.test(text)) startHour = 9;
+      endHour = Math.min(24, startHour + 2);
+    }
   }
 
   const isExam = /devoir|examen|ds|dc|test|امتحان|فرض/i.test(text);
 
-  const isPart = /particulier|etude|étude|dar el prof|chez prof|fi darou/i.test(text);
+  const isPart = /particulier|etude|étude|dar el prof|chez prof|fi darou|برتيكولي|دروس خصوصية/i.test(text);
   let sessionType = "À la maison";
   let sessionLoc = null;
 
@@ -475,27 +606,37 @@ export function parseTunisianNaturalLanguageLocally(rawText) {
       addr = "Chez le Professeur";
     }
     sessionLoc = { address: addr, lat, lng };
-  } else if (/dar|maison|دار/i.test(text)) {
-    sessionType = "À la maison";
-  } else if (/ligne|zoom|meet|اونلاين/i.test(text)) {
-    sessionType = "En ligne";
   } else if (/lycee|lycée|ecole|معهد/i.test(text)) {
     sessionType = "Lycée";
+  } else if (/ligne|zoom|meet|teams|اونلاين/i.test(text)) {
+    sessionType = "En ligne";
+  } else if (/dar|maison|دار/i.test(text)) {
+    sessionType = "À la maison";
+  }
+
+  // Extraction du travail à faire / devoirs / exercices
+  let extractedTodo = null;
+  const todoMatch = rawText.match(/(?:travail(?:\s+à|\s+a)?\s+faire|exercices?|exos?|s[eé]rie|khedma|w\s+el\s+khedma|wal\s+khedma|w\s+khedma|الخدمة|والخدمة|تمارين|واجب|r[eé]vision|projet|chapitre|tp|td)\s*[:=\s\-]+([^.]+)/i);
+  if (todoMatch && todoMatch[1]) {
+    extractedTodo = todoMatch[1].trim();
   }
 
   return {
     action: isExam ? "add_exam" : "add_session",
     subject: subject,
     dayIndex: dayIndex,
+    dateStr: targetDateStr,
     startHour: startHour,
     startMinute: startMinute,
     endHour: endHour,
     endMinute: endMinute,
     type: sessionType,
     location: sessionLoc,
+    todo: extractedTodo,
+    freq: dayOffset > 0 ? "Ce jour seulement" : "Chaque semaine",
     replyMessage: isPart
-      ? "فهمتك بالباهي ! تم تسجيل حصة الدرس الخصوصي مع تحديد الموقع على الخريطة بنجاح."
-      : "فهمتك بالباهي ! تم تسجيل الحصة في جدول أوقاتك بنجاح.",
+      ? "فهمتك بالباهي ! تم تسجيل حصة الدرس الخصوصي مع تحديد الموقع على الخريطة والواجبات المطلوبة بنجاح."
+      : "فهمتك بالباهي ! تم تسجيل الحصة والعمل المطلوب في جدول أوقاتك بنجاح.",
   };
 }
 
@@ -624,7 +765,6 @@ Règles :
             });
           }
           hideLoading();
-          playBeep();
           alert(`🎉 ${sessions.length} séances ont été extraites et ajoutées à votre planning avec succès !`);
         } else {
           hideLoading();
@@ -672,5 +812,7 @@ window.closeAiModal = closeAiModal;
 window.useAiExample = useAiExample;
 window.toggleAiSpeechRecording = toggleAiSpeechRecording;
 window.startAiSpeechRecording = startAiSpeechRecording;
+window.stopAiSpeechRecording = stopAiSpeechRecording;
 window.executeAiCommand = executeAiCommand;
 window.handleImageUpload = handleImageUpload;
+

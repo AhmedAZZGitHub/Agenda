@@ -69,6 +69,35 @@
       }
     };
 
+    // Remplacement silencieux et moderne de window.alert pour éliminer les bips système Windows/Navigateur
+    window.alert = function (msg) {
+      if (!msg) return;
+      var container = document.getElementById("appToastContainer");
+      if (!container) {
+        container = document.createElement("div");
+        container.id = "appToastContainer";
+        container.style.cssText = "position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:9999999;display:flex;flex-direction:column;gap:8px;max-width:480px;width:calc(100vw - 32px);pointer-events:none;";
+        document.body.appendChild(container);
+      }
+
+      var toast = document.createElement("div");
+      toast.style.cssText = "pointer-events:auto;background:var(--card,#ffffff);color:var(--text,#0f172a);border:1.5px solid var(--primary,#0284c7);border-radius:14px;padding:12px 16px;box-shadow:0 10px 28px rgba(0,0,0,0.22);display:flex;gap:10px;align-items:center;justify-content:space-between;animation:toastSlideIn 0.3s cubic-bezier(0.16,1,0.3,1);backdrop-filter:blur(10px);font-size:13px;font-weight:700;line-height:1.4;";
+
+      var formattedMsg = String(msg).replace(/\n/g, "<br>");
+      toast.innerHTML = '<div style="display:flex;align-items:center;gap:8px;flex:1;"><span style="font-size:18px;">✨</span><div>' + formattedMsg + '</div></div><button style="background:none;border:none;font-size:16px;cursor:pointer;color:var(--muted);padding:0 4px;font-weight:800;" onclick="this.parentElement.remove()">✕</button>';
+
+      container.appendChild(toast);
+
+      setTimeout(function () {
+        toast.style.transition = "opacity 0.35s ease, transform 0.35s ease";
+        toast.style.opacity = "0";
+        toast.style.transform = "translateY(-15px)";
+        setTimeout(function () {
+          toast.remove();
+        }, 350);
+      }, 4000);
+    };
+
     // Bootstrap immédiat des fonctions globales d'interface pour éviter tout 'is not a function'
     window.openOverlay = function (id) {
       var el = document.getElementById(id);
@@ -134,7 +163,7 @@
       if (viewImport) viewImport.style.display = tab === "import" ? "flex" : "none";
     };
   </script>
-  <link rel="stylesheet" href="css/styles.css?v=16.5" />
+  <link rel="stylesheet" href="css/styles.css?v=16.8" />
 </head>
 
 <body>
@@ -1240,39 +1269,47 @@
       </div>
 
       <!-- BOUTON MICROPHONE ET ANIMATION -->
-      <div style="text-align: center; padding: 12px 0;">
-        <button type="button" class="ai-mic-btn" id="aiModalMicBtn" onclick="window.toggleAiSpeechRecording()">
+      <div style="text-align: center; padding: 8px 0 12px 0;">
+        <button type="button" class="ai-mic-btn" id="aiModalMicBtn" onclick="window.toggleAiSpeechRecording()" title="Cliquez pour parler ou arrêter">
           🎙️
         </button>
-        <div id="aiMicStatusText" style="font-size: 12px; font-weight: 700; color: var(--muted); margin-top: 10px;">
-          Cliquez sur le micro et parlez naturellement en Tunisien, Français ou Arabe.
+        <div id="aiMicStatusText" style="font-size: 12px; font-weight: 700; color: var(--muted); margin-top: 10px; line-height: 1.4;">
+          Cliquez sur le micro et parlez librement en Tunisien, Français ou Arabe.
+        </div>
+        <div style="display: flex; justify-content: center; gap: 8px; margin-top: 8px;">
+          <button type="button" id="btnAiFinishRecording" class="btn-action" style="display: none; background: #ef4444; color: white; font-weight: 800; padding: 8px 16px; border-radius: 10px; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.35);" onclick="window.stopAiSpeechRecording()">
+            ⏹️ J'ai terminé d'enregistrer
+          </button>
+          <button type="button" id="btnAiStartRecording" class="btn-action" style="display: inline-flex; background: #0284c7; color: white; font-weight: 800; padding: 8px 16px; border-radius: 10px;" onclick="window.startAiSpeechRecording()">
+            🎙️ Démarrer l'enregistrement
+          </button>
         </div>
       </div>
 
       <!-- TRANSCRIPTION ET TEXTE SAISI -->
       <div>
         <label style="font-size: 11px; font-weight: 700; color: var(--muted); display: block; margin-bottom: 4px;">
-          Texte dicté ou message personnalisé :
+          📝 Texte dicté ou instruction :
         </label>
         <textarea id="aiTranscriptInput" class="input" style="width: 100%; height: 75px; resize: none; font-size: 13px;"
-          placeholder="Ex: Zidli seance math ghodwa m3a 14h / Devoir physique vendredi 10h / أضف حصة فيزياء غدا"></textarea>
+          placeholder="Ex: Zidli seance Math ghodwa 14h particulier w khedma serie 3 / Séance SVT samedi 9h au lycée travail à faire TP génétique..."></textarea>
       </div>
 
       <!-- EXEMPLES RAPIDES EN TUNISIEN / FRANÇAIS / ARABE -->
       <div>
-        <div style="font-size: 11px; font-weight: 700; color: var(--muted); margin-bottom: 6px;">💡 Exemples de commandes rapides :</div>
+        <div style="font-size: 11px; font-weight: 700; color: var(--muted); margin-bottom: 6px;">💡 Exemples complets (Séance, Heure, Type & Devoirs) :</div>
         <div style="display: flex; gap: 6px; flex-wrap: wrap;">
-          <span class="example-chip" onclick="window.useAiExample('Zidli seance Math ghodwa m3a 14h')">🇹🇳 Zidli seance Math ghodwa 14h</span>
-          <span class="example-chip" onclick="window.useAiExample('Devoir Physique nhar larba3a 10h')">🇹🇳 Devoir Physique nhar larba3a</span>
-          <span class="example-chip" onclick="window.useAiExample('أضف حصة فلسفة يوم الجمعة من 16 إلى 18')">🇸🇦 أضف حصة فلسفة الجمعة 16h</span>
-          <span class="example-chip" onclick="window.useAiExample('Séance SVT samedi de 9h à 11h à la maison')">🇫🇷 Séance SVT samedi 9h</span>
+          <span class="example-chip" onclick="window.useAiExample('Zidli seance Math ghodwa 14h particulier w khedma serie 3 analyse')">🇹🇳 Maths 14h Particulier + Série 3</span>
+          <span class="example-chip" onclick="window.useAiExample('Séance SVT samedi de 9h à 11h au lycée travail à faire TP génétique')">🇫🇷 SVT Samedi 9h Lycée + TP</span>
+          <span class="example-chip" onclick="window.useAiExample('أضف حصة فيزياء الجمعة مع 16h في الدار والعمل تمارين الكهرباء')">🇸🇦 فيزياء الجمعة 16h + تمارين</span>
+          <span class="example-chip" onclick="window.useAiExample('Devoir Informatique nhar larba3a 10h projet Python')">🇹🇳 Devoir Info Mercredi 10h</span>
         </div>
       </div>
 
       <div id="aiFeedbackBox" style="display: none; padding: 12px; border-radius: 12px; font-size: 13px; font-weight: 700; line-height: 1.4;"></div>
 
       <div style="display: flex; gap: 8px;">
-        <button type="button" class="btn-add" style="flex: 1; justify-content: center; padding: 12px;" onclick="window.executeAiCommand()">
+        <button type="button" class="btn-add" style="flex: 1; justify-content: center; padding: 12px; font-size: 13.5px;" onclick="window.executeAiCommand()">
           ✨ Analyser & Ajouter au Planning
         </button>
       </div>
@@ -1541,7 +1578,7 @@
   </div>
 
   <!-- SCRIPT APPLICATION -->
-  <script type="module" src="js/app.js?v=16.5"></script>
+  <script type="module" src="js/app.js?v=16.8"></script>
 </body>
 
 </html>

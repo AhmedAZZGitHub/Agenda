@@ -67,15 +67,7 @@ export function hideLoading() {
 }
 
 export function playBeep() {
-  try {
-    const ctx = new (window.AudioContext || window.webkitAudioContext)();
-    const osc = ctx.createOscillator();
-    osc.type = "sine";
-    osc.frequency.setValueAtTime(880, ctx.currentTime);
-    osc.connect(ctx.destination);
-    osc.start();
-    osc.stop(ctx.currentTime + 0.8);
-  } catch (e) {}
+  // Tous les sons et bips sont désactivés dans l'application
 }
 
 export function getSubjectMeta(sub = "") {

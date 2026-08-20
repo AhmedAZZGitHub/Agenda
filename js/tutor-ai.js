@@ -2,7 +2,7 @@
 // Tuteur IA Éducatif Gemini Pro (Baccalauréat Tunisien) & Correction d'Exercices par Photo
 
 import { getAiModelName, getAiApiKey } from "./ai-assistant.js?v=16.5";
-import { state, showLoading, hideLoading, playBeep } from "./state.js?v=16.5";
+import { state, showLoading, hideLoading } from "./state.js?v=16.5";
 
 let tutorChatHistory = [];
 let tutorAttachedImageBase64 = null;
@@ -392,7 +392,6 @@ Pour poser n'importe quelle question et recevoir les explications complètes gé
 
   const formattedBotReply = formatMarkdownForChat(botReply);
   appendTutorMessage("bot", formattedBotReply);
-  playBeep();
 }
 
 // Moteur Pédagogique Spécialisé Baccalauréat (Réponses précises par notion)
@@ -547,40 +546,56 @@ export function toggleTutorVoice() {
   const btn = document.getElementById("btnTutorVoice");
 
   if (isTutorListening) {
+    isTutorListening = false;
     if (tutorSpeechRecognition) {
       try {
         tutorSpeechRecognition.stop();
       } catch (e) {}
     }
-    isTutorListening = false;
     if (btn) btn.style.color = "";
   } else {
     try {
       tutorSpeechRecognition = new SpeechRecognition();
       tutorSpeechRecognition.lang = "ar-TN";
       tutorSpeechRecognition.interimResults = true;
-      tutorSpeechRecognition.continuous = false;
+      tutorSpeechRecognition.continuous = true;
 
       tutorSpeechRecognition.onstart = function () {
         isTutorListening = true;
-        if (btn) btn.style.color = "#ef4444";
+        if (btn) {
+          btn.style.color = "#ef4444";
+          btn.title = "En écoute continue... Cliquez pour arrêter";
+        }
       };
 
       tutorSpeechRecognition.onresult = function (event) {
-        let text = "";
+        let interimTranscript = "";
+        let finalTranscript = "";
         for (let i = 0; i < event.results.length; i++) {
-          text += event.results[i][0].transcript;
+          if (event.results[i].isFinal) {
+            finalTranscript += event.results[i][0].transcript + " ";
+          } else {
+            interimTranscript += event.results[i][0].transcript;
+          }
         }
+        const full = (finalTranscript + interimTranscript).trim();
         const textInp = document.getElementById("tutorTextInput");
-        if (textInp) textInp.value = text;
+        if (textInp && full) textInp.value = full;
       };
 
-      tutorSpeechRecognition.onerror = function () {
+      tutorSpeechRecognition.onerror = function (event) {
+        if (event.error === "no-speech" && isTutorListening) return;
         isTutorListening = false;
         if (btn) btn.style.color = "";
       };
 
       tutorSpeechRecognition.onend = function () {
+        if (isTutorListening) {
+          try {
+            tutorSpeechRecognition.start();
+            return;
+          } catch (e) {}
+        }
         isTutorListening = false;
         if (btn) btn.style.color = "";
       };
@@ -588,6 +603,8 @@ export function toggleTutorVoice() {
       tutorSpeechRecognition.start();
     } catch (e) {
       console.error(e);
+      isTutorListening = false;
+      if (btn) btn.style.color = "";
     }
   }
 }
