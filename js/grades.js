@@ -1,8 +1,8 @@
 // js/grades.js
 // Gestion du Carnet Trimestriel, Calcul des Moyennes et Annales du Bac (2000 -> 2026)
 
-import { database, ref, set } from "./firebase-config.js?v=16.2";
-import { state, getStudentPath, getSubjectMeta } from "./state.js?v=16.2";
+import { database, ref, set } from "./firebase-config.js?v=16.3";
+import { state, getStudentPath, getSubjectMeta } from "./state.js?v=16.3";
 
 export const bacSubjectsList = [
   { id: "math", manifestKey: "math", name: "Mathématiques", coef: 4 },

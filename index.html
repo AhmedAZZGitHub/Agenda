@@ -87,7 +87,7 @@
       if (b) b.style.display = val && val.indexOf("Ce jour seulement") !== -1 ? "block" : "none";
     };
   </script>
-  <link rel="stylesheet" href="css/styles.css?v=16.2" />
+  <link rel="stylesheet" href="css/styles.css?v=16.3" />
 </head>
 
 <body>
@@ -776,7 +776,7 @@
           <span class="example-chip" onclick="window.setMapPresetLocation('Bizerte Ville', 37.2744, 9.8739)">Bizerte</span>
         </div>
 
-        <div id="sessionPickerMap" style="height: 180px; width: 100%; border-radius: 10px; border: 1.5px solid var(--dash); z-index: 1;"></div>
+        <div id="sessionPickerMap" style="height: 125px; width: 100%; border-radius: 8px; border: 1.5px solid var(--dash); z-index: 1;"></div>
         <div style="font-size: 10.5px; color: var(--muted); font-weight: 600;">
           💡 <i>Vous pouvez cliquer ou glisser le marqueur sur la carte pour définir l'emplacement précis.</i>
         </div>
@@ -847,85 +847,85 @@
 
   <!-- MODALE DÉTAILS ET MODIFICATION DE SÉANCE -->
   <div class="modal" id="sessionDetailModal">
-    <div class="modal-box" style="max-width: 540px; gap: 14px;">
+    <div class="modal-box" style="max-width: 480px; gap: 10px; padding: 14px 18px;">
       <!-- EN-TÊTE SÉANCE -->
       <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-        <div style="display: flex; align-items: center; gap: 10px;">
-          <span style="font-size: 26px;" id="sdIco">📐</span>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="font-size: 22px;" id="sdIco">📐</span>
           <div>
-            <div style="font-weight: 900; font-size: 17px; color: var(--text);" id="sdSubTitle">Mathématiques</div>
-            <div style="font-size: 12px; color: var(--muted); font-weight: 700;" id="sdTimeBadge">Lundi • 08:00 - 10:00 (2h00)</div>
+            <div style="font-weight: 900; font-size: 15px; color: var(--text);" id="sdSubTitle">Mathématiques</div>
+            <div style="font-size: 11.5px; color: var(--muted); font-weight: 700;" id="sdTimeBadge">Lundi • 08:00 - 10:00 (2h00)</div>
           </div>
         </div>
-        <span onclick="window.closeModal('sessionDetailModal')" style="cursor: pointer; color: #ef4444; font-size: 20px; font-weight: 800;">✕</span>
+        <span onclick="window.closeModal('sessionDetailModal')" style="cursor: pointer; color: #ef4444; font-size: 18px; font-weight: 800;">✕</span>
       </div>
 
       <!-- ONGLETS: VUE DÉTAILS / MODE MODIFICATION -->
       <div class="auth-tabs" style="margin-bottom: 0;">
-        <button class="auth-tab-btn active" id="sdTabOverviewBtn" onclick="window.switchSdTab('overview')">
+        <button class="auth-tab-btn active" id="sdTabOverviewBtn" style="padding: 6px 12px; font-size: 12px;" onclick="window.switchSdTab('overview')">
           📋 Détails & Devoirs
         </button>
-        <button class="auth-tab-btn" id="sdTabEditBtn" onclick="window.switchSdTab('edit')">
-          ✏️ Modifier la Séance
+        <button class="auth-tab-btn" id="sdTabEditBtn" style="padding: 6px 12px; font-size: 12px;" onclick="window.switchSdTab('edit')">
+          ✏️ Modifier
         </button>
       </div>
 
       <!-- CONTENU VUE 1 : APERÇU, TRAVAIL À FAIRE & MAPS -->
-      <div id="sdViewOverview" style="display: flex; flex-direction: column; gap: 12px;">
+      <div id="sdViewOverview" style="display: flex; flex-direction: column; gap: 8px;">
         <!-- INFORMATIONS CLÉS -->
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-          <div style="background: var(--dash); padding: 10px 12px; border-radius: 10px; font-size: 12px;">
-            <span style="color: var(--muted); font-weight: 700; display: block; margin-bottom: 2px;">Lieu / Type :</span>
-            <span style="font-weight: 800; font-size: 13px;" id="sdTypeVal">🏠 À la maison</span>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
+          <div style="background: var(--dash); padding: 7px 10px; border-radius: 8px; font-size: 11.5px;">
+            <span style="color: var(--muted); font-weight: 700; display: block; font-size: 10.5px;">Lieu / Type :</span>
+            <span style="font-weight: 800; font-size: 12px;" id="sdTypeVal">🏠 À la maison</span>
           </div>
-          <div style="background: var(--dash); padding: 10px 12px; border-radius: 10px; font-size: 12px;">
-            <span style="color: var(--muted); font-weight: 700; display: block; margin-bottom: 2px;">Fréquence :</span>
-            <span style="font-weight: 800; font-size: 13px;" id="sdFreqVal">Chaque semaine</span>
+          <div style="background: var(--dash); padding: 7px 10px; border-radius: 8px; font-size: 11.5px;">
+            <span style="color: var(--muted); font-weight: 700; display: block; font-size: 10.5px;">Fréquence :</span>
+            <span style="font-weight: 800; font-size: 12px;" id="sdFreqVal">Chaque semaine</span>
           </div>
         </div>
 
         <!-- SECTION EXERCICES DONNÉS & DEVOIRS POUR CETTE SÉANCE -->
-        <div style="background: var(--card); border: 1.5px solid var(--dash); border-radius: 12px; padding: 14px; display: flex; flex-direction: column; gap: 10px;">
-          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
-            <span style="font-weight: 800; font-size: 13.5px; display: flex; align-items: center; gap: 6px; color: var(--text);">
+        <div style="background: var(--card); border: 1.5px solid var(--dash); border-radius: 10px; padding: 10px 12px; display: flex; flex-direction: column; gap: 8px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 4px;">
+            <span style="font-weight: 800; font-size: 12.5px; display: flex; align-items: center; gap: 4px; color: var(--text);">
               📝 Exercices & Devoirs Donnés :
             </span>
-            <div style="display: flex; align-items: center; gap: 6px;">
+            <div style="display: flex; align-items: center; gap: 4px;">
               <input type="checkbox" id="sdTodoDone" style="display: none;" onchange="window.saveQuickSessionTodo()" />
-              <button type="button" id="sdTodoStatusToggleBtn" class="btn-action" style="padding: 4px 10px; font-size: 11.5px; font-weight: 800; border-radius: 8px;" onclick="window.toggleSdTodoStatus()">
+              <button type="button" id="sdTodoStatusToggleBtn" class="btn-action" style="padding: 3px 8px; font-size: 11px; font-weight: 800; border-radius: 6px;" onclick="window.toggleSdTodoStatus()">
                 ⏳ Non fait (À faire)
               </button>
             </div>
           </div>
-          <textarea id="sdTodoText" class="input" style="width: 100%; height: 80px; resize: vertical; font-size: 12.5px;"
+          <textarea id="sdTodoText" class="input" style="width: 100%; height: 50px; resize: vertical; font-size: 12px; padding: 6px 8px;"
             placeholder="Ex: Exercices 1, 2 et 4 p.85 (Série Continuité et Limites) / Apprendre le cours..."
             oninput="window.saveQuickSessionTodo()"></textarea>
-          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
-            <button type="button" class="btn-action" style="padding: 5px 12px; font-size: 11.5px; font-weight: 700; color: #7c3aed; border-color: #ddd6fe; background: #f5f3ff;" onclick="window.askTutorAboutSessionTodo()">
-              🤖 Demander de l'aide au Tuteur IA
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 4px;">
+            <button type="button" class="btn-action" style="padding: 4px 10px; font-size: 11px; font-weight: 700; color: #7c3aed; border-color: #ddd6fe; background: #f5f3ff;" onclick="window.askTutorAboutSessionTodo()">
+              🤖 Aide Tuteur IA
             </button>
-            <button type="button" class="btn-add" style="padding: 5px 14px; font-size: 11.5px; font-weight: 800;" onclick="window.saveQuickSessionTodo()">
+            <button type="button" class="btn-add" style="padding: 4px 12px; font-size: 11px; font-weight: 800;" onclick="window.saveQuickSessionTodo()">
               💾 Enregistrer
             </button>
           </div>
         </div>
 
         <!-- SECTION LOCALISATION MAPS (SI COURS PARTICULIER) -->
-        <div id="sdParticularMapSection" style="display: none; flex-direction: column; gap: 8px; background: var(--card); border: 1.5px solid var(--dash); border-radius: 12px; padding: 14px;">
+        <div id="sdParticularMapSection" style="display: none; flex-direction: column; gap: 6px; background: var(--card); border: 1.5px solid var(--dash); border-radius: 10px; padding: 10px 12px;">
           <div style="display: flex; justify-content: space-between; align-items: center;">
-            <span style="font-weight: 800; font-size: 13px; display: flex; align-items: center; gap: 6px;">
-              📍 Localisation du Cours Particulier :
+            <span style="font-weight: 800; font-size: 12px; display: flex; align-items: center; gap: 4px;">
+              📍 Emplacement du Cours Particulier :
             </span>
           </div>
-          <div style="font-size: 12.5px; font-weight: 800; color: var(--primary);" id="sdLocationAddressText">
+          <div style="font-size: 11.5px; font-weight: 800; color: var(--primary);" id="sdLocationAddressText">
             Adresse non spécifiée
           </div>
-          <div id="sdDetailMap" style="height: 180px; width: 100%; border-radius: 10px; border: 1.5px solid var(--dash); z-index: 1;"></div>
-          <div style="display: flex; gap: 6px; flex-wrap: wrap;">
-            <button type="button" class="btn-add" id="sdBtnGoogleNav" style="flex: 1; justify-content: center; padding: 8px 12px; font-size: 12px;">
-              🧭 Ouvrir l'Itinéraire (Google Maps)
+          <div id="sdDetailMap" style="height: 120px; width: 100%; border-radius: 8px; border: 1.5px solid var(--dash); z-index: 1;"></div>
+          <div style="display: flex; gap: 4px; flex-wrap: wrap;">
+            <button type="button" class="btn-add" id="sdBtnGoogleNav" style="flex: 1; justify-content: center; padding: 6px 10px; font-size: 11px;">
+              🧭 Itinéraire (Google Maps)
             </button>
-            <button type="button" class="btn-action" id="sdBtnCopyAddr" style="padding: 8px 12px; font-size: 12px;">
+            <button type="button" class="btn-action" id="sdBtnCopyAddr" style="padding: 6px 10px; font-size: 11px;">
               📋 Copier
             </button>
           </div>
@@ -933,12 +933,12 @@
       </div>
 
       <!-- CONTENU VUE 2 : FORMULAIRE COMPLET D'ÉDITION -->
-      <form id="sdViewEdit" onsubmit="window.handleSaveEditedSession(event)" style="display: none; flex-direction: column; gap: 10px;">
+      <form id="sdViewEdit" onsubmit="window.handleSaveEditedSession(event)" style="display: none; flex-direction: column; gap: 8px;">
         <input type="hidden" id="sdEditId" />
 
         <div>
-          <label style="font-size: 11px; font-weight: 700; color: var(--muted); display: block; margin-bottom: 4px;">Matière :</label>
-          <select id="sdEditSub" class="input" style="width: 100%">
+          <label style="font-size: 10.5px; font-weight: 700; color: var(--muted); display: block; margin-bottom: 2px;">Matière :</label>
+          <select id="sdEditSub" class="input" style="width: 100%; padding: 6px 8px; font-size: 12px;">
             <option value="Mathématiques">📐 Mathématiques</option>
             <option value="Physique-Chimie">🔬 Sciences Physiques</option>
             <option value="Sciences SVT">🧬 SVT</option>
@@ -952,10 +952,10 @@
           </select>
         </div>
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px">
           <div>
-            <label style="font-size: 11px; font-weight: 700; color: var(--muted); display: block; margin-bottom: 4px;">Lieu / Type :</label>
-            <select id="sdEditType" class="input" style="width: 100%" onchange="window.onEditSessionTypeChange(this.value)">
+            <label style="font-size: 10.5px; font-weight: 700; color: var(--muted); display: block; margin-bottom: 2px;">Lieu / Type :</label>
+            <select id="sdEditType" class="input" style="width: 100%; padding: 6px 8px; font-size: 12px;" onchange="window.onEditSessionTypeChange(this.value)">
               <option value="À la maison">🏠 À la maison (Autonomie)</option>
               <option value="En ligne">💻 En ligne</option>
               <option value="Lycée">🏫 Lycée</option>
@@ -963,26 +963,26 @@
             </select>
           </div>
           <div>
-            <label style="font-size: 11px; font-weight: 700; color: var(--muted); display: block; margin-bottom: 4px;">Fréquence :</label>
-            <select id="sdEditFreq" class="input" style="width: 100%" onchange="window.onEditFreqChange(this.value)">
+            <label style="font-size: 10.5px; font-weight: 700; color: var(--muted); display: block; margin-bottom: 2px;">Fréquence :</label>
+            <select id="sdEditFreq" class="input" style="width: 100%; padding: 6px 8px; font-size: 12px;" onchange="window.onEditFreqChange(this.value)">
               <option value="Chaque semaine">🔁 Chaque semaine</option>
               <option value="Par quinzaine (1 semaine sur 2)">⏳ 1 semaine sur 2 (Quinzaine)</option>
               <option value="Ce jour seulement">📍 Ce jour seulement (Séance unique)</option>
             </select>
-            <div id="sdEditSingleDateBox" style="display: none; margin-top: 6px;">
-              <label style="font-size: 10.5px; font-weight: 700; color: #ec4899; display: block; margin-bottom: 2px;">🗓️ Date exacte :</label>
-              <input type="date" id="sdEditSingleDateInput" class="input" style="width: 100%; font-size: 12px;" />
+            <div id="sdEditSingleDateBox" style="display: none; margin-top: 4px;">
+              <label style="font-size: 10px; font-weight: 700; color: #ec4899; display: block;">🗓️ Date exacte :</label>
+              <input type="date" id="sdEditSingleDateInput" class="input" style="width: 100%; font-size: 11.5px; padding: 4px 6px;" />
             </div>
           </div>
         </div>
 
         <!-- ZONE CARTE POUR MODIFICATION PARTICULIER -->
-        <div id="sdEditMapBox" style="display: none; flex-direction: column; gap: 8px; background: var(--dash); padding: 12px; border-radius: 12px;">
-          <label style="font-size: 11px; font-weight: 800; color: var(--text);">📍 Adresse & Emplacement :</label>
-          <input type="text" id="sdEditLocText" class="input" style="width: 100%" placeholder="ex: Ennasr 2, Tunis / Chez Prof..." />
+        <div id="sdEditMapBox" style="display: none; flex-direction: column; gap: 6px; background: var(--dash); padding: 10px; border-radius: 10px;">
+          <label style="font-size: 10.5px; font-weight: 800; color: var(--text);">📍 Adresse & Emplacement :</label>
+          <input type="text" id="sdEditLocText" class="input" style="width: 100%; padding: 6px 8px; font-size: 12px;" placeholder="ex: Ennasr 2, Tunis / Chez Prof..." />
           <input type="hidden" id="sdEditLocLat" value="36.8065" />
           <input type="hidden" id="sdEditLocLng" value="10.1815" />
-          <div id="sdEditPickerMap" style="height: 160px; width: 100%; border-radius: 10px; border: 1.5px solid var(--dash); z-index: 1;"></div>
+          <div id="sdEditPickerMap" style="height: 120px; width: 100%; border-radius: 8px; border: 1.5px solid var(--dash); z-index: 1;"></div>
         </div>
 
         <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px">
@@ -1420,7 +1420,7 @@
   </div>
 
   <!-- SCRIPT APPLICATION -->
-  <script type="module" src="js/app.js?v=16.2"></script>
+  <script type="module" src="js/app.js?v=16.3"></script>
 </body>
 
 </html>
