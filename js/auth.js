@@ -116,7 +116,7 @@ export async function handleRegister(e) {
 
     await updateProfile(user, { displayName: name });
 
-    const isAutoApproved = email.toLowerCase().includes("admin") || uid === "admin_preconfig";
+    const isMasterAdmin = email.toLowerCase() === "admin@agenda.tn" || email.toLowerCase() === "admin@planningbac.tn" || uid === "admin_preconfig";
     const parentCode = state.selectedRegRole === "student" ? "BAC-" + Math.random().toString(36).substring(2, 6).toUpperCase() : null;
 
     const profileData = {
@@ -124,7 +124,7 @@ export async function handleRegister(e) {
       email: email,
       displayName: name,
       role: state.selectedRegRole,
-      status: isAutoApproved ? "approved" : "pending",
+      status: isMasterAdmin ? "approved" : "pending",
       section: state.selectedRegRole === "student" ? section : null,
       parentLinkCode: parentCode || null,
       linkedStudents: state.selectedRegRole === "parent" ? [] : null,
@@ -137,10 +137,10 @@ export async function handleRegister(e) {
     }
     hideLoading();
 
-    if (!isAutoApproved) {
+    if (!isMasterAdmin) {
       await signOut(auth);
       if (successDiv) {
-        successDiv.innerHTML = `🎉 <b>Demande enregistrée avec succès !</b><br>Votre compte a été créé. Vous pouvez vous connecter dès que l'administrateur valide votre accès.`;
+        successDiv.innerHTML = `⏳ <b>Demande d'inscription envoyée !</b><br>Vos informations ont bien été enregistrées. Votre compte est <b>en attente d'approbation par l'administrateur</b>. Vous pourrez vous connecter dès que l'admin aura validé votre accès.`;
         successDiv.style.display = "block";
       }
       switchAuthTab("login");
@@ -184,13 +184,16 @@ export async function loadUserProfile(uid) {
       console.warn("Erreur lecture Firebase Database profil:", dbErr);
     }
 
+    const email = state.currentUser?.email || "";
+    const isMasterAdmin = email.toLowerCase() === "admin@agenda.tn" || email.toLowerCase() === "admin@planningbac.tn" || uid === "admin_preconfig";
+
     if (!userSnap || !userSnap.exists()) {
       state.currentUserProfile = {
         uid: uid,
-        email: state.currentUser?.email || "",
-        displayName: state.currentUser?.displayName || state.currentUser?.email?.split("@")[0] || "Élève",
-        role: "student",
-        status: "approved",
+        email: email,
+        displayName: state.currentUser?.displayName || email.split("@")[0] || "Nouvel Utilisateur",
+        role: isMasterAdmin ? "admin" : "student",
+        status: isMasterAdmin ? "approved" : "pending",
         parentLinkCode: "BAC-" + Math.random().toString(36).substring(2, 6).toUpperCase(),
         createdAt: Date.now(),
       };
@@ -201,20 +204,20 @@ export async function loadUserProfile(uid) {
     } else {
       state.currentUserProfile = userSnap.val() || {};
       if (!state.currentUserProfile.status) {
-        state.currentUserProfile.status = "approved";
+        state.currentUserProfile.status = isMasterAdmin ? "approved" : "pending";
       }
       if (!state.currentUserProfile.role) {
-        state.currentUserProfile.role = "student";
+        state.currentUserProfile.role = isMasterAdmin ? "admin" : "student";
       }
     }
 
-    // Vérification du statut en attente
+    // Vérification du statut en attente d'approbation de l'administrateur
     if (state.currentUserProfile.status === "pending") {
       await signOut(auth);
       hideLoading();
       const errDiv = document.getElementById("authErrorMsg");
       if (errDiv) {
-        errDiv.innerHTML = "⏳ <b>Compte en attente</b> : Votre inscription doit être validée par l'administrateur.";
+        errDiv.innerHTML = "⏳ <b>Compte en attente d'approbation</b><br>Vos informations sont bien enregistrées. L'administrateur doit accepter votre demande avant que vous puissiez vous connecter.";
         errDiv.style.display = "block";
       }
       const authOverlay = document.getElementById("authOverlay");
