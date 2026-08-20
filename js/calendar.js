@@ -1,7 +1,7 @@
 // js/calendar.js
 // Gestion du Planning (Grille PC & Vue Mobile), Détails & Modification de Séance, Examens et Minuteur
 
-import { database, ref, set, remove, update } from "./firebase-config.js?v=15.8";
+import { database, ref, set, remove, update } from "./firebase-config.js?v=15.9";
 import {
   state,
   getStudentPath,
@@ -12,8 +12,8 @@ import {
   showLoading,
   hideLoading,
   playBeep,
-} from "./state.js?v=15.8";
-import { renderDetailSessionMap, initEditPickerMap } from "./maps.js?v=15.8";
+} from "./state.js?v=15.9";
+import { renderDetailSessionMap, initEditPickerMap } from "./maps.js?v=15.9";
 
 let activeDetailSessionId = null;
 let activeDetailSessionDate = null;

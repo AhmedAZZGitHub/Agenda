@@ -1,17 +1,18 @@
 // js/app.js
 // Point d'Entrée Principal de l'Application
 
-import { auth, onAuthStateChanged } from "./firebase-config.js?v=15.8";
-import { state } from "./state.js?v=15.8";
-import { loadUserProfile, detachAllDataListeners, renderUserProfileBar, updateReadOnlyUI } from "./auth.js?v=15.8";
-import { render, updateBacCountdown, updateHomeStreak } from "./calendar.js?v=15.8";
-import { initBacArchiveTabs, switchTrimester } from "./grades.js?v=15.8";
+import { auth, onAuthStateChanged } from "./firebase-config.js?v=15.9";
+import { state } from "./state.js?v=15.9";
+import { loadUserProfile, detachAllDataListeners, renderUserProfileBar, updateReadOnlyUI } from "./auth.js?v=15.9";
+import { render, updateBacCountdown, updateHomeStreak } from "./calendar.js?v=15.9";
+import { initBacArchiveTabs, switchTrimester } from "./grades.js?v=15.9";
 
 // Import modules to register window bindings
-import "./maps.js?v=15.8";
-import "./ai-assistant.js?v=15.8";
-import "./admin.js?v=15.8";
-import "./tutor-ai.js?v=15.8";
+import "./maps.js?v=15.9";
+import "./ai-assistant.js?v=15.9";
+import "./admin.js?v=15.9";
+import "./tutor-ai.js?v=15.9";
+import { initNotificationsSystem } from "./notifications.js?v=15.9";
 
 // Initialisation par défaut du modèle officiel Google Gemini Vision recommandé
 try {
@@ -37,6 +38,7 @@ onAuthStateChanged(auth, async (user) => {
       authBtn.onclick = window.handleLogout;
     }
     await loadUserProfile(user.uid);
+    initNotificationsSystem();
   } else {
     state.currentUser = null;
     state.currentUserProfile = null;
@@ -105,5 +107,6 @@ document.addEventListener("DOMContentLoaded", () => {
   switchTrimester("trim1");
   updateBacCountdown();
   setInterval(updateBacCountdown, 60000);
+  initNotificationsSystem();
   render();
 });

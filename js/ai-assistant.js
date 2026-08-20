@@ -1,19 +1,19 @@
 // js/ai-assistant.js
 // Assistant Vocal Multilingue (Tounsi / Arabe / Français), Gemini Pro 3.1 & Vision Scanner
 
-import { database, ref, set } from "./firebase-config.js?v=15.8";
-import { state, getStudentPath, showLoading, hideLoading, playBeep } from "./state.js?v=15.8";
+import { database, ref, set } from "./firebase-config.js?v=15.9";
+import { state, getStudentPath, showLoading, hideLoading, playBeep } from "./state.js?v=15.9";
 
 let selectedAiSpeechLang = "ar-TN";
 let aiSpeechRecognition = null;
 let isAiSpeechRecording = false;
 
-export const DEFAULT_AI_KEY = "AIzaSyBsC9bjxuhysJ6AyouCS1kcyHNg0Dpic1c";
+export const DEFAULT_AI_KEY = "";
 
 export function getAiApiKey() {
   const saved = localStorage.getItem("gemini_api_key");
   if (saved && saved.trim()) return saved.trim();
-  return DEFAULT_AI_KEY; // Clé intégrée par défaut dans l'application
+  return "";
 }
 
 export function getAiModelName() {
@@ -505,6 +505,19 @@ export async function handleImageUpload(e) {
   if (!file) return;
 
   const apiKey = getAiApiKey();
+  if (!apiKey) {
+    if (e.target) e.target.value = "";
+    const proceed = confirm(
+      "🔑 Clé API Google Gemini requise pour la Vision IA :\n\n" +
+      "Pour analyser vos photos d'emploi du temps avec l'IA, veuillez configurer votre clé API Google Gemini (100% gratuite sur https://aistudio.google.com/app/apikey).\n\n" +
+      "👉 Cliquez sur OK pour ouvrir les paramètres et coller votre clé."
+    );
+    if (proceed) {
+      window.promptSetAiApiKey ? window.promptSetAiApiKey() : window.openAiSettingsModal();
+    }
+    return;
+  }
+
   showLoading("🧠 Analyse de l'emploi du temps par Vision IA...");
 
   try {
