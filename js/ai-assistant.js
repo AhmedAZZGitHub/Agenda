@@ -199,9 +199,13 @@ function updateMicUiState(isRecording) {
 
 export function cleanDuplicateWords(text) {
   if (!text) return "";
-  // Supprime les répétitions consécutives de mots identiques (ex: "maths maths" -> "maths", "غدا غدا" -> "غدا")
-  let cleaned = text.replace(/([\p{L}\p{N}]+)(?:\s+\1)+(?=\s|$|[.,!?])/giu, "$1");
-  return cleaned.replace(/\s{2,}/g, " ").trim();
+  let s = text;
+  // 1. Supprime les répétitions de phrases ou groupes de mots successifs
+  s = s.replace(/(\b.+?\b)(?:\s+\1)+(?=\s|$|[.,!?])/giu, "$1");
+  // 2. Supprime les répétitions de mots uniques successifs (ex: "ajoute ajoute" -> "ajoute", "غدا غدا" -> "غدا")
+  s = s.replace(/([\p{L}\p{N}]+)(?:\s+\1)+(?=\s|$|[.,!?])/giu, "$1");
+  // 3. Normalisation des espaces
+  return s.replace(/\s{2,}/g, " ").trim();
 }
 
 export function mergeTranscripts(base, addition) {
@@ -210,11 +214,11 @@ export function mergeTranscripts(base, addition) {
   if (!base) return addition;
   if (!addition) return base;
 
-  // Si la nouvelle partie est déjà entièrement présente à la fin de la base
+  // Si l'addition est déjà contenue à la fin de base
   if (base.toLowerCase().endsWith(addition.toLowerCase())) {
     return base;
   }
-  // Si la base est déjà le préfixe complet de la nouvelle partie
+  // Si base est le préfixe de addition
   if (addition.toLowerCase().startsWith(base.toLowerCase())) {
     return addition;
   }
@@ -222,9 +226,8 @@ export function mergeTranscripts(base, addition) {
   const baseWords = base.split(/\s+/);
   const addWords = addition.split(/\s+/);
 
-  // Recherche de chevauchement (overlap) entre la fin de base et le début de addition
   let maxOverlap = 0;
-  const maxCheck = Math.min(baseWords.length, addWords.length, 15);
+  const maxCheck = Math.min(baseWords.length, addWords.length, 25);
   for (let len = 1; len <= maxCheck; len++) {
     const baseSlice = baseWords.slice(baseWords.length - len).join(" ").toLowerCase();
     const addSlice = addWords.slice(0, len).join(" ").toLowerCase();
@@ -241,8 +244,146 @@ export function mergeTranscripts(base, addition) {
   return `${base} ${addition}`;
 }
 
-let aiRecognitionRestartTimeout = null;
-let currentSessionFinal = "";
+export class VoiceTranscriber {
+  constructor(options = {}) {
+    this.lang = options.lang || "ar-TN";
+    this.onUpdate = options.onUpdate || (() => {});
+    this.onStateChange = options.onStateChange || (() => {});
+    this.isRecording = false;
+    this.recognition = null;
+    this.restartTimer = null;
+    this.finalizedText = "";
+    this.currentSessionFinal = "";
+    this.currentInterim = "";
+  }
+
+  start(initialText = "") {
+    this.stop();
+    this.isRecording = true;
+    this.finalizedText = cleanDuplicateWords((initialText || "").trim());
+    this.currentSessionFinal = "";
+    this.currentInterim = "";
+    this._startInstance();
+    this.onStateChange(true);
+    this._publish();
+  }
+
+  stop() {
+    this.isRecording = false;
+    if (this.restartTimer) {
+      clearTimeout(this.restartTimer);
+      this.restartTimer = null;
+    }
+    if (this.recognition) {
+      try {
+        this.recognition.onstart = null;
+        this.recognition.onresult = null;
+        this.recognition.onerror = null;
+        this.recognition.onend = null;
+        this.recognition.stop();
+      } catch (e) {}
+      this.recognition = null;
+    }
+    const newlySpoken = (this.currentSessionFinal || this.currentInterim || "").trim();
+    if (newlySpoken) {
+      this.finalizedText = mergeTranscripts(this.finalizedText, newlySpoken);
+    }
+    this.finalizedText = cleanDuplicateWords(this.finalizedText);
+    this.currentSessionFinal = "";
+    this.currentInterim = "";
+    this.onStateChange(false);
+    this._publish();
+  }
+
+  _startInstance() {
+    if (!this.isRecording) return;
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) return;
+
+    try {
+      const rec = new SpeechRecognition();
+      rec.lang = this.lang;
+      rec.interimResults = true;
+      rec.continuous = true;
+
+      rec.onstart = () => {
+        if (this.isRecording) {
+          this.onStateChange(true);
+        }
+      };
+
+      rec.onresult = (event) => {
+        if (!this.isRecording) return;
+
+        let sessionFinal = "";
+        let interim = "";
+
+        for (let i = 0; i < event.results.length; i++) {
+          const item = event.results[i];
+          const transcript = item[0]?.transcript || "";
+          if (item.isFinal) {
+            sessionFinal += transcript.trim() + " ";
+          } else {
+            interim += transcript;
+          }
+        }
+
+        this.currentSessionFinal = sessionFinal.trim();
+        this.currentInterim = interim.trim();
+        this._publish();
+      };
+
+      rec.onerror = (event) => {
+        console.warn("Speech recognition notice:", event.error);
+        if (event.error === "not-allowed" || event.error === "service-not-allowed") {
+          this.stop();
+        }
+      };
+
+      rec.onend = () => {
+        if (!this.isRecording) return;
+
+        const newlySpoken = (this.currentSessionFinal || this.currentInterim || "").trim();
+        if (newlySpoken) {
+          this.finalizedText = mergeTranscripts(this.finalizedText, newlySpoken);
+        }
+        this.currentSessionFinal = "";
+        this.currentInterim = "";
+        this._publish();
+
+        if (this.restartTimer) clearTimeout(this.restartTimer);
+        this.restartTimer = setTimeout(() => {
+          if (this.isRecording) {
+            this._startInstance();
+          }
+        }, 150);
+      };
+
+      this.recognition = rec;
+      rec.start();
+    } catch (err) {
+      console.warn("Speech recognition start retry:", err);
+      if (this.restartTimer) clearTimeout(this.restartTimer);
+      this.restartTimer = setTimeout(() => {
+        if (this.isRecording) this._startInstance();
+      }, 300);
+    }
+  }
+
+  _publish() {
+    let full = this.finalizedText;
+    if (this.currentSessionFinal) {
+      full = mergeTranscripts(full, this.currentSessionFinal);
+    }
+    if (this.currentInterim) {
+      full = mergeTranscripts(full, this.currentInterim);
+    }
+    const cleaned = cleanDuplicateWords(full);
+    this.onUpdate(cleaned);
+  }
+}
+
+let aiVoiceTranscriber = null;
 
 export function toggleAiSpeechRecording() {
   if (isAiSpeechRecording) {
@@ -253,118 +394,16 @@ export function toggleAiSpeechRecording() {
 }
 
 export function stopAiSpeechRecording() {
+  if (aiVoiceTranscriber) {
+    aiVoiceTranscriber.stop();
+  }
   isAiSpeechRecording = false;
-  if (aiRecognitionRestartTimeout) {
-    clearTimeout(aiRecognitionRestartTimeout);
-    aiRecognitionRestartTimeout = null;
-  }
-  if (aiSpeechRecognition) {
-    try {
-      aiSpeechRecognition.stop();
-    } catch (e) {}
-  }
   updateMicUiState(false);
-  const transcriptInput = document.getElementById("aiTranscriptInput");
-  if (transcriptInput) {
-    transcriptInput.value = cleanDuplicateWords(transcriptInput.value);
-  }
   const st = document.getElementById("aiMicStatusText");
   if (st) {
     st.innerHTML = "✅ <b>Dictée terminée !</b> Cliquez sur <b>'✨ Analyser & Ajouter'</b> pour insérer la séance et le travail à faire.";
     st.style.color = "#059669";
   }
-}
-
-function createSpeechRecognitionInstance() {
-  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SpeechRecognition) return null;
-
-  const rec = new SpeechRecognition();
-  rec.lang = selectedAiSpeechLang;
-  rec.interimResults = true;
-  rec.continuous = true;
-
-  const statusText = document.getElementById("aiMicStatusText");
-  const transcriptInput = document.getElementById("aiTranscriptInput");
-
-  rec.onstart = function () {
-    updateMicUiState(true);
-    const langNames = {
-      "ar-TN": "🇹🇳 Tounsi (Derja)",
-      "fr-FR": "🇫🇷 Français",
-      "ar-SA": "🇸🇦 Arabe",
-      "en-US": "🇬🇧 Anglais",
-    };
-    if (statusText) {
-      statusText.innerHTML = `🔴 <b>Écoute continue active (${langNames[selectedAiSpeechLang] || "Tounsi"})...</b><br><span style="font-size:11.5px; opacity:0.9;">Parlez à votre rythme sans répétition. Cliquez sur <b>⏹️ Terminer</b> quand vous avez fini.</span>`;
-      statusText.style.color = "#0284c7";
-    }
-  };
-
-  rec.onresult = function (event) {
-    let interim = "";
-    let sessionFinal = "";
-    for (let i = 0; i < event.results.length; i++) {
-      if (event.results[i].isFinal) {
-        sessionFinal += event.results[i][0].transcript.trim() + " ";
-      } else {
-        interim += event.results[i][0].transcript;
-      }
-    }
-    currentSessionFinal = sessionFinal.trim();
-    const mergedFinal = mergeTranscripts(accumulatedTranscript, currentSessionFinal);
-    const withInterim = interim.trim() ? mergeTranscripts(mergedFinal, interim.trim()) : mergedFinal;
-    const finalCleaned = cleanDuplicateWords(withInterim);
-    if (transcriptInput) {
-      transcriptInput.value = finalCleaned;
-    }
-  };
-
-  rec.onerror = function (event) {
-    console.warn("Speech recognition event:", event.error);
-    if (event.error === "no-speech" || event.error === "network") {
-      // Ignorer les micro-pauses sans couper le flux
-      return;
-    }
-    if (event.error === "not-allowed" || event.error === "service-not-allowed") {
-      isAiSpeechRecording = false;
-      updateMicUiState(false);
-      if (statusText) {
-        statusText.innerText = "⚠️ Accès au micro refusé. Veuillez autoriser le microphone dans votre navigateur.";
-        statusText.style.color = "#ef4444";
-      }
-    }
-  };
-
-  rec.onend = function () {
-    if (!isAiSpeechRecording) {
-      updateMicUiState(false);
-      return;
-    }
-
-    // Fusionner uniquement la partie validée (finalisée) de la session écoulée
-    if (currentSessionFinal) {
-      accumulatedTranscript = cleanDuplicateWords(mergeTranscripts(accumulatedTranscript, currentSessionFinal));
-      currentSessionFinal = "";
-    }
-
-    // Relance asynchrone transparente sans perte ni doublon
-    if (aiRecognitionRestartTimeout) clearTimeout(aiRecognitionRestartTimeout);
-    aiRecognitionRestartTimeout = setTimeout(() => {
-      if (isAiSpeechRecording) {
-        try {
-          aiSpeechRecognition = createSpeechRecognitionInstance();
-          if (aiSpeechRecognition) {
-            aiSpeechRecognition.start();
-          }
-        } catch (restartErr) {
-          console.warn("Speech recognition auto-resume retry:", restartErr);
-        }
-      }
-    }, 150);
-  };
-
-  return rec;
 }
 
 export function startAiSpeechRecording() {
@@ -374,27 +413,38 @@ export function startAiSpeechRecording() {
     return;
   }
 
-  isAiSpeechRecording = true;
   const transcriptInput = document.getElementById("aiTranscriptInput");
-  accumulatedTranscript = transcriptInput ? cleanDuplicateWords(transcriptInput.value.trim()) : "";
-  currentSessionFinal = "";
+  const initialText = transcriptInput ? transcriptInput.value.trim() : "";
 
-  try {
-    if (aiSpeechRecognition) {
-      try {
-        aiSpeechRecognition.stop();
-      } catch (e) {}
-    }
-
-    aiSpeechRecognition = createSpeechRecognitionInstance();
-    if (aiSpeechRecognition) {
-      aiSpeechRecognition.start();
-    }
-  } catch (err) {
-    console.error("SpeechRecognition start exception:", err);
-    isAiSpeechRecording = false;
-    updateMicUiState(false);
+  if (!aiVoiceTranscriber) {
+    aiVoiceTranscriber = new VoiceTranscriber({
+      lang: selectedAiSpeechLang,
+      onUpdate: (fullText) => {
+        const inp = document.getElementById("aiTranscriptInput");
+        if (inp) {
+          inp.value = fullText;
+        }
+      },
+      onStateChange: (recording) => {
+        isAiSpeechRecording = recording;
+        updateMicUiState(recording);
+        const statusText = document.getElementById("aiMicStatusText");
+        if (statusText && recording) {
+          const langNames = {
+            "ar-TN": "🇹🇳 Tounsi (Derja)",
+            "fr-FR": "🇫🇷 Français",
+            "ar-SA": "🇸🇦 Arabe",
+            "en-US": "🇬🇧 Anglais",
+          };
+          statusText.innerHTML = `🔴 <b>Écoute active (${langNames[selectedAiSpeechLang] || "Tounsi"})...</b><br><span style="font-size:11.5px; opacity:0.9;">Parlez à votre rythme. Cliquez sur <b>⏹️ Terminer</b> quand vous avez fini.</span>`;
+          statusText.style.color = "#0284c7";
+        }
+      }
+    });
   }
+
+  aiVoiceTranscriber.lang = selectedAiSpeechLang;
+  aiVoiceTranscriber.start(initialText);
 }
 
 export async function executeAiCommand() {

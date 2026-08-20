@@ -1,17 +1,15 @@
 // js/tutor-ai.js
 // Tuteur IA Éducatif Gemini Pro (Baccalauréat Tunisien) & Correction d'Exercices par Photo
 
-import { getAiModelName, getAiApiKey, cleanDuplicateWords, mergeTranscripts } from "./ai-assistant.js?v=16.5";
+import { getAiModelName, getAiApiKey, cleanDuplicateWords, mergeTranscripts, VoiceTranscriber } from "./ai-assistant.js?v=16.5";
 import { state, showLoading, hideLoading } from "./state.js?v=16.5";
 import { ARABIC_METHODOLOGY_KNOWLEDGE } from "./arabic-knowledge.js";
 
 let tutorChatHistory = [];
 let tutorAttachedImageBase64 = null;
 let tutorAttachedImageMime = "image/jpeg";
-let tutorSpeechRecognition = null;
 let isTutorListening = false;
-let tutorAccumulatedTranscript = "";
-let tutorCurrentSessionFinal = "";
+let tutorVoiceTranscriber = null;
 
 const TUTOR_SYSTEM_INSTRUCTION = `Tu es "Tuteur Bac IA", un professeur particulier d'élite et tuteur bienveillant dédié exclusivement aux élèves préparant le Baccalauréat (notamment le Baccalauréat Tunisien pour toutes les sections : Mathématiques, Sciences Expérimentales, Informatique, Économie et Gestion, Technique, Lettres et Sport).
 
@@ -715,84 +713,6 @@ Concernant votre question sur **"${text}"** :
   Avez-vous une formule ou un énoncé précis sur cette notion ?`;
 }
 
-let tutorRecognitionRestartTimeout = null;
-
-function createTutorSpeechRecognitionInstance() {
-  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SpeechRecognition) return null;
-
-  const rec = new SpeechRecognition();
-  rec.lang = "ar-TN";
-  rec.interimResults = true;
-  rec.continuous = true;
-
-  const btn = document.getElementById("btnTutorVoice");
-  const textInp = document.getElementById("tutorTextInput");
-
-  rec.onstart = function () {
-    if (btn) {
-      btn.style.color = "#ef4444";
-      btn.title = "🔴 Écoute continue active... Cliquez pour arrêter";
-    }
-  };
-
-  rec.onresult = function (event) {
-    let interimTranscript = "";
-    let finalTranscript = "";
-    for (let i = 0; i < event.results.length; i++) {
-      if (event.results[i].isFinal) {
-        finalTranscript += event.results[i][0].transcript.trim() + " ";
-      } else {
-        interimTranscript += event.results[i][0].transcript;
-      }
-    }
-    tutorCurrentSessionFinal = finalTranscript.trim();
-    const mergedFinal = mergeTranscripts(tutorAccumulatedTranscript, tutorCurrentSessionFinal);
-    const withInterim = interimTranscript.trim() ? mergeTranscripts(mergedFinal, interimTranscript.trim()) : mergedFinal;
-    const finalCleaned = cleanDuplicateWords(withInterim);
-    if (textInp) {
-      textInp.value = finalCleaned;
-    }
-  };
-
-  rec.onerror = function (event) {
-    console.warn("Tutor speech event:", event.error);
-    if (event.error === "no-speech" || event.error === "network") {
-      return;
-    }
-    if (event.error === "not-allowed" || event.error === "service-not-allowed") {
-      isTutorListening = false;
-      if (btn) btn.style.color = "";
-    }
-  };
-
-  rec.onend = function () {
-    if (!isTutorListening) {
-      if (btn) btn.style.color = "";
-      return;
-    }
-
-    if (tutorCurrentSessionFinal) {
-      tutorAccumulatedTranscript = cleanDuplicateWords(mergeTranscripts(tutorAccumulatedTranscript, tutorCurrentSessionFinal));
-      tutorCurrentSessionFinal = "";
-    }
-
-    if (tutorRecognitionRestartTimeout) clearTimeout(tutorRecognitionRestartTimeout);
-    tutorRecognitionRestartTimeout = setTimeout(() => {
-      if (isTutorListening) {
-        try {
-          tutorSpeechRecognition = createTutorSpeechRecognitionInstance();
-          if (tutorSpeechRecognition) tutorSpeechRecognition.start();
-        } catch (e) {
-          console.warn("Tutor speech restart retry:", e);
-        }
-      }
-    }, 150);
-  };
-
-  return rec;
-}
-
 export function toggleTutorVoice() {
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   if (!SpeechRecognition) {
@@ -804,32 +724,30 @@ export function toggleTutorVoice() {
   const textInp = document.getElementById("tutorTextInput");
 
   if (isTutorListening) {
+    if (tutorVoiceTranscriber) {
+      tutorVoiceTranscriber.stop();
+    }
     isTutorListening = false;
-    if (tutorRecognitionRestartTimeout) {
-      clearTimeout(tutorRecognitionRestartTimeout);
-      tutorRecognitionRestartTimeout = null;
-    }
-    if (tutorSpeechRecognition) {
-      try {
-        tutorSpeechRecognition.stop();
-      } catch (e) {}
-    }
-    if (textInp) {
-      textInp.value = cleanDuplicateWords(textInp.value);
-    }
     if (btn) btn.style.color = "";
   } else {
-    isTutorListening = true;
-    tutorAccumulatedTranscript = textInp ? cleanDuplicateWords(textInp.value.trim()) : "";
-    tutorCurrentSessionFinal = "";
-    try {
-      tutorSpeechRecognition = createTutorSpeechRecognitionInstance();
-      if (tutorSpeechRecognition) tutorSpeechRecognition.start();
-    } catch (e) {
-      console.error(e);
-      isTutorListening = false;
-      if (btn) btn.style.color = "";
+    if (!tutorVoiceTranscriber) {
+      tutorVoiceTranscriber = new VoiceTranscriber({
+        lang: "ar-TN",
+        onUpdate: (fullText) => {
+          const inp = document.getElementById("tutorTextInput");
+          if (inp) inp.value = fullText;
+        },
+        onStateChange: (listening) => {
+          isTutorListening = listening;
+          const b = document.getElementById("btnTutorVoice");
+          if (b) {
+            b.style.color = listening ? "#ef4444" : "";
+            b.title = listening ? "🔴 Écoute active... Cliquez pour arrêter" : "Dicter votre message";
+          }
+        }
+      });
     }
+    tutorVoiceTranscriber.start(textInp ? textInp.value.trim() : "");
   }
 }
 
