@@ -86,8 +86,22 @@
       var b = document.getElementById("sdEditSingleDateBox");
       if (b) b.style.display = val && val.indexOf("Ce jour seulement") !== -1 ? "block" : "none";
     };
+    window.openShareScheduleModal = function () {
+      window.openModal("shareScheduleModal");
+      if (window.openShareScheduleModalImpl) window.openShareScheduleModalImpl();
+    };
+    window.switchShareScheduleTab = function (tab) {
+      var tabMyCodeBtn = document.getElementById("tabShareMyCodeBtn");
+      var tabImportBtn = document.getElementById("tabShareImportBtn");
+      var viewMyCode = document.getElementById("viewShareMyCode");
+      var viewImport = document.getElementById("viewShareImport");
+      if (tabMyCodeBtn) tabMyCodeBtn.classList.toggle("active", tab === "myCode");
+      if (tabImportBtn) tabImportBtn.classList.toggle("active", tab === "import");
+      if (viewMyCode) viewMyCode.style.display = tab === "myCode" ? "flex" : "none";
+      if (viewImport) viewImport.style.display = tab === "import" ? "flex" : "none";
+    };
   </script>
-  <link rel="stylesheet" href="css/styles.css?v=16.3" />
+  <link rel="stylesheet" href="css/styles.css?v=16.4" />
 </head>
 
 <body>
@@ -666,8 +680,8 @@
       <div style="display: flex; gap: 6px; flex-wrap: wrap; align-items: center">
         <input type="file" id="photoInput" accept="image/*" style="display: none"
           onchange="window.handleImageUpload(event)" />
-        <button class="btn-vision student-action-btn" onclick="document.getElementById('photoInput').click()">📸
-          Scanner</button>
+        <button class="btn-vision student-action-btn" onclick="document.getElementById('photoInput').click()">📸 Scanner</button>
+        <button class="btn-action student-action-btn" onclick="window.openShareScheduleModal()" style="font-weight: 800; border-color: var(--primary); color: var(--primary);">📋 Copier Planning</button>
         <button class="btn-mic student-action-btn" id="mainMicBtn" onclick="window.voiceInput()">🎙️ Micro IA</button>
         <button class="btn-add student-action-btn" onclick="window.openModal('addModal')">+ Séance</button>
         <button class="btn-action student-action-btn" onclick="window.clearAllData()"
@@ -840,6 +854,71 @@
         </button>
         <button type="button" class="btn-action" id="btnCopyMapAddr" style="padding: 10px 14px; font-size: 12px;">
           📋 Copier l'adresse
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODALE PARTAGE ET COPIE DE PLANNING ENTRE COMPTES -->
+  <div class="modal" id="shareScheduleModal">
+    <div class="modal-box" style="max-width: 480px; gap: 12px; padding: 16px 20px;">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <span style="font-weight: 900; font-size: 16px; display: flex; align-items: center; gap: 8px;">
+          📋 Partager & Copier un Planning
+        </span>
+        <span onclick="window.closeModal('shareScheduleModal')" style="cursor: pointer; color: #ef4444; font-size: 20px; font-weight: 800;">✕</span>
+      </div>
+
+      <!-- ONGLETS: MON CODE / IMPORTER -->
+      <div class="auth-tabs" style="margin-bottom: 4px;">
+        <button class="auth-tab-btn active" id="tabShareMyCodeBtn" onclick="window.switchShareScheduleTab('myCode')">
+          📤 Mon Code de Partage
+        </button>
+        <button class="auth-tab-btn" id="tabShareImportBtn" onclick="window.switchShareScheduleTab('import')">
+          📥 Importer d'un Autre Compte
+        </button>
+      </div>
+
+      <!-- ONGLET 1: MON CODE DE PARTAGE -->
+      <div id="viewShareMyCode" style="display: flex; flex-direction: column; gap: 12px; text-align: center; padding: 6px 0;">
+        <div style="font-size: 12.5px; color: var(--muted); line-height: 1.4;">
+          Donnez ce code à vos camarades de classe pour qu'ils puissent <b>copier toutes vos séances</b> dans leur compte en 1 clic :
+        </div>
+        <div style="background: var(--dash); border: 2px dashed var(--primary); padding: 14px; border-radius: 12px; font-size: 24px; font-weight: 900; letter-spacing: 2px; color: var(--primary);" id="myShareScheduleCodeDisplay">
+          BAC-XXXX
+        </div>
+        <button type="button" class="btn-add" style="justify-content: center; padding: 10px; font-size: 13px;" onclick="window.copyMyShareScheduleCode()">
+          📋 Copier mon Code de Partage
+        </button>
+      </div>
+
+      <!-- ONGLET 2: IMPORTER LE PLANNING D'UN AMI -->
+      <div id="viewShareImport" style="display: none; flex-direction: column; gap: 12px;">
+        <div>
+          <label style="font-size: 11.5px; font-weight: 700; color: var(--muted); display: block; margin-bottom: 4px;">
+            🔑 Code de votre ami / camarade (ex: BAC-XXXX) :
+          </label>
+          <input type="text" id="importScheduleCodeInput" class="input" style="width: 100%; text-transform: uppercase; font-weight: 800; letter-spacing: 1px; font-size: 14px;" placeholder="BAC-XXXX" />
+        </div>
+
+        <div>
+          <label style="font-size: 11.5px; font-weight: 700; color: var(--muted); display: block; margin-bottom: 6px;">
+            ⚙️ Mode d'importation :
+          </label>
+          <div style="display: flex; flex-direction: column; gap: 6px; font-size: 12px;">
+            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+              <input type="radio" name="importScheduleMode" id="importModeMerge" value="merge" checked />
+              <span>➕ <b>Ajouter et compléter</b> (conserve vos séances existantes)</span>
+            </label>
+            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+              <input type="radio" name="importScheduleMode" id="importModeReplace" value="replace" />
+              <span>🔄 <b>Remplacer tout mon planning</b> par ce nouvel emploi du temps</span>
+            </label>
+          </div>
+        </div>
+
+        <button type="button" class="btn-add" style="justify-content: center; padding: 12px; font-size: 13px; margin-top: 4px;" onclick="window.importScheduleWithCode()">
+          🚀 Copier & Importer ce Planning
         </button>
       </div>
     </div>
@@ -1420,7 +1499,7 @@
   </div>
 
   <!-- SCRIPT APPLICATION -->
-  <script type="module" src="js/app.js?v=16.3"></script>
+  <script type="module" src="js/app.js?v=16.4"></script>
 </body>
 
 </html>

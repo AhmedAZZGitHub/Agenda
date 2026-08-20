@@ -1,18 +1,18 @@
 // js/app.js
 // Point d'Entrée Principal de l'Application
 
-import { auth, onAuthStateChanged } from "./firebase-config.js?v=16.3";
-import { state } from "./state.js?v=16.3";
-import { loadUserProfile, detachAllDataListeners, renderUserProfileBar, updateReadOnlyUI } from "./auth.js?v=16.3";
-import { render, updateBacCountdown, updateHomeStreak } from "./calendar.js?v=16.3";
-import { initBacArchiveTabs, switchTrimester } from "./grades.js?v=16.3";
+import { auth, onAuthStateChanged } from "./firebase-config.js?v=16.4";
+import { state } from "./state.js?v=16.4";
+import { loadUserProfile, detachAllDataListeners, renderUserProfileBar, updateReadOnlyUI } from "./auth.js?v=16.4";
+import { render, updateBacCountdown, updateHomeStreak } from "./calendar.js?v=16.4";
+import { initBacArchiveTabs, switchTrimester } from "./grades.js?v=16.4";
 
 // Import modules to register window bindings
-import "./maps.js?v=16.3";
-import "./ai-assistant.js?v=16.3";
-import "./admin.js?v=16.3";
-import "./tutor-ai.js?v=16.3";
-import { initNotificationsSystem } from "./notifications.js?v=16.3";
+import "./maps.js?v=16.4";
+import "./ai-assistant.js?v=16.4";
+import "./admin.js?v=16.4";
+import "./tutor-ai.js?v=16.4";
+import { initNotificationsSystem } from "./notifications.js?v=16.4";
 
 // Initialisation par défaut du modèle officiel Google Gemini Vision recommandé
 try {

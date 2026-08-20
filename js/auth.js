@@ -15,11 +15,11 @@ import {
   get,
   onValue,
   off,
-} from "./firebase-config.js?v=16.3";
-import { state, getStudentPath, showLoading, hideLoading } from "./state.js?v=16.3";
-import { loadAdminKPIs, listenToAnnouncements } from "./admin.js?v=16.3";
-import { render } from "./calendar.js?v=16.3";
-import { switchTrimester, selectBacSubject } from "./grades.js?v=16.3";
+} from "./firebase-config.js?v=16.4";
+import { state, getStudentPath, showLoading, hideLoading } from "./state.js?v=16.4";
+import { loadAdminKPIs, listenToAnnouncements } from "./admin.js?v=16.4";
+import { render } from "./calendar.js?v=16.4";
+import { switchTrimester, selectBacSubject } from "./grades.js?v=16.4";
 
 export function showAuthModal() {
   const el = document.getElementById("authOverlay");

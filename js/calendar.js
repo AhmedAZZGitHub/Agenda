@@ -1,7 +1,7 @@
 // js/calendar.js
 // Gestion du Planning (Grille PC & Vue Mobile), Détails & Modification de Séance, Examens et Minuteur
 
-import { database, ref, set, remove, update } from "./firebase-config.js?v=16.3";
+import { database, ref, set, get, remove, update } from "./firebase-config.js?v=16.4";
 import {
   state,
   getStudentPath,
@@ -12,8 +12,8 @@ import {
   showLoading,
   hideLoading,
   playBeep,
-} from "./state.js?v=16.3";
-import { renderDetailSessionMap, initEditPickerMap } from "./maps.js?v=16.3";
+} from "./state.js?v=16.4";
+import { renderDetailSessionMap, initEditPickerMap } from "./maps.js?v=16.4";
 
 let activeDetailSessionId = null;
 let activeDetailSessionDate = null;
@@ -964,6 +964,127 @@ export function updateHomeStreak() {
   if (badgeVal) badgeVal.innerText = count;
 }
 
+// --- PARTAGE ET COPIE DE PLANNING ENTRE COMPTES (CODE DE PARTAGE) ---
+export function openShareScheduleModal() {
+  const code =
+    (state.currentUserProfile && state.currentUserProfile.parentLinkCode) ||
+    (state.currentUser && state.currentUser.uid ? "BAC-" + state.currentUser.uid.substring(0, 4).toUpperCase() : "BAC-PRO1");
+
+  const displayEl = document.getElementById("myShareScheduleCodeDisplay");
+  if (displayEl) displayEl.innerText = code;
+
+  switchShareScheduleTab("myCode");
+  window.openModal("shareScheduleModal");
+}
+
+export function switchShareScheduleTab(tab) {
+  const tabMyCodeBtn = document.getElementById("tabShareMyCodeBtn");
+  const tabImportBtn = document.getElementById("tabShareImportBtn");
+  const viewMyCode = document.getElementById("viewShareMyCode");
+  const viewImport = document.getElementById("viewShareImport");
+
+  if (tabMyCodeBtn) tabMyCodeBtn.classList.toggle("active", tab === "myCode");
+  if (tabImportBtn) tabImportBtn.classList.toggle("active", tab === "import");
+  if (viewMyCode) viewMyCode.style.display = tab === "myCode" ? "flex" : "none";
+  if (viewImport) viewImport.style.display = tab === "import" ? "flex" : "none";
+}
+
+export function copyMyShareScheduleCode() {
+  const code = document.getElementById("myShareScheduleCodeDisplay")?.innerText;
+  if (code) {
+    navigator.clipboard.writeText(code);
+    alert("📋 Code de partage copié : " + code + "\n\nEnvoyez-le à vos amis pour qu'ils puissent copier votre planning !");
+  }
+}
+
+export async function importScheduleWithCode() {
+  if (state.isReadOnly) return alert("Accès en lecture seule.");
+  const codeInp = document.getElementById("importScheduleCodeInput");
+  let code = codeInp ? codeInp.value.trim().toUpperCase() : "";
+  if (!code) return alert("Veuillez saisir le code de partage d'un camarade (ex: BAC-XXXX).");
+
+  showLoading("Recherche de l'emploi du temps...");
+  try {
+    let targetUid = null;
+    let codeSnap = await get(ref(database, `parent_codes/${code}`));
+    if (codeSnap.exists()) {
+      targetUid = codeSnap.val();
+    } else if (!code.startsWith("BAC-")) {
+      const codeSnapWithPrefix = await get(ref(database, `parent_codes/BAC-${code}`));
+      if (codeSnapWithPrefix.exists()) {
+        targetUid = codeSnapWithPrefix.val();
+      }
+    }
+
+    if (!targetUid) {
+      hideLoading();
+      return alert("⚠️ Code de planning introuvable. Vérifiez que votre ami vous a bien transmis son code de partage.");
+    }
+
+    if (state.currentUser && targetUid === state.currentUser.uid) {
+      hideLoading();
+      return alert("Vous avez entré votre propre code de partage !");
+    }
+
+    const userSnap = await get(ref(database, `users/${targetUid}`));
+    const userProfile = userSnap.val() || {};
+    const friendName = userProfile.displayName || userProfile.email || "votre camarade";
+
+    const seancesSnap = await get(ref(database, `student_data/${targetUid}/seances`));
+    const seancesObj = seancesSnap.val() || {};
+    const seancesList = Object.values(seancesObj);
+
+    if (seancesList.length === 0) {
+      hideLoading();
+      return alert(`L'élève ${friendName} n'a aucune séance enregistrée dans son planning.`);
+    }
+
+    hideLoading();
+
+    const replaceMode = document.getElementById("importModeReplace")?.checked === true;
+    const confirmTitle = replaceMode ? "Remplacer tout votre planning ?" : "Ajouter au planning existant ?";
+    const confirmText = replaceMode
+      ? `Attention : Vos séances actuelles seront remplacées par les ${seancesList.length} séances de ${friendName}. Confirmer ?`
+      : `Voulez-vous importer les ${seancesList.length} séances de ${friendName} et les ajouter à votre planning ?`;
+
+    window.showStyledConfirm(
+      confirmTitle,
+      confirmText,
+      "📥",
+      async () => {
+        showLoading("Importation en cours...");
+        try {
+          if (replaceMode) {
+            await set(ref(database, getStudentPath("seances")), null);
+          }
+
+          let count = 0;
+          for (const seance of seancesList) {
+            const newId = Date.now().toString() + Math.floor(Math.random() * 100000);
+            const clonedSeance = {
+              ...seance,
+              id: newId,
+            };
+            await set(ref(database, getStudentPath(`seances/${newId}`)), clonedSeance);
+            count++;
+          }
+
+          hideLoading();
+          window.closeModal("shareScheduleModal");
+          playBeep();
+          alert(`🎉 Succès ! ${count} séances de ${friendName} ont été copiées dans votre planning !`);
+        } catch (err) {
+          hideLoading();
+          alert("Erreur lors de la copie : " + err.message);
+        }
+      }
+    );
+  } catch (err) {
+    hideLoading();
+    alert("Erreur de recherche : " + err.message);
+  }
+}
+
 // Global Window Bindings
 window.setLayout = setLayout;
 window.render = render;
@@ -999,3 +1120,7 @@ window.toggleTimer = toggleTimer;
 window.resetTimer = resetTimer;
 window.updateBacCountdown = updateBacCountdown;
 window.updateHomeStreak = updateHomeStreak;
+window.openShareScheduleModal = openShareScheduleModal;
+window.switchShareScheduleTab = switchShareScheduleTab;
+window.copyMyShareScheduleCode = copyMyShareScheduleCode;
+window.importScheduleWithCode = importScheduleWithCode;
