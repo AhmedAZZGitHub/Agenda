@@ -197,6 +197,8 @@ function updateMicUiState(isRecording) {
   if (startBtn) startBtn.style.display = isRecording ? "none" : "inline-flex";
 }
 
+let aiRecognitionRestartTimeout = null;
+
 export function toggleAiSpeechRecording() {
   if (isAiSpeechRecording) {
     stopAiSpeechRecording();
@@ -207,6 +209,10 @@ export function toggleAiSpeechRecording() {
 
 export function stopAiSpeechRecording() {
   isAiSpeechRecording = false;
+  if (aiRecognitionRestartTimeout) {
+    clearTimeout(aiRecognitionRestartTimeout);
+    aiRecognitionRestartTimeout = null;
+  }
   if (aiSpeechRecognition) {
     try {
       aiSpeechRecognition.stop();
@@ -220,12 +226,104 @@ export function stopAiSpeechRecording() {
   }
 }
 
+function createSpeechRecognitionInstance() {
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognition) return null;
+
+  const rec = new SpeechRecognition();
+  rec.lang = selectedAiSpeechLang;
+  rec.interimResults = true;
+  rec.continuous = true;
+
+  const statusText = document.getElementById("aiMicStatusText");
+  const transcriptInput = document.getElementById("aiTranscriptInput");
+
+  rec.onstart = function () {
+    updateMicUiState(true);
+    const langNames = {
+      "ar-TN": "🇹🇳 Tounsi (Derja)",
+      "fr-FR": "🇫🇷 Français",
+      "ar-SA": "🇸🇦 Arabe",
+      "en-US": "🇬🇧 Anglais",
+    };
+    if (statusText) {
+      statusText.innerHTML = `🔴 <b>Écoute continue active (${langNames[selectedAiSpeechLang] || "Tounsi"})...</b><br><span style="font-size:11.5px; opacity:0.9;">Parlez à votre rythme sans limite de temps. Cliquez sur <b>⏹️ Terminer</b> quand vous avez fini.</span>`;
+      statusText.style.color = "#0284c7";
+    }
+  };
+
+  rec.onresult = function (event) {
+    let interim = "";
+    let sessionFinal = "";
+    for (let i = 0; i < event.results.length; i++) {
+      if (event.results[i].isFinal) {
+        sessionFinal += event.results[i][0].transcript + " ";
+      } else {
+        interim += event.results[i][0].transcript;
+      }
+    }
+    const combined = (accumulatedTranscript ? accumulatedTranscript + " " : "") + sessionFinal + interim;
+    if (transcriptInput) {
+      transcriptInput.value = combined.trim();
+    }
+  };
+
+  rec.onerror = function (event) {
+    console.warn("Speech recognition event:", event.error);
+    if (event.error === "no-speech" || event.error === "network") {
+      // Les pauses naturelles ou micro-coupures ne doivent JAMAIS couper l'enregistrement
+      return;
+    }
+    if (event.error === "not-allowed" || event.error === "service-not-allowed") {
+      isAiSpeechRecording = false;
+      updateMicUiState(false);
+      if (statusText) {
+        statusText.innerText = "⚠️ Accès au micro refusé. Veuillez autoriser le microphone dans votre navigateur.";
+        statusText.style.color = "#ef4444";
+      }
+    }
+  };
+
+  rec.onend = function () {
+    if (!isAiSpeechRecording) {
+      updateMicUiState(false);
+      return;
+    }
+
+    // Sauvegarde du texte courant avant réinitialisation du flux audio
+    if (transcriptInput) {
+      accumulatedTranscript = transcriptInput.value.trim();
+    }
+
+    // Relance asynchrone automatique pour contourner la coupure native de 10s du navigateur
+    if (aiRecognitionRestartTimeout) clearTimeout(aiRecognitionRestartTimeout);
+    aiRecognitionRestartTimeout = setTimeout(() => {
+      if (isAiSpeechRecording) {
+        try {
+          aiSpeechRecognition = createSpeechRecognitionInstance();
+          if (aiSpeechRecognition) {
+            aiSpeechRecognition.start();
+          }
+        } catch (restartErr) {
+          console.warn("Speech recognition auto-resume retry:", restartErr);
+        }
+      }
+    }, 150);
+  };
+
+  return rec;
+}
+
 export function startAiSpeechRecording() {
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   if (!SpeechRecognition) {
     alert("La reconnaissance vocale n'est pas supportée par votre navigateur actuel. Vous pouvez saisir votre commande au clavier.");
     return;
   }
+
+  isAiSpeechRecording = true;
+  const transcriptInput = document.getElementById("aiTranscriptInput");
+  accumulatedTranscript = transcriptInput ? transcriptInput.value.trim() : "";
 
   try {
     if (aiSpeechRecognition) {
@@ -234,80 +332,10 @@ export function startAiSpeechRecording() {
       } catch (e) {}
     }
 
-    aiSpeechRecognition = new SpeechRecognition();
-    aiSpeechRecognition.lang = selectedAiSpeechLang;
-    aiSpeechRecognition.interimResults = true;
-    aiSpeechRecognition.continuous = true; // Écoute continue sans coupure automatique
-
-    const statusText = document.getElementById("aiMicStatusText");
-    const transcriptInput = document.getElementById("aiTranscriptInput");
-
-    accumulatedTranscript = transcriptInput ? transcriptInput.value.trim() : "";
-    let sessionFinalTranscript = "";
-
-    aiSpeechRecognition.onstart = function () {
-      isAiSpeechRecording = true;
-      updateMicUiState(true);
-      const langNames = {
-        "ar-TN": "🇹🇳 Tounsi (Derja)",
-        "fr-FR": "🇫🇷 Français",
-        "ar-SA": "🇸🇦 Arabe",
-        "en-US": "🇬🇧 Anglais",
-      };
-      if (statusText) {
-        statusText.innerHTML = `🔴 <b>Écoute continue active (${langNames[selectedAiSpeechLang] || "Tounsi"})...</b><br><span style="font-size:11.5px; opacity:0.9;">Parlez à votre rythme (Séance, Heure, Type, Travail à faire). Cliquez sur <b>⏹️</b> ou <b>'Terminer'</b> quand vous avez fini.</span>`;
-        statusText.style.color = "#0284c7";
-      }
-    };
-
-    aiSpeechRecognition.onresult = function (event) {
-      let interim = "";
-      sessionFinalTranscript = "";
-      for (let i = 0; i < event.results.length; i++) {
-        if (event.results[i].isFinal) {
-          sessionFinalTranscript += event.results[i][0].transcript + " ";
-        } else {
-          interim += event.results[i][0].transcript;
-        }
-      }
-      const combined = (accumulatedTranscript ? accumulatedTranscript + " " : "") + sessionFinalTranscript + interim;
-      if (transcriptInput) {
-        transcriptInput.value = combined.trim();
-      }
-    };
-
-    aiSpeechRecognition.onerror = function (event) {
-      console.warn("Speech recognition notice/error:", event.error);
-      if (event.error === "no-speech" && isAiSpeechRecording) {
-        // En mode continu, ignorer les silences naturels
-        return;
-      }
-      if (event.error === "not-allowed" || event.error === "service-not-allowed") {
-        isAiSpeechRecording = false;
-        updateMicUiState(false);
-        if (statusText) {
-          statusText.innerText = "⚠️ Accès au micro refusé. Veuillez autoriser le microphone dans votre navigateur.";
-          statusText.style.color = "#ef4444";
-        }
-      }
-    };
-
-    aiSpeechRecognition.onend = function () {
-      // Auto-reprise si l'utilisateur n'a pas appuyé lui-même sur Arrêter
-      if (isAiSpeechRecording) {
-        try {
-          accumulatedTranscript = transcriptInput ? transcriptInput.value.trim() : "";
-          aiSpeechRecognition.start();
-          return;
-        } catch (restartErr) {
-          console.warn("SpeechRecognition auto-restart:", restartErr);
-        }
-      }
-      isAiSpeechRecording = false;
-      updateMicUiState(false);
-    };
-
-    aiSpeechRecognition.start();
+    aiSpeechRecognition = createSpeechRecognitionInstance();
+    if (aiSpeechRecognition) {
+      aiSpeechRecognition.start();
+    }
   } catch (err) {
     console.error("SpeechRecognition start exception:", err);
     isAiSpeechRecording = false;

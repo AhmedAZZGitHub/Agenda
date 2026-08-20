@@ -713,6 +713,74 @@ Concernant votre question sur **"${text}"** :
   Avez-vous une formule ou un énoncé précis sur cette notion ?`;
 }
 
+let tutorRecognitionRestartTimeout = null;
+
+function createTutorSpeechRecognitionInstance() {
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognition) return null;
+
+  const rec = new SpeechRecognition();
+  rec.lang = "ar-TN";
+  rec.interimResults = true;
+  rec.continuous = true;
+
+  const btn = document.getElementById("btnTutorVoice");
+  const textInp = document.getElementById("tutorTextInput");
+
+  rec.onstart = function () {
+    if (btn) {
+      btn.style.color = "#ef4444";
+      btn.title = "🔴 Écoute continue active... Cliquez pour arrêter";
+    }
+  };
+
+  rec.onresult = function (event) {
+    let interimTranscript = "";
+    let finalTranscript = "";
+    for (let i = 0; i < event.results.length; i++) {
+      if (event.results[i].isFinal) {
+        finalTranscript += event.results[i][0].transcript + " ";
+      } else {
+        interimTranscript += event.results[i][0].transcript;
+      }
+    }
+    const full = (finalTranscript + interimTranscript).trim();
+    if (textInp && full) textInp.value = full;
+  };
+
+  rec.onerror = function (event) {
+    console.warn("Tutor speech event:", event.error);
+    if (event.error === "no-speech" || event.error === "network") {
+      return;
+    }
+    if (event.error === "not-allowed" || event.error === "service-not-allowed") {
+      isTutorListening = false;
+      if (btn) btn.style.color = "";
+    }
+  };
+
+  rec.onend = function () {
+    if (!isTutorListening) {
+      if (btn) btn.style.color = "";
+      return;
+    }
+
+    if (tutorRecognitionRestartTimeout) clearTimeout(tutorRecognitionRestartTimeout);
+    tutorRecognitionRestartTimeout = setTimeout(() => {
+      if (isTutorListening) {
+        try {
+          tutorSpeechRecognition = createTutorSpeechRecognitionInstance();
+          if (tutorSpeechRecognition) tutorSpeechRecognition.start();
+        } catch (e) {
+          console.warn("Tutor speech restart retry:", e);
+        }
+      }
+    }, 150);
+  };
+
+  return rec;
+}
+
 export function toggleTutorVoice() {
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   if (!SpeechRecognition) {
@@ -724,6 +792,10 @@ export function toggleTutorVoice() {
 
   if (isTutorListening) {
     isTutorListening = false;
+    if (tutorRecognitionRestartTimeout) {
+      clearTimeout(tutorRecognitionRestartTimeout);
+      tutorRecognitionRestartTimeout = null;
+    }
     if (tutorSpeechRecognition) {
       try {
         tutorSpeechRecognition.stop();
@@ -731,53 +803,10 @@ export function toggleTutorVoice() {
     }
     if (btn) btn.style.color = "";
   } else {
+    isTutorListening = true;
     try {
-      tutorSpeechRecognition = new SpeechRecognition();
-      tutorSpeechRecognition.lang = "ar-TN";
-      tutorSpeechRecognition.interimResults = true;
-      tutorSpeechRecognition.continuous = true;
-
-      tutorSpeechRecognition.onstart = function () {
-        isTutorListening = true;
-        if (btn) {
-          btn.style.color = "#ef4444";
-          btn.title = "En écoute continue... Cliquez pour arrêter";
-        }
-      };
-
-      tutorSpeechRecognition.onresult = function (event) {
-        let interimTranscript = "";
-        let finalTranscript = "";
-        for (let i = 0; i < event.results.length; i++) {
-          if (event.results[i].isFinal) {
-            finalTranscript += event.results[i][0].transcript + " ";
-          } else {
-            interimTranscript += event.results[i][0].transcript;
-          }
-        }
-        const full = (finalTranscript + interimTranscript).trim();
-        const textInp = document.getElementById("tutorTextInput");
-        if (textInp && full) textInp.value = full;
-      };
-
-      tutorSpeechRecognition.onerror = function (event) {
-        if (event.error === "no-speech" && isTutorListening) return;
-        isTutorListening = false;
-        if (btn) btn.style.color = "";
-      };
-
-      tutorSpeechRecognition.onend = function () {
-        if (isTutorListening) {
-          try {
-            tutorSpeechRecognition.start();
-            return;
-          } catch (e) {}
-        }
-        isTutorListening = false;
-        if (btn) btn.style.color = "";
-      };
-
-      tutorSpeechRecognition.start();
+      tutorSpeechRecognition = createTutorSpeechRecognitionInstance();
+      if (tutorSpeechRecognition) tutorSpeechRecognition.start();
     } catch (e) {
       console.error(e);
       isTutorListening = false;
