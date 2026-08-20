@@ -1,7 +1,7 @@
 // js/notifications.js
 // Système de Notifications et Rappels Intelligents pour les Cours et Séances d'Étude
 
-import { state, formatM, getSubjectMeta, playBeep } from "./state.js?v=15.9";
+import { state, formatM, getSubjectMeta, playBeep } from "./state.js?v=16.0";
 
 const sentNotifications = new Set();
 
@@ -175,6 +175,7 @@ export function checkUpcomingSessions() {
 
   state.db.forEach((ev) => {
     if (ev.day !== realDayIdx) return;
+    if (window.shouldShowSession && !window.shouldShowSession(ev, realDayIdx, getMon(now))) return;
 
     const meta = getSubjectMeta(ev.sub);
     const isPart = ev.type && ev.type.includes("Particulier");

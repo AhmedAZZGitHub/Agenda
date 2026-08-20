@@ -1,7 +1,7 @@
 // js/calendar.js
 // Gestion du Planning (Grille PC & Vue Mobile), Détails & Modification de Séance, Examens et Minuteur
 
-import { database, ref, set, remove, update } from "./firebase-config.js?v=15.9";
+import { database, ref, set, remove, update } from "./firebase-config.js?v=16.0";
 import {
   state,
   getStudentPath,
@@ -12,8 +12,8 @@ import {
   showLoading,
   hideLoading,
   playBeep,
-} from "./state.js?v=15.9";
-import { renderDetailSessionMap, initEditPickerMap } from "./maps.js?v=15.9";
+} from "./state.js?v=16.0";
+import { renderDetailSessionMap, initEditPickerMap } from "./maps.js?v=16.0";
 
 let activeDetailSessionId = null;
 let activeDetailSessionDate = null;
@@ -73,6 +73,58 @@ export function render() {
   updateBacCountdown();
 }
 
+export function getWeekNumber(d) {
+  const target = new Date(d.valueOf());
+  const dayNr = (d.getDay() + 6) % 7;
+  target.setDate(target.getDate() - dayNr + 3);
+  const firstThursday = target.valueOf();
+  target.setMonth(0, 1);
+  if (target.getDay() !== 4) {
+    target.setMonth(0, 1 + ((4 - target.getDay() + 7) % 7));
+  }
+  return 1 + Math.ceil((firstThursday - target) / 604800000);
+}
+
+export function shouldShowSession(ev, dayIndex, currentMonday) {
+  if (ev.day !== dayIndex) return false;
+
+  const d = new Date(currentMonday);
+  d.setDate(d.getDate() + dayIndex);
+  const dateKey = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+
+  // 1. Cas "Ce jour seulement" (Séance unique)
+  if (ev.freq && ev.freq.includes("Ce jour seulement")) {
+    if (ev.singleDate && ev.singleDate !== dateKey) {
+      return false;
+    }
+  }
+
+  // 2. Cas "Par quinzaine" (1 semaine sur 2)
+  if (ev.freq && ev.freq.includes("quinzaine")) {
+    const weekNum = getWeekNumber(d);
+    const baseParity = ev.baseWeekParity ?? 0;
+    if (weekNum % 2 !== baseParity) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+export function onFreqChange(val) {
+  const singleDateBox = document.getElementById("singleDateBox");
+  if (singleDateBox) {
+    singleDateBox.style.display = val && val.includes("Ce jour seulement") ? "block" : "none";
+  }
+}
+
+export function onEditFreqChange(val) {
+  const editSingleDateBox = document.getElementById("sdEditSingleDateBox");
+  if (editSingleDateBox) {
+    editSingleDateBox.style.display = val && val.includes("Ce jour seulement") ? "block" : "none";
+  }
+}
+
 export function renderPc() {
   const pHead = document.getElementById("pcHeader");
   if (!pHead) return;
@@ -107,7 +159,7 @@ export function renderPc() {
 
     const dateKey = getSessionDateKey(day);
     state.db
-      .filter((e) => e.day === day)
+      .filter((e) => shouldShowSession(e, day, state.currentMonday))
       .forEach((ev) => {
         const meta = getSubjectMeta(ev.sub);
         const status = getEventStatus(ev.day, ev.s, ev.e);
@@ -115,6 +167,7 @@ export function renderPc() {
         const hPx = Math.max(30, ((ev.e - ev.s) / 60) * 46);
 
         const isQuin = ev.freq && ev.freq.includes("quinzaine");
+        const isSingle = ev.freq && ev.freq.includes("Ce jour seulement");
         const isHome = ev.type && ev.type.includes("maison");
         const isOnline = ev.type && ev.type.includes("ligne");
         const isPart = ev.type && ev.type.includes("Particulier");
@@ -136,7 +189,8 @@ export function renderPc() {
             </div>
             <div style="margin-top:1px; display:flex; gap:2px; flex-wrap:wrap;">
               ${isPart ? `<span class="tag-meta" style="background:#7c3aed; color:white; cursor:pointer;" onclick="event.stopPropagation(); window.openMapViewer('${ev.id}')" title="Voir l'emplacement sur la carte">📍 ${ev.location?.address ? (ev.location.address.length > 12 ? ev.location.address.substring(0, 12) + "..." : ev.location.address) : "Particulier"}</span>` : ev.type ? `<span class="tag-meta" style="${isHome ? "background:#059669; color:white;" : isOnline ? "background:#0891b2; color:white;" : ""}">${ev.type}</span>` : ""}
-              ${isQuin ? `<span class="tag-meta" style="background:#f59e0b; color:white;">1/2</span>` : ""}
+              ${isQuin ? `<span class="tag-meta" style="background:#f59e0b; color:white;">⏳ 1/2</span>` : ""}
+              ${isSingle ? `<span class="tag-meta" style="background:#ec4899; color:white;">📍 Unique</span>` : ""}
               ${hasTodo ? `<span class="tag-meta" style="${isDone ? "background:#059669; color:white; font-weight:800;" : "background:#ea580c; color:white; font-weight:800;"}" onclick="event.stopPropagation(); window.toggleSessionTodoDone('${ev.id}', '${dateKey}', event)" title="Exercices pour le ${dateKey} : ${todoObj.todo.replace(/"/g, '&quot;')} (Cliquer pour basculer Fait/Non fait)">${isDone ? "✅ Ex. Fait" : "⏳ Ex. À faire"}</span>` : ""}
             </div>
           </div>
@@ -166,7 +220,7 @@ export function renderMob() {
   const ml = document.getElementById("mobList");
   if (!ml) return;
   ml.innerHTML = "";
-  const dayEvs = state.db.filter((e) => e.day === state.curDayIdx).sort((a, b) => a.s - b.s);
+  const dayEvs = state.db.filter((e) => shouldShowSession(e, state.curDayIdx, state.currentMonday)).sort((a, b) => a.s - b.s);
   if (!dayEvs.length) {
     ml.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted);font-size:13px;">☕ Aucune séance prévue ce jour-là.</div>';
     return;
@@ -176,6 +230,7 @@ export function renderMob() {
     const meta = getSubjectMeta(ev.sub);
     const status = getEventStatus(ev.day, ev.s, ev.e);
     const isQuin = ev.freq && ev.freq.includes("quinzaine");
+    const isSingle = ev.freq && ev.freq.includes("Ce jour seulement");
     const isHome = ev.type && ev.type.includes("maison");
     const isOnline = ev.type && ev.type.includes("ligne");
     const isPart = ev.type && ev.type.includes("Particulier");
@@ -192,7 +247,8 @@ export function renderMob() {
           <div style="font-size:14px;font-weight:800;">${meta.ico} ${ev.sub}</div>
           <div style="margin:3px 0; display:flex; gap:3px; flex-wrap:wrap;">
             ${isPart ? `<span class="tag-meta" style="background:#7c3aed; color:white; font-weight:800;">📍 ${ev.location?.address || "Cours Particulier"}</span>` : ev.type ? `<span class="tag-meta" style="${isHome ? "background:#059669; color:white;" : isOnline ? "background:#0891b2; color:white;" : ""}">${ev.type}</span>` : ""}
-            ${isQuin ? `<span class="tag-meta" style="background:#f59e0b; color:white;">1/2 quinzaine</span>` : ""}
+            ${isQuin ? `<span class="tag-meta" style="background:#f59e0b; color:white;">⏳ 1/2 quinzaine</span>` : ""}
+            ${isSingle ? `<span class="tag-meta" style="background:#ec4899; color:white;">📍 Unique</span>` : ""}
             ${hasTodo ? `<span class="tag-meta" style="${isDone ? "background:#059669; color:white; font-weight:800;" : "background:#ea580c; color:white; font-weight:800;"}" onclick="event.stopPropagation(); window.toggleSessionTodoDone('${ev.id}', '${curDateKey}', event)" title="Cliquer pour basculer Fait/Non fait">${isDone ? "✅ Exercices Faits" : "⏳ Exercices À faire"}</span>` : ""}
           </div>
           <div style="font-size:12px;opacity:0.85;font-weight:600;">🕒 ${formatM(ev.s)} - ${formatM(ev.e)}</div>
@@ -245,9 +301,19 @@ export function saveEvent() {
   const sub = document.getElementById("mSub")?.value.trim();
   if (!sub) return;
   const type = document.getElementById("mType")?.value;
-  const freq = document.getElementById("mFreq")?.value;
+  const freq = document.getElementById("mFreq")?.value || "Chaque semaine";
   const [sH, sM] = (document.getElementById("mStart")?.value || "08:00").split(":").map(Number);
   const [eH, eM] = (document.getElementById("mEnd")?.value || "10:00").split(":").map(Number);
+  const day = parseInt(document.getElementById("mDay")?.value || "0");
+
+  const targetDate = new Date(state.currentMonday);
+  targetDate.setDate(targetDate.getDate() + day);
+  const baseWeekParity = getWeekNumber(targetDate) % 2;
+
+  let singleDate = null;
+  if (freq.includes("Ce jour seulement")) {
+    singleDate = document.getElementById("mSingleDateInput")?.value || `${targetDate.getFullYear()}-${String(targetDate.getMonth() + 1).padStart(2, "0")}-${String(targetDate.getDate()).padStart(2, "0")}`;
+  }
 
   const newId = Date.now().toString();
 
@@ -261,12 +327,14 @@ export function saveEvent() {
 
   const newEvent = {
     id: newId,
-    day: parseInt(document.getElementById("mDay")?.value || "0"),
+    day,
     s: sH * 60 + sM,
     e: eH * 60 + eM,
     sub,
     type,
     freq,
+    baseWeekParity,
+    singleDate,
     location: locData,
   };
 
@@ -319,7 +387,15 @@ export function openSessionDetails(id, explicitDateKey = null) {
   if (subEl) subEl.innerText = `${ev.sub} (Coef ${meta.coef || 1})`;
   if (timeEl) timeEl.innerText = `${formattedDateHeader} • ${formatM(ev.s)} - ${formatM(ev.e)} (${durHours}h)`;
   if (typeEl) typeEl.innerText = ev.type || "À la maison";
-  if (freqEl) freqEl.innerText = ev.freq || "Chaque semaine";
+  if (freqEl) {
+    if (ev.freq && ev.freq.includes("Ce jour seulement")) {
+      freqEl.innerText = `📍 Ce jour seulement (${ev.singleDate || dateKey})`;
+    } else if (ev.freq && ev.freq.includes("quinzaine")) {
+      freqEl.innerText = "⏳ 1 semaine sur 2 (Quinzaine)";
+    } else {
+      freqEl.innerText = "🔁 Chaque semaine";
+    }
+  }
 
   // Récupération des devoirs/exercices isolés pour CETTE date précise
   const todoKey = `${id}_${dateKey}`;
@@ -377,6 +453,8 @@ export function openSessionDetails(id, explicitDateKey = null) {
   const editSub = document.getElementById("sdEditSub");
   const editType = document.getElementById("sdEditType");
   const editFreq = document.getElementById("sdEditFreq");
+  const editSingleDateBox = document.getElementById("sdEditSingleDateBox");
+  const editSingleDateInput = document.getElementById("sdEditSingleDateInput");
   const editDay = document.getElementById("sdEditDay");
   const editStart = document.getElementById("sdEditStart");
   const editEnd = document.getElementById("sdEditEnd");
@@ -387,7 +465,15 @@ export function openSessionDetails(id, explicitDateKey = null) {
   if (editId) editId.value = ev.id;
   if (editSub) editSub.value = ev.sub;
   if (editType) editType.value = ev.type || "À la maison";
-  if (editFreq) editFreq.value = ev.freq || "Toutes les semaines";
+  if (editFreq) {
+    editFreq.value = ev.freq || "Chaque semaine";
+    if (editSingleDateBox) {
+      editSingleDateBox.style.display = ev.freq && ev.freq.includes("Ce jour seulement") ? "block" : "none";
+    }
+  }
+  if (editSingleDateInput) {
+    editSingleDateInput.value = ev.singleDate || dateKey;
+  }
   if (editDay) editDay.value = ev.day;
   if (editStart) editStart.value = formatM(ev.s);
   if (editEnd) editEnd.value = formatM(ev.e);
@@ -432,12 +518,36 @@ export function onEditSessionTypeChange(val) {
   }
 }
 
-export async function saveQuickSessionTodo(explicitDoneStatus = null) {
+export function updateSdTodoStatusButton(isDone) {
+  const btn = document.getElementById("sdTodoStatusToggleBtn");
+  if (!btn) return;
+  if (isDone) {
+    btn.innerText = "✅ Devoirs Faits";
+    btn.style.background = "#dcfce7";
+    btn.style.color = "#15803d";
+    btn.style.borderColor = "#86efac";
+  } else {
+    btn.innerText = "⏳ À faire";
+    btn.style.background = "#ffedd5";
+    btn.style.color = "#c2410c";
+    btn.style.borderColor = "#fdba74";
+  }
+}
+
+export async function toggleSdTodoDone() {
+  if (state.isReadOnly || !activeDetailSessionId) return;
+  const todoDoneInp = document.getElementById("sdTodoDone");
+  if (!todoDoneInp) return;
+  todoDoneInp.checked = !todoDoneInp.checked;
+  updateSdTodoStatusButton(todoDoneInp.checked);
+  await handleSaveSessionTodo();
+}
+
+export async function handleSaveSessionTodo() {
   if (state.isReadOnly || !activeDetailSessionId || !activeDetailSessionDate) return;
   const textEl = document.getElementById("sdTodoText");
   const todo = textEl ? textEl.value.trim() : "";
   const checkbox = document.getElementById("sdTodoDone");
-
   let todoDone = checkbox ? checkbox.checked : false;
   if (explicitDoneStatus !== null) {
     todoDone = explicitDoneStatus;
@@ -891,6 +1001,10 @@ window.deleteEvent = deleteEvent;
 window.openSessionDetails = openSessionDetails;
 window.switchSdTab = switchSdTab;
 window.onEditSessionTypeChange = onEditSessionTypeChange;
+window.onFreqChange = onFreqChange;
+window.onEditFreqChange = onEditFreqChange;
+window.shouldShowSession = shouldShowSession;
+window.getWeekNumber = getWeekNumber;
 window.getSessionDateKey = getSessionDateKey;
 window.saveQuickSessionTodo = saveQuickSessionTodo;
 window.updateSdTodoStatusButton = updateSdTodoStatusButton;

@@ -143,9 +143,22 @@ window.openModal = function (id, day = state.curDayIdx, h = 8) {
     const mDay = document.getElementById("mDay");
     const mStart = document.getElementById("mStart");
     const mEnd = document.getElementById("mEnd");
+    const mFreq = document.getElementById("mFreq");
+    const singleDateBox = document.getElementById("singleDateBox");
+    const singleDateInput = document.getElementById("mSingleDateInput");
+
     if (mDay) mDay.value = day;
     if (mStart) mStart.value = `${h < 10 ? "0" + h : h}:00`;
     if (mEnd) mEnd.value = `${h + 2 < 10 ? "0" + (h + 2) : h + 2}:00`;
+    if (mFreq) mFreq.value = "Chaque semaine";
+    if (singleDateBox) singleDateBox.style.display = "none";
+
+    const d = new Date(state.currentMonday);
+    d.setDate(d.getDate() + day);
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const dateStr = String(d.getDate()).padStart(2, "0");
+    if (singleDateInput) singleDateInput.value = `${y}-${m}-${dateStr}`;
   }
   const el = document.getElementById(id);
   if (el) el.style.display = "flex";

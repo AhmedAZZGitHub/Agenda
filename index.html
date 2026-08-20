@@ -79,7 +79,7 @@
       if (window.renderStatsData) window.renderStatsData();
     };
   </script>
-  <link rel="stylesheet" href="css/styles.css?v=15.9" />
+  <link rel="stylesheet" href="css/styles.css?v=16.0" />
 </head>
 
 <body>
@@ -726,13 +726,20 @@
           </select>
         </div>
         <div>
-          <label
-            style="font-size: 11px; font-weight: 700; color: var(--muted); display: block; margin-bottom: 4px;">Fréquence
-            :</label>
-          <select id="mFreq" class="input" style="width: 100%">
-            <option value="Toutes les semaines">Chaque semaine</option>
-            <option value="Par quinzaine (1/2)">1 semaine sur 2 (Quinzaine)</option>
+          <label style="font-size: 11px; font-weight: 700; color: var(--muted); display: block; margin-bottom: 4px;">
+            📅 Répétition / Fréquence :
+          </label>
+          <select id="mFreq" class="input" style="width: 100%" onchange="window.onFreqChange(this.value)">
+            <option value="Chaque semaine">🔁 Chaque semaine (Régulier)</option>
+            <option value="Par quinzaine (1 semaine sur 2)">⏳ Par quinzaine (1 semaine sur 2)</option>
+            <option value="Ce jour seulement">📍 Ce jour seulement (Séance unique)</option>
           </select>
+          <div id="singleDateBox" style="display: none; margin-top: 6px;">
+            <label style="font-size: 10.5px; font-weight: 700; color: #ec4899; display: block; margin-bottom: 2px;">
+              🗓️ Date exacte de la séance :
+            </label>
+            <input type="date" id="mSingleDateInput" class="input" style="width: 100%; font-size: 12px;" />
+          </div>
         </div>
       </div>
 
@@ -949,10 +956,15 @@
           </div>
           <div>
             <label style="font-size: 11px; font-weight: 700; color: var(--muted); display: block; margin-bottom: 4px;">Fréquence :</label>
-            <select id="sdEditFreq" class="input" style="width: 100%">
-              <option value="Toutes les semaines">Chaque semaine</option>
-              <option value="Par quinzaine (1/2)">1 semaine sur 2</option>
+            <select id="sdEditFreq" class="input" style="width: 100%" onchange="window.onEditFreqChange(this.value)">
+              <option value="Chaque semaine">🔁 Chaque semaine</option>
+              <option value="Par quinzaine (1 semaine sur 2)">⏳ 1 semaine sur 2 (Quinzaine)</option>
+              <option value="Ce jour seulement">📍 Ce jour seulement (Séance unique)</option>
             </select>
+            <div id="sdEditSingleDateBox" style="display: none; margin-top: 6px;">
+              <label style="font-size: 10.5px; font-weight: 700; color: #ec4899; display: block; margin-bottom: 2px;">🗓️ Date exacte :</label>
+              <input type="date" id="sdEditSingleDateInput" class="input" style="width: 100%; font-size: 12px;" />
+            </div>
           </div>
         </div>
 
@@ -1400,7 +1412,7 @@
   </div>
 
   <!-- SCRIPT APPLICATION -->
-  <script type="module" src="js/app.js?v=15.9"></script>
+  <script type="module" src="js/app.js?v=16.0"></script>
 </body>
 
 </html>
