@@ -197,7 +197,52 @@ function updateMicUiState(isRecording) {
   if (startBtn) startBtn.style.display = isRecording ? "none" : "inline-flex";
 }
 
+export function cleanDuplicateWords(text) {
+  if (!text) return "";
+  // Supprime les répétitions consécutives de mots identiques (ex: "maths maths" -> "maths", "غدا غدا" -> "غدا")
+  let cleaned = text.replace(/([\p{L}\p{N}]+)(?:\s+\1)+(?=\s|$|[.,!?])/giu, "$1");
+  return cleaned.replace(/\s{2,}/g, " ").trim();
+}
+
+export function mergeTranscripts(base, addition) {
+  base = (base || "").trim();
+  addition = (addition || "").trim();
+  if (!base) return addition;
+  if (!addition) return base;
+
+  // Si la nouvelle partie est déjà entièrement présente à la fin de la base
+  if (base.toLowerCase().endsWith(addition.toLowerCase())) {
+    return base;
+  }
+  // Si la base est déjà le préfixe complet de la nouvelle partie
+  if (addition.toLowerCase().startsWith(base.toLowerCase())) {
+    return addition;
+  }
+
+  const baseWords = base.split(/\s+/);
+  const addWords = addition.split(/\s+/);
+
+  // Recherche de chevauchement (overlap) entre la fin de base et le début de addition
+  let maxOverlap = 0;
+  const maxCheck = Math.min(baseWords.length, addWords.length, 15);
+  for (let len = 1; len <= maxCheck; len++) {
+    const baseSlice = baseWords.slice(baseWords.length - len).join(" ").toLowerCase();
+    const addSlice = addWords.slice(0, len).join(" ").toLowerCase();
+    if (baseSlice === addSlice) {
+      maxOverlap = len;
+    }
+  }
+
+  if (maxOverlap > 0) {
+    const nonOverlappingAdd = addWords.slice(maxOverlap).join(" ");
+    return nonOverlappingAdd ? `${base} ${nonOverlappingAdd}` : base;
+  }
+
+  return `${base} ${addition}`;
+}
+
 let aiRecognitionRestartTimeout = null;
+let currentSessionFinal = "";
 
 export function toggleAiSpeechRecording() {
   if (isAiSpeechRecording) {
@@ -219,6 +264,10 @@ export function stopAiSpeechRecording() {
     } catch (e) {}
   }
   updateMicUiState(false);
+  const transcriptInput = document.getElementById("aiTranscriptInput");
+  if (transcriptInput) {
+    transcriptInput.value = cleanDuplicateWords(transcriptInput.value);
+  }
   const st = document.getElementById("aiMicStatusText");
   if (st) {
     st.innerHTML = "✅ <b>Dictée terminée !</b> Cliquez sur <b>'✨ Analyser & Ajouter'</b> pour insérer la séance et le travail à faire.";
@@ -247,7 +296,7 @@ function createSpeechRecognitionInstance() {
       "en-US": "🇬🇧 Anglais",
     };
     if (statusText) {
-      statusText.innerHTML = `🔴 <b>Écoute continue active (${langNames[selectedAiSpeechLang] || "Tounsi"})...</b><br><span style="font-size:11.5px; opacity:0.9;">Parlez à votre rythme sans limite de temps. Cliquez sur <b>⏹️ Terminer</b> quand vous avez fini.</span>`;
+      statusText.innerHTML = `🔴 <b>Écoute continue active (${langNames[selectedAiSpeechLang] || "Tounsi"})...</b><br><span style="font-size:11.5px; opacity:0.9;">Parlez à votre rythme sans répétition. Cliquez sur <b>⏹️ Terminer</b> quand vous avez fini.</span>`;
       statusText.style.color = "#0284c7";
     }
   };
@@ -257,21 +306,24 @@ function createSpeechRecognitionInstance() {
     let sessionFinal = "";
     for (let i = 0; i < event.results.length; i++) {
       if (event.results[i].isFinal) {
-        sessionFinal += event.results[i][0].transcript + " ";
+        sessionFinal += event.results[i][0].transcript.trim() + " ";
       } else {
         interim += event.results[i][0].transcript;
       }
     }
-    const combined = (accumulatedTranscript ? accumulatedTranscript + " " : "") + sessionFinal + interim;
+    currentSessionFinal = sessionFinal.trim();
+    const mergedFinal = mergeTranscripts(accumulatedTranscript, currentSessionFinal);
+    const withInterim = interim.trim() ? mergeTranscripts(mergedFinal, interim.trim()) : mergedFinal;
+    const finalCleaned = cleanDuplicateWords(withInterim);
     if (transcriptInput) {
-      transcriptInput.value = combined.trim();
+      transcriptInput.value = finalCleaned;
     }
   };
 
   rec.onerror = function (event) {
     console.warn("Speech recognition event:", event.error);
     if (event.error === "no-speech" || event.error === "network") {
-      // Les pauses naturelles ou micro-coupures ne doivent JAMAIS couper l'enregistrement
+      // Ignorer les micro-pauses sans couper le flux
       return;
     }
     if (event.error === "not-allowed" || event.error === "service-not-allowed") {
@@ -290,12 +342,13 @@ function createSpeechRecognitionInstance() {
       return;
     }
 
-    // Sauvegarde du texte courant avant réinitialisation du flux audio
-    if (transcriptInput) {
-      accumulatedTranscript = transcriptInput.value.trim();
+    // Fusionner uniquement la partie validée (finalisée) de la session écoulée
+    if (currentSessionFinal) {
+      accumulatedTranscript = cleanDuplicateWords(mergeTranscripts(accumulatedTranscript, currentSessionFinal));
+      currentSessionFinal = "";
     }
 
-    // Relance asynchrone automatique pour contourner la coupure native de 10s du navigateur
+    // Relance asynchrone transparente sans perte ni doublon
     if (aiRecognitionRestartTimeout) clearTimeout(aiRecognitionRestartTimeout);
     aiRecognitionRestartTimeout = setTimeout(() => {
       if (isAiSpeechRecording) {
@@ -323,7 +376,8 @@ export function startAiSpeechRecording() {
 
   isAiSpeechRecording = true;
   const transcriptInput = document.getElementById("aiTranscriptInput");
-  accumulatedTranscript = transcriptInput ? transcriptInput.value.trim() : "";
+  accumulatedTranscript = transcriptInput ? cleanDuplicateWords(transcriptInput.value.trim()) : "";
+  currentSessionFinal = "";
 
   try {
     if (aiSpeechRecognition) {

@@ -1,7 +1,7 @@
 // js/tutor-ai.js
 // Tuteur IA Éducatif Gemini Pro (Baccalauréat Tunisien) & Correction d'Exercices par Photo
 
-import { getAiModelName, getAiApiKey } from "./ai-assistant.js?v=16.5";
+import { getAiModelName, getAiApiKey, cleanDuplicateWords, mergeTranscripts } from "./ai-assistant.js?v=16.5";
 import { state, showLoading, hideLoading } from "./state.js?v=16.5";
 import { ARABIC_METHODOLOGY_KNOWLEDGE } from "./arabic-knowledge.js";
 
@@ -10,6 +10,8 @@ let tutorAttachedImageBase64 = null;
 let tutorAttachedImageMime = "image/jpeg";
 let tutorSpeechRecognition = null;
 let isTutorListening = false;
+let tutorAccumulatedTranscript = "";
+let tutorCurrentSessionFinal = "";
 
 const TUTOR_SYSTEM_INSTRUCTION = `Tu es "Tuteur Bac IA", un professeur particulier d'élite et tuteur bienveillant dédié exclusivement aux élèves préparant le Baccalauréat (notamment le Baccalauréat Tunisien pour toutes les sections : Mathématiques, Sciences Expérimentales, Informatique, Économie et Gestion, Technique, Lettres et Sport).
 
@@ -739,13 +741,18 @@ function createTutorSpeechRecognitionInstance() {
     let finalTranscript = "";
     for (let i = 0; i < event.results.length; i++) {
       if (event.results[i].isFinal) {
-        finalTranscript += event.results[i][0].transcript + " ";
+        finalTranscript += event.results[i][0].transcript.trim() + " ";
       } else {
         interimTranscript += event.results[i][0].transcript;
       }
     }
-    const full = (finalTranscript + interimTranscript).trim();
-    if (textInp && full) textInp.value = full;
+    tutorCurrentSessionFinal = finalTranscript.trim();
+    const mergedFinal = mergeTranscripts(tutorAccumulatedTranscript, tutorCurrentSessionFinal);
+    const withInterim = interimTranscript.trim() ? mergeTranscripts(mergedFinal, interimTranscript.trim()) : mergedFinal;
+    const finalCleaned = cleanDuplicateWords(withInterim);
+    if (textInp) {
+      textInp.value = finalCleaned;
+    }
   };
 
   rec.onerror = function (event) {
@@ -763,6 +770,11 @@ function createTutorSpeechRecognitionInstance() {
     if (!isTutorListening) {
       if (btn) btn.style.color = "";
       return;
+    }
+
+    if (tutorCurrentSessionFinal) {
+      tutorAccumulatedTranscript = cleanDuplicateWords(mergeTranscripts(tutorAccumulatedTranscript, tutorCurrentSessionFinal));
+      tutorCurrentSessionFinal = "";
     }
 
     if (tutorRecognitionRestartTimeout) clearTimeout(tutorRecognitionRestartTimeout);
@@ -789,6 +801,7 @@ export function toggleTutorVoice() {
   }
 
   const btn = document.getElementById("btnTutorVoice");
+  const textInp = document.getElementById("tutorTextInput");
 
   if (isTutorListening) {
     isTutorListening = false;
@@ -801,9 +814,14 @@ export function toggleTutorVoice() {
         tutorSpeechRecognition.stop();
       } catch (e) {}
     }
+    if (textInp) {
+      textInp.value = cleanDuplicateWords(textInp.value);
+    }
     if (btn) btn.style.color = "";
   } else {
     isTutorListening = true;
+    tutorAccumulatedTranscript = textInp ? cleanDuplicateWords(textInp.value.trim()) : "";
+    tutorCurrentSessionFinal = "";
     try {
       tutorSpeechRecognition = createTutorSpeechRecognitionInstance();
       if (tutorSpeechRecognition) tutorSpeechRecognition.start();
