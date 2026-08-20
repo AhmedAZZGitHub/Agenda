@@ -78,8 +78,16 @@
       window.openOverlay("statsOverlay");
       if (window.renderStatsData) window.renderStatsData();
     };
+    window.onFreqChange = function (val) {
+      var b = document.getElementById("singleDateBox");
+      if (b) b.style.display = val && val.indexOf("Ce jour seulement") !== -1 ? "block" : "none";
+    };
+    window.onEditFreqChange = function (val) {
+      var b = document.getElementById("sdEditSingleDateBox");
+      if (b) b.style.display = val && val.indexOf("Ce jour seulement") !== -1 ? "block" : "none";
+    };
   </script>
-  <link rel="stylesheet" href="css/styles.css?v=16.0" />
+  <link rel="stylesheet" href="css/styles.css?v=16.1" />
 </head>
 
 <body>
@@ -1412,7 +1420,7 @@
   </div>
 
   <!-- SCRIPT APPLICATION -->
-  <script type="module" src="js/app.js?v=16.0"></script>
+  <script type="module" src="js/app.js?v=16.1"></script>
 </body>
 
 </html>

@@ -1,7 +1,7 @@
 // js/notifications.js
 // Système de Notifications et Rappels Intelligents pour les Cours et Séances d'Étude
 
-import { state, formatM, getSubjectMeta, playBeep } from "./state.js?v=16.0";
+import { state, formatM, getSubjectMeta, playBeep } from "./state.js?v=16.1";
 
 const sentNotifications = new Set();
 
