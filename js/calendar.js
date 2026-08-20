@@ -1,7 +1,7 @@
 // js/calendar.js
 // Gestion du Planning (Grille PC & Vue Mobile), Détails & Modification de Séance, Examens et Minuteur
 
-import { database, ref, set, remove, update } from "./firebase-config.js?v=16.1";
+import { database, ref, set, remove, update } from "./firebase-config.js?v=16.2";
 import {
   state,
   getStudentPath,
@@ -12,8 +12,8 @@ import {
   showLoading,
   hideLoading,
   playBeep,
-} from "./state.js?v=16.1";
-import { renderDetailSessionMap, initEditPickerMap } from "./maps.js?v=16.1";
+} from "./state.js?v=16.2";
+import { renderDetailSessionMap, initEditPickerMap } from "./maps.js?v=16.2";
 
 let activeDetailSessionId = null;
 let activeDetailSessionDate = null;
@@ -534,16 +534,7 @@ export function updateSdTodoStatusButton(isDone) {
   }
 }
 
-export async function toggleSdTodoDone() {
-  if (state.isReadOnly || !activeDetailSessionId) return;
-  const todoDoneInp = document.getElementById("sdTodoDone");
-  if (!todoDoneInp) return;
-  todoDoneInp.checked = !todoDoneInp.checked;
-  updateSdTodoStatusButton(todoDoneInp.checked);
-  await handleSaveSessionTodo();
-}
-
-export async function handleSaveSessionTodo() {
+export async function saveQuickSessionTodo(explicitDoneStatus = null) {
   if (state.isReadOnly || !activeDetailSessionId || !activeDetailSessionDate) return;
   const textEl = document.getElementById("sdTodoText");
   const todo = textEl ? textEl.value.trim() : "";
@@ -574,23 +565,6 @@ export async function handleSaveSessionTodo() {
   }
 
   render();
-}
-
-export function updateSdTodoStatusButton(isDone) {
-  const btn = document.getElementById("sdTodoStatusToggleBtn");
-  if (btn) {
-    if (isDone) {
-      btn.innerHTML = "✅ Exercices Faits";
-      btn.style.background = "#dcfce7";
-      btn.style.color = "#15803d";
-      btn.style.borderColor = "#86efac";
-    } else {
-      btn.innerHTML = "⏳ Non fait (À faire)";
-      btn.style.background = "#fee2e2";
-      btn.style.color = "#b91c1c";
-      btn.style.borderColor = "#fca5a5";
-    }
-  }
 }
 
 export function toggleSdTodoStatus() {
