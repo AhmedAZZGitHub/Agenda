@@ -200,11 +200,12 @@ function updateMicUiState(isRecording) {
 export function cleanDuplicateWords(text) {
   if (!text) return "";
   let s = text.trim();
-  // 1. Supprime les répétitions consécutives de mots identiques (ex: "ajoute ajoute" -> "ajoute", "غدا غدا" -> "غدا")
-  s = s.replace(/([\p{L}\p{N}]+)(?:\s+\1)+(?=\s|$|[.,!?])/giu, "$1");
-  // 2. Supprime les répétitions consécutives de groupes de deux mots (ex: "ajoute demain ajoute demain" -> "ajoute demain")
-  s = s.replace(/([\p{L}\p{N}]+\s+[\p{L}\p{N}]+)(?:\s+\1)+(?=\s|$|[.,!?])/giu, "$1");
-  // 3. Normalisation des espaces
+  // 1. Supprime les répétitions de phrases ou groupes de mots consécutifs (ex: "ajoute demain ajoute demain" -> "ajoute demain")
+  for (let pass = 0; pass < 3; pass++) {
+    s = s.replace(/([\p{L}\p{N}]+(?:\s+[\p{L}\p{N}]+){1,8})(?:\s+\1)+(?=\s|$|[.,!?])/giu, "$1");
+    // 2. Supprime les répétitions consécutives de mots uniques (ex: "ajoute ajoute" -> "ajoute", "exercices exercices" -> "exercices", "غدا غدا" -> "غدا")
+    s = s.replace(/([\p{L}\p{N}]+)(?:\s+\1)+(?=\s|$|[.,!?])/giu, "$1");
+  }
   return s.replace(/\s{2,}/g, " ").trim();
 }
 
@@ -252,15 +253,15 @@ export class VoiceTranscriber {
     this.isRecording = false;
     this.recognition = null;
     this.restartTimer = null;
-    this.finalTranscript = "";
-    this.interimTranscript = "";
+    this.previousSessionText = "";
+    this.currentSessionText = "";
   }
 
   start(initialText = "") {
     this.stop();
     this.isRecording = true;
-    this.finalTranscript = cleanDuplicateWords((initialText || "").trim());
-    this.interimTranscript = "";
+    this.previousSessionText = cleanDuplicateWords((initialText || "").trim());
+    this.currentSessionText = "";
     this._startInstance();
     this.onStateChange(true);
     this._publish();
@@ -282,11 +283,11 @@ export class VoiceTranscriber {
       } catch (e) {}
       this.recognition = null;
     }
-    if (this.interimTranscript) {
-      this.finalTranscript = mergeTranscripts(this.finalTranscript, this.interimTranscript);
-      this.interimTranscript = "";
+    if (this.currentSessionText) {
+      this.previousSessionText = mergeTranscripts(this.previousSessionText, this.currentSessionText);
+      this.currentSessionText = "";
     }
-    this.finalTranscript = cleanDuplicateWords(this.finalTranscript);
+    this.previousSessionText = cleanDuplicateWords(this.previousSessionText);
     this.onStateChange(false);
     this._publish();
   }
@@ -311,18 +312,27 @@ export class VoiceTranscriber {
       rec.onresult = (event) => {
         if (!this.isRecording) return;
 
-        let interim = "";
-        for (let i = event.resultIndex; i < event.results.length; ++i) {
-          const item = event.results[i];
-          const transcript = item[0]?.transcript || "";
-          if (item.isFinal) {
-            this.finalTranscript = mergeTranscripts(this.finalTranscript, transcript.trim());
-          } else {
-            interim += transcript;
+        let finalStr = "";
+        let lastFinalIndex = -1;
+
+        for (let i = 0; i < event.results.length; i++) {
+          if (event.results[i].isFinal) {
+            finalStr += (finalStr ? " " : "") + event.results[i][0].transcript.trim();
+            lastFinalIndex = i;
           }
         }
 
-        this.interimTranscript = interim.trim();
+        let interimStr = "";
+        for (let i = lastFinalIndex + 1; i < event.results.length; i++) {
+          interimStr += (interimStr ? " " : "") + event.results[i][0].transcript.trim();
+        }
+
+        if (finalStr && interimStr) {
+          this.currentSessionText = `${finalStr} ${interimStr}`.trim();
+        } else {
+          this.currentSessionText = (finalStr || interimStr).trim();
+        }
+
         this._publish();
       };
 
@@ -336,9 +346,9 @@ export class VoiceTranscriber {
       rec.onend = () => {
         if (!this.isRecording) return;
 
-        if (this.interimTranscript) {
-          this.finalTranscript = mergeTranscripts(this.finalTranscript, this.interimTranscript);
-          this.interimTranscript = "";
+        if (this.currentSessionText) {
+          this.previousSessionText = mergeTranscripts(this.previousSessionText, this.currentSessionText);
+          this.currentSessionText = "";
           this._publish();
         }
 
@@ -362,9 +372,9 @@ export class VoiceTranscriber {
   }
 
   _publish() {
-    const full = this.interimTranscript
-      ? mergeTranscripts(this.finalTranscript, this.interimTranscript)
-      : this.finalTranscript;
+    const full = this.currentSessionText
+      ? mergeTranscripts(this.previousSessionText, this.currentSessionText)
+      : this.previousSessionText;
     const cleaned = cleanDuplicateWords(full);
     this.onUpdate(cleaned);
   }
@@ -439,7 +449,9 @@ export async function executeAiCommand() {
   stopAiSpeechRecording();
 
   const input = document.getElementById("aiTranscriptInput");
-  const text = input ? input.value.trim() : "";
+  const rawText = input ? input.value.trim() : "";
+  const text = cleanDuplicateWords(rawText);
+  if (input) input.value = text;
   const feedback = document.getElementById("aiFeedbackBox");
 
   if (!text) {
@@ -511,9 +523,10 @@ export async function executeAiCommand() {
 
     // Enregistrement du travail à faire / devoirs s'il est spécifié
     if (parsedResult.todo && parsedResult.todo.trim()) {
+      const cleanedTodo = cleanDuplicateWords(parsedResult.todo.trim());
       const todoKey = `${newId}_${targetDateKey}`;
       const todoObj = {
-        todo: parsedResult.todo.trim(),
+        todo: cleanedTodo,
         todoDone: false,
         date: targetDateKey,
         sessionId: newId,
