@@ -1,0 +1,49 @@
+{
+  "name": "Planning & Suivi Baccalauréat Pro",
+  "short_name": "Agenda Bac",
+  "description": "Application complète d'organisation scolaire, révisions, tuteur IA et annales du Baccalauréat.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0f172a",
+  "theme_color": "#0284c7",
+  "lang": "fr-FR",
+  "categories": ["education", "productivity"],
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Mon Emploi du Temps",
+      "short_name": "Planning",
+      "description": "Consulter mon agenda de la semaine",
+      "url": "./index.html",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Tuteur IA Gemini",
+      "short_name": "Tuteur IA",
+      "description": "Poser une question ou réviser avec l'IA",
+      "url": "./index.html",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}

@@ -61,17 +61,33 @@ export function updateNotifButtonState() {
 }
 
 export function sendAppNotification(title, body, icon = "🔔", tag = null) {
-  // 1. Notification Système du Navigateur
+  // 1. Notification Système du Navigateur / Service Worker (Compatible Mobile Android & iOS)
   if ("Notification" in window && Notification.permission === "granted") {
-    try {
-      new Notification(title, {
-        body: body,
-        icon: "https://cdn-icons-png.flaticon.com/512/2907/2907150.png",
-        tag: tag || "notif_" + Date.now(),
-        requireInteraction: true,
-      });
-    } catch (e) {
-      console.warn("Erreur notification système:", e);
+    const notifOptions = {
+      body: body,
+      icon: "icons/icon-192.png",
+      badge: "icons/icon-192.png",
+      tag: tag || "notif_" + Date.now(),
+      vibrate: [200, 100, 200],
+      requireInteraction: true,
+    };
+
+    if ("serviceWorker" in navigator && navigator.serviceWorker.ready) {
+      navigator.serviceWorker.ready
+        .then((reg) => {
+          return reg.showNotification(title, notifOptions);
+        })
+        .catch(() => {
+          try {
+            new Notification(title, notifOptions);
+          } catch (err) {}
+        });
+    } else {
+      try {
+        new Notification(title, notifOptions);
+      } catch (err) {
+        console.warn("Erreur notification système:", err);
+      }
     }
   }
 

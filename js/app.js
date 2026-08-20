@@ -85,13 +85,16 @@ onAuthStateChanged(auth, async (user) => {
 
 // Initialisation globale au chargement du DOM
 document.addEventListener("DOMContentLoaded", () => {
-  // Nettoyage proactif des anciens Service Workers / Cache
+  // Enregistrement proactif du Service Worker PWA
   if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.getRegistrations().then((registrations) => {
-      for (let registration of registrations) {
-        registration.unregister();
-      }
-    });
+    navigator.serviceWorker
+      .register("./sw.js")
+      .then((reg) => {
+        console.log("PWA Service Worker actif:", reg.scope);
+      })
+      .catch((err) => {
+        console.warn("Erreur enregistrement Service Worker:", err);
+      });
   }
 
   // Thème sombre

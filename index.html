@@ -3,12 +3,22 @@
 
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
   <title>Planning & Tableau de Bord Baccalauréat Pro</title>
+  
+  <!-- CONFIGURATION PWA ET APPLICATION MOBILE -->
   <meta name="theme-color" content="#0284c7" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Agenda Bac" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png" />
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+  
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
@@ -19,22 +29,45 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
-    try {
-      if ("serviceWorker" in navigator) {
-        navigator.serviceWorker.getRegistrations().then(function (registrations) {
-          for (var registration of registrations) {
-            registration.unregister();
-          }
+    // Initialisation Service Worker pour PWA
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("./sw.js").then((reg) => {
+          console.log("PWA Service Worker actif:", reg.scope);
+        }).catch((err) => {
+          console.warn("Erreur Service Worker:", err);
         });
-      }
-      if ("caches" in window) {
-        caches.keys().then(function (names) {
-          for (var name of names) {
-            caches.delete(name);
+      });
+    }
+
+    // Gestion du bouton d'installation de l'App (Android / Chrome / PC / iOS)
+    window.pwaDeferredPrompt = null;
+    window.addEventListener("beforeinstallprompt", (e) => {
+      e.preventDefault();
+      window.pwaDeferredPrompt = e;
+      const installBtns = document.querySelectorAll(".btn-pwa-install");
+      installBtns.forEach((btn) => (btn.style.display = "inline-flex"));
+    });
+
+    window.installPWA = function () {
+      if (window.pwaDeferredPrompt) {
+        window.pwaDeferredPrompt.prompt();
+        window.pwaDeferredPrompt.userChoice.then((choiceResult) => {
+          if (choiceResult.outcome === "accepted") {
+            const installBtns = document.querySelectorAll(".btn-pwa-install");
+            installBtns.forEach((btn) => (btn.style.display = "none"));
           }
+          window.pwaDeferredPrompt = null;
         });
+      } else {
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+        if (isIOS) {
+          alert("📲 Pour installer sur iPhone / iPad :\n\n1. Appuyez sur l'icône Partager (carré avec flèche en haut ⬆️ en bas de Safari)\n2. Faites défiler et appuyez sur 'Sur l'écran d'accueil' ➕");
+        } else {
+          alert("📲 Pour installer l'application :\n\nOuvrez le menu de votre navigateur (les 3 points en haut à droite) et appuyez sur 'Installer l'application' ou 'Ajouter à l'écran d'accueil'.");
+        }
       }
-    } catch (e) {}
+    };
 
     // Bootstrap immédiat des fonctions globales d'interface pour éviter tout 'is not a function'
     window.openOverlay = function (id) {
@@ -115,6 +148,13 @@
       </div>
       <div style="text-align: center; font-size: 13px; color: var(--muted)">
         Plateforme collaborative de gestion & suivi scolaire
+      </div>
+
+      <div style="display: flex; justify-content: center; margin: 2px 0 4px;">
+        <button type="button" class="btn-pwa-install" onclick="window.installPWA()"
+          style="display: inline-flex; align-items: center; gap: 6px; background: rgba(2, 132, 199, 0.1); color: var(--primary); border: 1.5px solid var(--primary); border-radius: 99px; padding: 6px 14px; font-size: 11.5px; font-weight: 800; cursor: pointer;">
+          📲 Installer l'application sur ce téléphone
+        </button>
       </div>
 
       <div class="auth-tabs">
@@ -620,6 +660,7 @@
       </div>
 
       <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap">
+        <button class="btn-action btn-pwa-install" onclick="window.installPWA()" style="padding: 6px 12px; font-size: 12px; font-weight: 800; background: linear-gradient(135deg, #0284c7, #4f46e5); color: #ffffff; border: none; display: inline-flex; align-items: center; gap: 4px; border-radius: 10px;" title="Installer l'application sur votre appareil">📲 Installer l'App</button>
         <button class="btn-action student-action-btn" id="btnTopShareSchedule" onclick="window.openShareScheduleModal()" style="padding: 6px 12px; font-size: 12px; font-weight: 800; border-color: var(--primary); color: var(--primary); display: flex; align-items: center; gap: 4px;" title="Copier ou partager un emploi du temps avec un code">📋 Copier Planning</button>
         <button class="btn-action" id="btnToggleNotifications" style="padding: 6px 12px; font-size: 12px; font-weight: 800;" onclick="window.requestNotificationPermission ? window.requestNotificationPermission() : null" title="Activer / Gérer les rappels de cours et d'étude">🔔 Activer Rappels</button>
         <button class="btn-action" id="btnToggleDark" onclick="window.toggleDarkMode()">🌙 Mode Sombre</button>
