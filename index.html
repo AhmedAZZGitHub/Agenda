@@ -101,7 +101,7 @@
       if (viewImport) viewImport.style.display = tab === "import" ? "flex" : "none";
     };
   </script>
-  <link rel="stylesheet" href="css/styles.css?v=16.4" />
+  <link rel="stylesheet" href="css/styles.css?v=16.5" />
 </head>
 
 <body>
@@ -620,6 +620,7 @@
       </div>
 
       <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap">
+        <button class="btn-action student-action-btn" id="btnTopShareSchedule" onclick="window.openShareScheduleModal()" style="padding: 6px 12px; font-size: 12px; font-weight: 800; border-color: var(--primary); color: var(--primary); display: flex; align-items: center; gap: 4px;" title="Copier ou partager un emploi du temps avec un code">📋 Copier Planning</button>
         <button class="btn-action" id="btnToggleNotifications" style="padding: 6px 12px; font-size: 12px; font-weight: 800;" onclick="window.requestNotificationPermission ? window.requestNotificationPermission() : null" title="Activer / Gérer les rappels de cours et d'étude">🔔 Activer Rappels</button>
         <button class="btn-action" id="btnToggleDark" onclick="window.toggleDarkMode()">🌙 Mode Sombre</button>
         <button class="btn-action" id="authActionBtn" style="color: var(--primary);" onclick="window.showAuthModal()">
@@ -1499,7 +1500,7 @@
   </div>
 
   <!-- SCRIPT APPLICATION -->
-  <script type="module" src="js/app.js?v=16.4"></script>
+  <script type="module" src="js/app.js?v=16.5"></script>
 </body>
 
 </html>
