@@ -13,6 +13,7 @@ import {
   ref,
   set,
   get,
+  update,
   onValue,
   off,
 } from "./firebase-config.js?v=16.5";
@@ -20,6 +21,18 @@ import { state, getStudentPath, showLoading, hideLoading } from "./state.js?v=16
 import { loadAdminKPIs, listenToAnnouncements } from "./admin.js?v=16.5";
 import { render } from "./calendar.js?v=16.5";
 import { switchTrimester, selectBacSubject } from "./grades.js?v=16.5";
+
+export const MASTER_ADMIN_EMAILS = [
+  "ahmedazzouzi72@gmail.com",
+  "admin@agenda.tn",
+  "admin@planningbac.tn"
+];
+
+export function isMasterAdmin(email, uid = "") {
+  if (!email && !uid) return false;
+  const cleanEmail = (email || "").toLowerCase().trim();
+  return MASTER_ADMIN_EMAILS.includes(cleanEmail) || uid === "admin_preconfig";
+}
 
 export function showAuthModal() {
   const el = document.getElementById("authOverlay");
@@ -116,15 +129,15 @@ export async function handleRegister(e) {
 
     await updateProfile(user, { displayName: name });
 
-    const isMasterAdmin = email.toLowerCase() === "admin@agenda.tn" || email.toLowerCase() === "admin@planningbac.tn" || uid === "admin_preconfig";
+    const isMaster = isMasterAdmin(email, uid);
     const parentCode = state.selectedRegRole === "student" ? "BAC-" + Math.random().toString(36).substring(2, 6).toUpperCase() : null;
 
     const profileData = {
       uid: uid,
       email: email,
       displayName: name,
-      role: state.selectedRegRole,
-      status: isMasterAdmin ? "approved" : "pending",
+      role: isMaster ? "admin" : state.selectedRegRole,
+      status: isMaster ? "approved" : "pending",
       section: state.selectedRegRole === "student" ? section : null,
       parentLinkCode: parentCode || null,
       linkedStudents: state.selectedRegRole === "parent" ? [] : null,
@@ -137,7 +150,7 @@ export async function handleRegister(e) {
     }
     hideLoading();
 
-    if (!isMasterAdmin) {
+    if (!isMaster) {
       await signOut(auth);
       if (successDiv) {
         successDiv.innerHTML = `⏳ <b>Demande d'inscription envoyée !</b><br>Vos informations ont bien été enregistrées. Votre compte est <b>en attente d'approbation par l'administrateur</b>. Vous pourrez vous connecter dès que l'admin aura validé votre accès.`;
@@ -185,15 +198,15 @@ export async function loadUserProfile(uid) {
     }
 
     const email = state.currentUser?.email || "";
-    const isMasterAdmin = email.toLowerCase() === "admin@agenda.tn" || email.toLowerCase() === "admin@planningbac.tn" || uid === "admin_preconfig";
+    const isMaster = isMasterAdmin(email, uid);
 
     if (!userSnap || !userSnap.exists()) {
       state.currentUserProfile = {
         uid: uid,
         email: email,
-        displayName: state.currentUser?.displayName || email.split("@")[0] || "Nouvel Utilisateur",
-        role: isMasterAdmin ? "admin" : "student",
-        status: isMasterAdmin ? "approved" : "pending",
+        displayName: state.currentUser?.displayName || email.split("@")[0] || (isMaster ? "Administrateur" : "Nouvel Utilisateur"),
+        role: isMaster ? "admin" : "student",
+        status: isMaster ? "approved" : "pending",
         parentLinkCode: "BAC-" + Math.random().toString(36).substring(2, 6).toUpperCase(),
         createdAt: Date.now(),
       };
@@ -203,11 +216,22 @@ export async function loadUserProfile(uid) {
       } catch (e) {}
     } else {
       state.currentUserProfile = userSnap.val() || {};
-      if (!state.currentUserProfile.status) {
-        state.currentUserProfile.status = isMasterAdmin ? "approved" : "pending";
-      }
-      if (!state.currentUserProfile.role) {
-        state.currentUserProfile.role = isMasterAdmin ? "admin" : "student";
+      if (isMaster) {
+        state.currentUserProfile.role = "admin";
+        state.currentUserProfile.status = "approved";
+        try {
+          await update(ref(database, `users/${uid}`), {
+            role: "admin",
+            status: "approved"
+          });
+        } catch (e) {}
+      } else {
+        if (!state.currentUserProfile.status) {
+          state.currentUserProfile.status = "pending";
+        }
+        if (!state.currentUserProfile.role) {
+          state.currentUserProfile.role = "student";
+        }
       }
     }
 
