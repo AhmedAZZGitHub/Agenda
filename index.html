@@ -32,7 +32,7 @@
     // Initialisation Service Worker pour PWA avec mise à jour immédiate
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", () => {
-        navigator.serviceWorker.register("./sw.js?v=19.7").then((reg) => {
+        navigator.serviceWorker.register("./sw.js?v=19.8").then((reg) => {
           reg.update();
           console.log("PWA Service Worker actif:", reg.scope);
         }).catch((err) => {
@@ -44,7 +44,7 @@
     if ("caches" in window) {
       caches.keys().then((names) => {
         names.forEach((name) => {
-          if (name !== "agenda-bac-v19.7") {
+          if (name !== "agenda-bac-v19.8") {
             caches.delete(name);
           }
         });
@@ -174,7 +174,7 @@
       if (viewImport) viewImport.style.display = tab === "import" ? "flex" : "none";
     };
   </script>
-  <link rel="stylesheet" href="css/styles.css?v=19.7" />
+  <link rel="stylesheet" href="css/styles.css?v=19.8" />
 </head>
 
 <body>
@@ -1795,7 +1795,7 @@
             Modèle Gemini Actif :
           </label>
           <select id="aiModelSelect" class="input" style="width: 100%" onchange="window.onAiModelChange(this.value)">
-            <option value="gemini-2.5-flash">⚡ gemini-2.5-flash (Recommandé - Ultra rapide & Gratuit)</option>
+            <option value="gemini-3.6-flash">⚡ gemini-3.6-flash (Recommandé - Ultra rapide & Gratuit)</option>
             <option value="gemini-2.5-pro">🧠 gemini-2.5-pro (Raisonnement avancé)</option>
             <option value="gemini-2.0-flash">🚀 gemini-2.0-flash</option>
             <option value="gemini-1.5-flash">📌 gemini-1.5-flash</option>
@@ -1806,7 +1806,7 @@
 
         <div id="customModelBox" style="display: none; flex-direction: column; gap: 4px;">
           <label style="font-size: 11px; font-weight: 700; color: var(--muted);">Nom du modèle personnalisé :</label>
-          <input type="text" id="aiCustomModelInput" class="input" placeholder="ex: gemini-2.5-flash" />
+          <input type="text" id="aiCustomModelInput" class="input" placeholder="ex: gemini-3.6-flash" />
         </div>
 
         <div id="aiTestFeedback" style="display: none; padding: 10px 12px; border-radius: 10px; font-size: 12px; font-weight: 700;"></div>
@@ -1824,7 +1824,7 @@
   </div>
 
   <!-- SCRIPT APPLICATION -->
-  <script type="module" src="js/app.js?v=19.7"></script>
+  <script type="module" src="js/app.js?v=19.8"></script>
 </body>
 
 </html>

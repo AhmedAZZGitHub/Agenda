@@ -15,10 +15,10 @@ import "./admin.js";
 import "./tutor-ai.js";
 import { initNotificationsSystem } from "./notifications.js";
 
-// Initialisation par défaut du modèle officiel Google Gemini
+// Initialisation par défaut du modèle officiel Google Gemini 3.6 Flash
 try {
   const curM = localStorage.getItem("gemini_model_name");
-  if (!curM || curM.includes("2.5-flash")) {
+  if (!curM || curM === "gemini-2.5-flash" || curM.includes("2.5-flash")) {
     localStorage.setItem("gemini_model_name", "gemini-3.6-flash");
   }
 } catch (e) {}

@@ -1,5 +1,5 @@
 // js/jarvis-engine.js
-// 🤖 Moteur Vocal 100% Direct Google Gemini (gemini-2.5-flash) avec Function Calling & Firebase
+// 🤖 Moteur Vocal 100% Direct Google Gemini (gemini-3.6-flash) avec Function Calling & Firebase
 // Aucune règle locale ou regex : toute la compréhension est déléguée directement à l'Intelligence Artificielle
 
 import { database, auth, ref, set, get, remove, update } from "./firebase-config.js";
@@ -836,8 +836,8 @@ export async function executeJarvisCommand(rawUserText) {
       "gemini-3.6-flash",
       "gemini-2.0-flash",
       "gemini-1.5-flash",
-      "gemini-2.5-flash",
-    ].filter((m, idx, arr) => m && arr.indexOf(m) === idx);
+      "gemini-2.5-pro",
+    ].filter((m, idx, arr) => m && m !== "gemini-2.5-flash" && arr.indexOf(m) === idx);
 
     let response = null;
     let successfulModel = "";
