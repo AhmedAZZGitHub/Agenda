@@ -29,13 +29,24 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
-    // Initialisation Service Worker pour PWA
+    // Initialisation Service Worker pour PWA avec mise à jour immédiate
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", () => {
-        navigator.serviceWorker.register("./sw.js").then((reg) => {
+        navigator.serviceWorker.register("./sw.js?v=18.9").then((reg) => {
+          reg.update();
           console.log("PWA Service Worker actif:", reg.scope);
         }).catch((err) => {
           console.warn("Erreur Service Worker:", err);
+        });
+      });
+    }
+    // Nettoyage proactif des anciens caches pour éviter tout blocage de version
+    if ("caches" in window) {
+      caches.keys().then((names) => {
+        names.forEach((name) => {
+          if (name !== "agenda-bac-v18.9") {
+            caches.delete(name);
+          }
         });
       });
     }
@@ -163,7 +174,7 @@
       if (viewImport) viewImport.style.display = tab === "import" ? "flex" : "none";
     };
   </script>
-  <link rel="stylesheet" href="css/styles.css?v=18.8" />
+  <link rel="stylesheet" href="css/styles.css?v=18.9" />
 </head>
 
 <body>
@@ -1745,7 +1756,7 @@
   </div>
 
   <!-- SCRIPT APPLICATION -->
-  <script type="module" src="js/app.js?v=18.8"></script>
+  <script type="module" src="js/app.js?v=18.9"></script>
 </body>
 
 </html>
