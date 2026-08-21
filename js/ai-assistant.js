@@ -391,7 +391,7 @@ export function toggleAiSpeechRecording() {
   }
 }
 
-export function stopAiSpeechRecording() {
+export function stopAiSpeechRecording(autoExecute = false) {
   if (aiVoiceTranscriber) {
     aiVoiceTranscriber.stop();
   }
@@ -399,8 +399,13 @@ export function stopAiSpeechRecording() {
   updateMicUiState(false);
   const st = document.getElementById("aiMicStatusText");
   if (st) {
-    st.innerHTML = "✅ <b>Dictée terminée !</b> Cliquez sur <b>'✨ Analyser & Ajouter'</b> pour insérer la séance et le travail à faire.";
+    st.innerHTML = autoExecute ? "✅ <b>Dictée terminée !</b> Exécution de votre commande..." : "✅ <b>Dictée terminée !</b> Cliquez sur <b>'✨ Exécuter'</b>.";
     st.style.color = "#059669";
+  }
+  if (autoExecute) {
+    setTimeout(() => {
+      executeAiCommand();
+    }, 200);
   }
 }
 

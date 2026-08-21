@@ -163,7 +163,7 @@
       if (viewImport) viewImport.style.display = tab === "import" ? "flex" : "none";
     };
   </script>
-  <link rel="stylesheet" href="css/styles.css?v=18.0" />
+  <link rel="stylesheet" href="css/styles.css?v=18.1" />
 </head>
 
 <body>
@@ -1246,12 +1246,12 @@
     </div>
   </div>
 
-  <!-- MODALE COPILOTE VOCAL & IA « JARVIS SUPRÊME » -->
+  <!-- MODALE ASSISTANT VOCAL & IA ÉLÈVES / PARENTS -->
   <div class="modal" id="aiAssistantModal">
-    <div class="modal-box" style="max-width: 540px; gap: 14px; border: 1.5px solid rgba(56, 189, 248, 0.4); box-shadow: 0 16px 36px rgba(15, 23, 42, 0.45);">
+    <div class="modal-box" style="max-width: 530px; gap: 14px;">
       <div style="display: flex; justify-content: space-between; align-items: center;">
-        <span style="font-weight: 800; font-size: 16px; display: flex; align-items: center; gap: 8px; color: #0284c7;">
-          🤖 Copilote Vocal « JARVIS Suprême »
+        <span style="font-weight: 800; font-size: 16px; display: flex; align-items: center; gap: 8px; color: #0284c7;" id="aiModalMainTitle">
+          🎙️ Assistant Vocal & IA
         </span>
         <div style="display: flex; align-items: center; gap: 8px;">
           <button type="button" id="btnJarvisAudioToggleModal" class="btn-action" style="padding: 4px 10px; font-size: 11.5px; font-weight: 700;" onclick="window.toggleJarvisSpeechMute()">
@@ -1274,16 +1274,16 @@
         </div>
       </div>
 
-      <!-- BOUTON MICROPHONE ET ANIMATION JARVIS -->
+      <!-- BOUTON MICROPHONE ET ANIMATION -->
       <div style="text-align: center; padding: 6px 0 10px 0;">
         <button type="button" class="ai-mic-btn" id="aiModalMicBtn" onclick="window.toggleAiSpeechRecording()" title="Cliquez pour parler ou arrêter">
           🎙️
         </button>
         <div id="aiMicStatusText" style="font-size: 12px; font-weight: 700; color: var(--muted); margin-top: 10px; line-height: 1.4;">
-          Cliquez sur le micro et dictez votre instruction en langage naturel (Tounsi, Français ou Arabe).
+          Cliquez sur le micro et parlez librement (Tounsi, Français ou Arabe).
         </div>
         <div style="display: flex; justify-content: center; gap: 8px; margin-top: 8px;">
-          <button type="button" id="btnAiFinishRecording" class="btn-action" style="display: none; background: #ef4444; color: white; font-weight: 800; padding: 8px 16px; border-radius: 10px; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.35);" onclick="window.stopAiSpeechRecording()">
+          <button type="button" id="btnAiFinishRecording" class="btn-action" style="display: none; background: #ef4444; color: white; font-weight: 800; padding: 8px 16px; border-radius: 10px; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.35);" onclick="window.stopAiSpeechRecording(true)">
             ⏹️ J'ai terminé d'enregistrer
           </button>
           <button type="button" id="btnAiStartRecording" class="btn-action" style="display: inline-flex; background: #0284c7; color: white; font-weight: 800; padding: 8px 16px; border-radius: 10px;" onclick="window.startAiSpeechRecording()">
@@ -1295,21 +1295,21 @@
       <!-- TRANSCRIPTION ET TEXTE SAISI -->
       <div>
         <label style="font-size: 11px; font-weight: 700; color: var(--muted); display: block; margin-bottom: 4px;">
-          📝 Instruction ou question pour JARVIS :
+          📝 Commande vocale ou question :
         </label>
         <textarea id="aiTranscriptInput" class="input" style="width: 100%; height: 75px; resize: none; font-size: 13px;"
-          placeholder="Ex: Qu'est-ce que j'ai aujourd'hui ? / Zidli seance Math ghodwa 14h particulier w khedma serie 3 / Lance un minuteur de 45 minutes / Explique-moi l'analyse en Maths..."></textarea>
+          placeholder="Ex: Ajoute Maths demain de 8h à 10h / Qu'est-ce que j'ai aujourd'hui ? / Lance un minuteur de 45 min / Séance SVT samedi 9h avec TP génétique..."></textarea>
       </div>
 
-      <!-- EXEMPLES RAPIDES DES 4 PILIERS -->
+      <!-- EXEMPLES RAPIDES -->
       <div>
-        <div style="font-size: 11px; font-weight: 700; color: var(--muted); margin-bottom: 6px;">💡 Exemples de commandes & compétences :</div>
+        <div style="font-size: 11px; font-weight: 700; color: var(--muted); margin-bottom: 6px;">💡 Exemples rapides :</div>
         <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+          <span class="example-chip" onclick="window.useAiExample('Ajoute une séance de Maths demain de 8h à 10h')">📐 Maths demain 8h-10h</span>
           <span class="example-chip" onclick="window.useAiExample('Qu\'est-ce que j\'ai comme cours et devoirs aujourd\'hui ?')">📅 Programme du jour</span>
-          <span class="example-chip" onclick="window.useAiExample('Ajoute une séance de Maths demain à 14h particulier avec série 3 analyse à faire')">➕ Séance & Devoirs</span>
-          <span class="example-chip" onclick="window.useAiExample('Lance un minuteur de révision de 45 minutes')">⏱️ Minuteur 45 min</span>
-          <span class="example-chip" onclick="window.useAiExample('Programme un devoir de contrôle de Physique samedi 10h sur la dipôle RC')">📝 Examen Physique</span>
-          <span class="example-chip" onclick="window.useAiExample('Explique-moi la différence entre أطروحة مدعومة et أطروحة مدحوضة selon la méthodologie du Bac')">🧠 Question Cours Bac</span>
+          <span class="example-chip" onclick="window.useAiExample('Séance SVT samedi de 9h à 11h au lycée travail à faire TP génétique')">🧬 SVT Samedi + TP</span>
+          <span class="example-chip" onclick="window.useAiExample('Lance un minuteur de 45 minutes')">⏱️ Minuteur 45 min</span>
+          <span class="example-chip" onclick="window.useAiExample('Programme un devoir de contrôle de Physique samedi 10h')">📝 Devoir Physique</span>
         </div>
       </div>
 
@@ -1317,7 +1317,7 @@
 
       <div style="display: flex; gap: 8px;">
         <button type="button" class="btn-add" style="flex: 1; justify-content: center; padding: 12px; font-size: 13.5px; background: linear-gradient(135deg, #0284c7, #4f46e5);" onclick="window.executeAiCommand()">
-          🚀 Exécuter la Commande JARVIS
+          ✨ Exécuter l'instruction
         </button>
       </div>
     </div>
@@ -1585,7 +1585,7 @@
   </div>
 
   <!-- SCRIPT APPLICATION -->
-  <script type="module" src="js/app.js?v=18.0"></script>
+  <script type="module" src="js/app.js?v=18.1"></script>
 </body>
 
 </html>

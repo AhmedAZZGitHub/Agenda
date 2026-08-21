@@ -1,5 +1,5 @@
 // js/jarvis-engine.js
-// 🤖 Moteur IA « JARVIS Suprême » - Copilote Vocal & Textuel d'Élite
+// 🤖 Moteur IA - Assistant Vocal Intelligent (Élèves) & Copilote JARVIS Suprême (Administrateur)
 // Function Calling Google Gemini (gemini-2.5-flash / Pro), Exécution Firebase en Direct & Synthèse Vocale
 
 import { database, auth, ref, set, get, remove, update, sendPasswordResetEmail } from "./firebase-config.js?v=18.0";
@@ -26,11 +26,11 @@ export function toggleJarvisSpeechMute() {
   if (isJarvisAudioMuted && window.speechSynthesis) {
     window.speechSynthesis.cancel();
   }
-  const btn = document.getElementById("btnJarvisAudioToggle");
-  if (btn) {
+  const btns = document.querySelectorAll("#btnJarvisAudioToggle, #btnJarvisAudioToggleModal");
+  btns.forEach((btn) => {
     btn.innerHTML = isJarvisAudioMuted ? "🔇 Voix Coupée" : "🔊 Voix Active";
     btn.classList.toggle("muted", isJarvisAudioMuted);
-  }
+  });
   return !isJarvisAudioMuted;
 }
 
@@ -55,59 +55,70 @@ export function speakJarvisResponse(text) {
     utterance.pitch = 1.0;
 
     const voices = window.speechSynthesis.getVoices();
-    const frVoice = voices.find((v) => v.lang.startsWith("fr") && (v.name.includes("Google") || v.name.includes("Natural") || v.name.includes("Thomas") || v.name.includes("Henri") || v.name.includes("Julie")));
+    const frVoice = voices.find(
+      (v) =>
+        v.lang.startsWith("fr") &&
+        (v.name.includes("Google") ||
+          v.name.includes("Natural") ||
+          v.name.includes("Thomas") ||
+          v.name.includes("Henri") ||
+          v.name.includes("Julie") ||
+          v.name.includes("Audrey") ||
+          v.name.includes("Aurelie"))
+    );
     if (frVoice) utterance.voice = frVoice;
 
     window.speechSynthesis.speak(utterance);
   } catch (err) {
-    console.warn("Synthèse vocale Jarvis non disponible:", err);
+    console.warn("Synthèse vocale non disponible:", err);
   }
 }
 
 // ============================================================
-// 1. DÉCLARATION COMPLÈTE DES OUTILS (GEMINI FUNCTION CALLING)
+// 1. DÉCLARATION DES OUTILS SÉPARÉS (ÉLÈVE vs ADMIN)
 // ============================================================
-export const JARVIS_TOOLS_DECLARATIONS = [
-  // --- PILIER 1 : EMPLOI DU TEMPS & GESTION QUOTIDIENNE ---
+
+// OUTILS ÉLÈVES & PARENTS (GRAND PUBLIC)
+export const STUDENT_TOOLS_DECLARATIONS = [
   {
     name: "ajouter_seance",
-    description: "Ajoute une nouvelle séance ou cours au planning de l'élève avec matière, horaire, lieu/modalité, répétition et travail à faire.",
+    description: "Ajoute une séance au planning. Extrait EXACTEMENT l'heure de début et de fin dictées (ex: 8h 10h -> 08:00 et 10:00). Si aucun travail n'est demandé, travail_a_faire doit être null.",
     parameters: {
       type: "OBJECT",
       properties: {
         matiere: {
           type: "STRING",
-          description: "Nom officiel de la matière (Mathématiques, Sciences Physiques, Sciences SVT, Informatique, Philosophie, Arabe, Français, Anglais, Économie & Gestion, Histoire-Géo, Sport, Option)",
+          description: "Matière (Mathématiques, Sciences Physiques, Sciences SVT, Informatique, Philosophie, Arabe, Français, Anglais, Économie & Gestion, Histoire-Géo, Sport, Option, Étude / Révision). Si non précisée, choisir 'Étude / Révision'.",
         },
         jour: {
           type: "STRING",
-          description: "Jour de la semaine ('Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche') ou index 0 à 6.",
+          description: "Jour de la séance ('Aujourd'hui', 'Demain', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche') ou index 0 à 6.",
         },
         heure_debut: {
           type: "STRING",
-          description: "Heure de début au format HH:MM (ex: '14:00', '09:30', '16:00').",
+          description: "Heure de début EXACTE au format HH:MM (ex: '08:00', '09:00', '10:00', '14:00', '16:00'). NE PAS METTRE 14:00 SI L'UTILISATEUR A DIT UNE AUTRE HEURE.",
         },
         heure_fin: {
           type: "STRING",
-          description: "Heure de fin au format HH:MM (ex: '16:00', '11:30', '18:00'). Si non spécifié, prévoir début + 2h.",
+          description: "Heure de fin EXACTE au format HH:MM (ex: '10:00', '12:00', '16:00', '18:00'). Si non précisée, calculer heure_debut + 2h.",
         },
         type_lieu: {
           type: "STRING",
           enum: ["À la maison", "En ligne", "Lycée", "Particulier"],
-          description: "Type ou modalité du cours.",
+          description: "Type de cours (par défaut 'À la maison' ou 'Particulier' si mentionné).",
         },
         frequence: {
           type: "STRING",
           enum: ["Chaque semaine", "Par quinzaine", "Ce jour seulement"],
-          description: "Fréquence de répétition de la séance.",
+          description: "Fréquence de répétition.",
         },
         date_specifique: {
           type: "STRING",
-          description: "Date exacte au format YYYY-MM-DD si la séance est ponctuelle ou pour une date précise.",
+          description: "Date exacte YYYY-MM-DD si séance ponctuelle.",
         },
         travail_a_faire: {
           type: "STRING",
-          description: "Exercices, série de devoirs, chapitre ou projet à préparer pour cette séance (ex: 'Série 3 analyse exercices 1 et 4').",
+          description: "UNIQUEMENT les exercices ou devoirs à faire (ex: 'Série 3 analyse', 'Exercices 1 et 4'). Doit être NULL si aucun travail n'est mentionné. NE JAMAIS METTRE LA COMMANDE DE L'UTILISATEUR DEDANS.",
         },
       },
       required: ["matiere", "jour", "heure_debut"],
@@ -115,38 +126,38 @@ export const JARVIS_TOOLS_DECLARATIONS = [
   },
   {
     name: "consulter_planning_jour",
-    description: "Consulte et analyse les séances et le travail à faire pour un jour donné (par exemple 'aujourd'hui', 'demain', 'samedi') et produit un récapitulatif oral et textuel complet.",
+    description: "Consulte et analyse le planning d'un jour donné (aujourd'hui, demain, samedi...) et résume les séances et exercices.",
     parameters: {
       type: "OBJECT",
       properties: {
         jour: {
           type: "STRING",
-          description: "Nom du jour recherché ('Aujourd'hui', 'Demain', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche') ou index 0-6.",
+          description: "Jour concerné ('Aujourd'hui', 'Demain', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche').",
         },
         date: {
           type: "STRING",
-          description: "Date précise au format YYYY-MM-DD si applicable.",
+          description: "Date YYYY-MM-DD si applicable.",
         },
       },
     },
   },
   {
     name: "modifier_devoir_seance",
-    description: "Met à jour ou ajoute le travail à faire / devoirs d'une séance spécifique ou coche les exercices comme terminés.",
+    description: "Met à jour ou coche les devoirs d'une séance spécifique.",
     parameters: {
       type: "OBJECT",
       properties: {
         seance_id: {
           type: "STRING",
-          description: "Identifiant de la séance ou nom de la matière.",
+          description: "Nom de la matière ou ID de la séance.",
         },
         nouveau_travail: {
           type: "STRING",
-          description: "Texte actualisé du travail à faire ou exercices à préparer.",
+          description: "Exercices ou devoirs à faire.",
         },
         est_fait: {
           type: "BOOLEAN",
-          description: "Indique si le travail à faire est complété/terminé.",
+          description: "true si terminé, false sinon.",
         },
       },
       required: ["seance_id"],
@@ -154,13 +165,13 @@ export const JARVIS_TOOLS_DECLARATIONS = [
   },
   {
     name: "programmer_examen",
-    description: "Planifie un examen, devoir de contrôle (DC), devoir de synthèse (DS) ou examen blanc.",
+    description: "Planifie un examen, devoir de contrôle (DC) ou synthèse (DS).",
     parameters: {
       type: "OBJECT",
       properties: {
         matiere: {
           type: "STRING",
-          description: "Matière de l'examen (Mathématiques, Physique, etc.).",
+          description: "Matière de l'examen.",
         },
         type_examen: {
           type: "STRING",
@@ -169,11 +180,11 @@ export const JARVIS_TOOLS_DECLARATIONS = [
         },
         date: {
           type: "STRING",
-          description: "Date de l'examen au format YYYY-MM-DD.",
+          description: "Date YYYY-MM-DD.",
         },
         programme: {
           type: "STRING",
-          description: "Chapitres, notions ou programme au menu de l'examen.",
+          description: "Programme ou chapitres au menu.",
         },
       },
       required: ["matiere", "date"],
@@ -181,22 +192,13 @@ export const JARVIS_TOOLS_DECLARATIONS = [
   },
   {
     name: "regler_minuteur",
-    description: "Règle et lance un minuteur de travail ou de révision (Pomodoro / session d'étude).",
+    description: "Règle et lance un minuteur de travail.",
     parameters: {
       type: "OBJECT",
       properties: {
-        heures: {
-          type: "NUMBER",
-          description: "Nombre d'heures du minuteur (0 à 12).",
-        },
-        minutes: {
-          type: "NUMBER",
-          description: "Nombre de minutes du minuteur (1 à 59).",
-        },
-        demarrer_immediatement: {
-          type: "BOOLEAN",
-          description: "Démarrer immédiatement le compte à rebours.",
-        },
+        heures: { type: "NUMBER", description: "Nombre d'heures (0 si moins d'une heure)." },
+        minutes: { type: "NUMBER", description: "Nombre de minutes." },
+        demarrer_immediatement: { type: "BOOLEAN", description: "Lancer le compte à rebours immédiatement." },
       },
       required: ["minutes"],
     },
@@ -207,110 +209,78 @@ export const JARVIS_TOOLS_DECLARATIONS = [
     parameters: {
       type: "OBJECT",
       properties: {
-        seance_id: {
-          type: "STRING",
-          description: "ID de la séance à supprimer ou nom de la matière.",
-        },
-        matiere: {
-          type: "STRING",
-          description: "Nom de la matière pour recherche contextuelle.",
-        },
-        jour: {
-          type: "STRING",
-          description: "Jour de la séance à supprimer.",
-        },
+        seance_id: { type: "STRING", description: "ID ou matière de la séance à supprimer." },
+        matiere: { type: "STRING", description: "Matière de la séance." },
       },
     },
   },
   {
     name: "vider_planning",
-    description: "Vide intégralement l'emploi du temps de l'élève actuel (efface toutes les séances).",
+    description: "Vide tout l'emploi du temps de l'élève actuel.",
     parameters: {
       type: "OBJECT",
       properties: {
-        confirmation: {
-          type: "BOOLEAN",
-          description: "Confirmation explicite de l'effacement total.",
-        },
+        confirmation: { type: "BOOLEAN", description: "Confirmation d'effacement." },
       },
     },
   },
+];
 
-  // --- PILIER 3 : SUPERVISION & CONTRÔLE GLOBAL ADMIN (RÉSERVÉ ROLE === 'admin') ---
+// OUTILS EXCLUSIVEMENT RÉSERVÉS À L'ADMINISTRATEUR (JARVIS SUPRÊME)
+export const ADMIN_TOOLS_DECLARATIONS = [
   {
     name: "approuver_demande_compte",
-    description: "Valide et active une demande de compte en attente dans la base de données. RÉSERVÉ STRICTEMENT AUX ADMINISTRATEURS.",
+    description: "Approuve et active une demande de compte en attente. STRICTEMENT RÉSERVÉ ADMIN.",
     parameters: {
       type: "OBJECT",
       properties: {
-        email_ou_nom: {
-          type: "STRING",
-          description: "Adresse email ou nom de la personne dont la demande doit être validée.",
-        },
+        email_ou_nom: { type: "STRING", description: "Email ou nom de l'utilisateur à approuver." },
       },
       required: ["email_ou_nom"],
     },
   },
   {
     name: "refuser_ou_supprimer_compte",
-    description: "Refuse une demande en attente ou supprime définitivement un compte utilisateur et ses données. RÉSERVÉ STRICTEMENT AUX ADMINISTRATEURS.",
+    description: "Supprime un compte utilisateur et ses données. STRICTEMENT RÉSERVÉ ADMIN.",
     parameters: {
       type: "OBJECT",
       properties: {
-        user_uid_ou_email: {
-          type: "STRING",
-          description: "UID ou adresse email du compte à supprimer.",
-        },
+        user_uid_ou_email: { type: "STRING", description: "UID ou email du compte." },
       },
       required: ["user_uid_ou_email"],
     },
   },
   {
     name: "activer_option_ia_compte",
-    description: "Active ou désactive l'accès aux fonctionnalités d'Intelligence Artificielle pour un compte élève donné. RÉSERVÉ STRICTEMENT AUX ADMINISTRATEURS.",
+    description: "Active ou désactive l'accès IA pour un élève. STRICTEMENT RÉSERVÉ ADMIN.",
     parameters: {
       type: "OBJECT",
       properties: {
-        user_uid_ou_email: {
-          type: "STRING",
-          description: "UID ou adresse email de l'élève.",
-        },
-        statut: {
-          type: "BOOLEAN",
-          description: "true pour activer l'accès IA, false pour le restreindre.",
-        },
+        user_uid_ou_email: { type: "STRING", description: "UID ou email de l'élève." },
+        statut: { type: "BOOLEAN", description: "true pour activer, false pour désactiver." },
       },
       required: ["user_uid_ou_email", "statut"],
     },
   },
   {
     name: "publier_annonce_globale",
-    description: "Diffuse une annonce générale visible par tous les utilisateurs connectés sur leur tableau de bord. RÉSERVÉ STRICTEMENT AUX ADMINISTRATEURS.",
+    description: "Diffuse une annonce générale sur tous les comptes. STRICTEMENT RÉSERVÉ ADMIN.",
     parameters: {
       type: "OBJECT",
       properties: {
-        titre: {
-          type: "STRING",
-          description: "Titre percutant de l'annonce.",
-        },
-        contenu: {
-          type: "STRING",
-          description: "Corps du message officiel.",
-        },
+        titre: { type: "STRING", description: "Titre de l'annonce." },
+        contenu: { type: "STRING", description: "Message de l'annonce." },
       },
       required: ["titre", "contenu"],
     },
   },
   {
     name: "inspecter_planning_eleve",
-    description: "Bascule la vue superviseur sur l'emploi du temps d'un élève spécifique pour l'analyser. RÉSERVÉ STRICTEMENT AUX ADMINISTRATEURS.",
+    description: "Supervise en direct le planning d'un élève. STRICTEMENT RÉSERVÉ ADMIN.",
     parameters: {
       type: "OBJECT",
       properties: {
-        student_uid_ou_nom: {
-          type: "STRING",
-          description: "UID ou nom de l'élève à superviser.",
-        },
+        student_uid_ou_nom: { type: "STRING", description: "UID ou nom de l'élève." },
       },
       required: ["student_uid_ou_nom"],
     },
@@ -318,7 +288,116 @@ export const JARVIS_TOOLS_DECLARATIONS = [
 ];
 
 // ============================================================
-// 2. CONTEXTE LIVE DYNAMIQUE INJECTÉ DANS GEMINI
+// 2. CONVERSION ET EXTRACTION ROBUSTE DES HORAIRES
+// ============================================================
+export function parseTimeToMinutes(tStr, defaultMin = 8 * 60) {
+  if (tStr === undefined || tStr === null || tStr === "") return defaultMin;
+  if (typeof tStr === "number") {
+    if (tStr >= 0 && tStr <= 24) return tStr * 60;
+    return tStr;
+  }
+  const str = String(tStr).trim().toLowerCase();
+
+  // "08:30", "8:30", "08h30", "8h30", "8h", "08h", "8"
+  const match =
+    str.match(/^(\d{1,2})(?:[h:](\d{2}))?$/i) ||
+    str.match(/(\d{1,2})\s*(?:h|:|\s*heures?)\s*(\d{2})?/i);
+
+  if (match) {
+    let h = parseInt(match[1], 10);
+    let m = match[2] ? parseInt(match[2], 10) : 0;
+    // Si l'utilisateur dit 1h à 6h l'après-midi
+    if (h >= 1 && h <= 6 && (str.includes("soir") || str.includes("apres") || str.includes("3achiya") || str.includes("pm"))) {
+      h += 12;
+    }
+    return h * 60 + m;
+  }
+
+  const num = parseInt(str, 10);
+  if (!isNaN(num) && num >= 0 && num <= 24) {
+    return num * 60;
+  }
+
+  return defaultMin;
+}
+
+// Extraction locale infaillible des plages horaires (ex: "8h 10h", "de 8h à 10h", "8h-10h", "8h", "14h")
+export function extractTimeRangeFromText(rawText) {
+  const text = (rawText || "").toLowerCase();
+
+  // Plage explicite : "8h 10h", "8h à 10h", "de 8h à 10h", "men 8h l 10h", "8h-10h", "8:00 10:00"
+  const rangeRegex = /(?:de|men|من)?\s*(\d{1,2})(?:h|:|\s*heures?)(\d{2})?\s*(?:a|à|hatta|ila|l|\-|et|w|حتى|إلى|\s)\s*(\d{1,2})(?:h|:|\s*heures?)(\d{2})?/i;
+  const rangeMatch = text.match(rangeRegex);
+
+  if (rangeMatch && rangeMatch[1] && rangeMatch[3]) {
+    let sH = parseInt(rangeMatch[1], 10);
+    let sM = rangeMatch[2] ? parseInt(rangeMatch[2], 10) : 0;
+    let eH = parseInt(rangeMatch[3], 10);
+    let eM = rangeMatch[4] ? parseInt(rangeMatch[4], 10) : 0;
+
+    // Ajustement après-midi si spécifié
+    const isPm = /3achiya|après-midi|apres-midi|soir|pm/i.test(text);
+    if (isPm) {
+      if (sH < 12) sH += 12;
+      if (eH < 12) eH += 12;
+    }
+    if (eH < sH && eH <= 12) eH += 12;
+
+    return {
+      startMin: sH * 60 + sM,
+      endMin: eH * 60 + eM,
+      startStr: `${sH < 10 ? "0" + sH : sH}:${sM < 10 ? "0" + sM : sM}`,
+      endStr: `${eH < 10 ? "0" + eH : eH}:${eM < 10 ? "0" + eM : eM}`,
+      found: true,
+    };
+  }
+
+  // Heure unique : "8h", "m3a 8h", "à 10h", "14h"
+  const singleRegex = /(?:m3a|a|à|fi|ساعة|مع)?\s*(\d{1,2})(?:h|:|\s*heures?)(\d{2})?/i;
+  const singleMatch = text.match(singleRegex);
+
+  if (singleMatch && singleMatch[1]) {
+    let sH = parseInt(singleMatch[1], 10);
+    let sM = singleMatch[2] ? parseInt(singleMatch[2], 10) : 0;
+
+    const isPm = /3achiya|après-midi|apres-midi|soir|pm/i.test(text);
+    if (isPm && sH < 12) sH += 12;
+
+    const eH = Math.min(24, sH + 2);
+    return {
+      startMin: sH * 60 + sM,
+      endMin: eH * 60 + sM,
+      startStr: `${sH < 10 ? "0" + sH : sH}:${sM < 10 ? "0" + sM : sM}`,
+      endStr: `${eH < 10 ? "0" + eH : eH}:${sM < 10 ? "0" + sM : sM}`,
+      found: true,
+    };
+  }
+
+  // Heure par défaut le matin (8h00 - 10h00)
+  return {
+    startMin: 8 * 60,
+    endMin: 10 * 60,
+    startStr: "08:00",
+    endStr: "10:00",
+    found: false,
+  };
+}
+
+// Extraction propre et isolée du travail à faire (todo)
+export function extractCleanTodo(rawText) {
+  if (!rawText) return null;
+  const match = rawText.match(
+    /(?:travail(?:\s+à|\s+a)?\s+faire|exercices?|exos?|s[eé]rie|khedma|w\s+el\s+khedma|wal\s+khedma|w\s+khedma|الخدمة|والخدمة|تمارين|واجب|r[eé]vision|chapitre|tp|td)\s*[:=\s\-]+([^.]+)/i
+  );
+  if (match && match[1]) {
+    const todo = cleanDuplicateWords(match[1].trim());
+    if (todo && todo.length > 1) return todo;
+  }
+  return null;
+}
+
+// ============================================================
+// 3. CONTEXTE LIVE DYNAMIQUE INJECTÉ DANS GEMINI
 // ============================================================
 export function buildJarvisLiveContext() {
   const now = new Date();
@@ -334,7 +413,6 @@ export function buildJarvisLiveContext() {
   const userSection = profile.section || "Baccalauréat";
   const isAdmin = userRole === "admin";
 
-  // Récupération des séances d'aujourd'hui
   const dateKey = getSessionDateKey(dayIdx);
   const todaySessions = (state.db || [])
     .filter((s) => s.day === dayIdx)
@@ -342,55 +420,38 @@ export function buildJarvisLiveContext() {
     .map((s) => {
       const todoKey = `${s.id}_${dateKey}`;
       const todoObj = state.sessionDateTodos && state.sessionDateTodos[todoKey];
-      const todoTxt = todoObj && todoObj.todo ? ` (Travail: ${todoObj.todo} [${todoObj.todoDone ? "Fait" : "À faire"}])` : "";
+      const todoTxt = todoObj && todoObj.todo ? ` (Devoir: ${todoObj.todo})` : "";
       return `- ${s.sub} de ${formatM(s.s)} à ${formatM(s.e)} [${s.type || "Lycée"}]${todoTxt}`;
     });
 
-  const todaySummary = todaySessions.length > 0
-    ? `Séances prévues aujourd'hui (${currentDayName} ${todayIso}) :\n${todaySessions.join("\n")}`
-    : `Aucune séance planifiée pour aujourd'hui (${currentDayName} ${todayIso}).`;
+  const todaySummary =
+    todaySessions.length > 0
+      ? `Séances d'aujourd'hui (${currentDayName} ${todayIso}) :\n${todaySessions.join("\n")}`
+      : `Aucune séance planifiée aujourd'hui (${currentDayName} ${todayIso}).`;
 
-  // Examens à venir
-  const upcomingExams = (state.examsDb || [])
-    .filter((ex) => ex.date >= todayIso)
-    .slice(0, 3)
-    .map((ex) => `- ${ex.type || "Examen"} en ${ex.sub} prévu le ${ex.date} (${ex.desc || "Sans détail"})`);
-
-  const examsSummary = upcomingExams.length > 0
-    ? `Examens à venir :\n${upcomingExams.join("\n")}`
-    : "Aucun examen imminent enregistré.";
-
-  // Contexte Admin si applicable
   let adminContext = "";
   if (isAdmin && state.allUsersCache && state.allUsersCache.length > 0) {
     const pendingList = state.allUsersCache.filter((u) => u.status === "pending");
-    adminContext = `\n[CONTEXTE ADMIN ACTIVE]
-- Demandes en attente de validation (${pendingList.length}) : ${pendingList.map((u) => `${u.displayName} (${u.email}, ${u.section || "Bac"})`).join(", ") || "Aucune"}
-- Total comptes actifs : ${state.allUsersCache.length}`;
+    adminContext = `\n[CONSOLE ADMINISTRATEUR DÉBLOQUÉE]
+- Demandes en attente : ${pendingList.length} (${pendingList.map((u) => u.displayName || u.email).join(", ") || "Aucune"})
+- Total comptes : ${state.allUsersCache.length}`;
   }
 
-  return `Tu es "JARVIS Suprême", le Copilote IA Vocal & Textuel d'élite et tuteur personnel suprême du Baccalauréat tunisien (toutes sections : Math, Sciences, Info, Éco-Gestion, Technique, Lettres, Sport).
-Tu disposes des PLEINS POUVOIRS sur l'application grâce à ton Function Calling (Tools).
+  return `Tu es l'Assistant Vocal et Tuteur intelligent officiel du Baccalauréat tunisien.
+Date : ${currentDayName} ${todayIso}, ${currentTime}.
+Utilisateur : ${userName} (${userRole}) - Section : ${userSection}.
 
-INFORMATIONS TEMPS RÉEL :
-- Date & Heure actuelles : ${currentDayName} ${todayIso} à ${currentTime}.
-- Utilisateur connecté : ${userName} (Email: ${profile.email || "Non défini"}).
-- Rôle actif : "${userRole.toUpperCase()}" | Section : ${userSection}.
-- Privilèges Administrateur : ${isAdmin ? "OUI (Accès total débloqué)" : "NON (Utilisateur standard)"}.
+${todaySummary}${adminContext}
 
-${todaySummary}
-${examsSummary}${adminContext}
-
-RÈGLES D'OR DE COMPORTEMENT :
-1. MULTILINGUISME NATUREL TOTAL : Tu comprends parfaitement et réponds avec aisance en Français, en Arabe littéraire et en dialecte Tunisien (Derja en lettres arabes ou arabizi : 3=ع, 7=ح, 9=ق, 5=خ, 2=ء).
-2. AUCUNE SYNTAXE OU FORMULE RIGIDE : Tu comprends le langage naturel libre, spontané, les phrases abrégées ou orales. Tu déduis intelligemment les matières, jours, heures et intentions sans jamais contraindre l'utilisateur.
-3. CONTRÔLE D'ACCÈS ADMIN STRICT : Les outils d'administration (approuver_demande_compte, refuser_ou_supprimer_compte, activer_option_ia_compte, publier_annonce_globale, inspecter_planning_eleve) sont STRICTEMENT RÉSERVÉS AUX ADMINISTRATEURS. Si un élève ou parent tente de les exécuter, refuse poliment mais fermement.
-4. TUTEUR DE HAUT NIVEAU : Si l'utilisateur pose une question de cours, de méthodologie ou d'exercice (notamment la méthodologie officielle en Arabe, les algorithmes Python, la physique ou les maths), réponds avec une rigueur pédagogique exemplaire.
-5. VOCATION ORALE : Sois concis, dynamique, élégant et charismatique (style JARVIS).`;
+RÈGLES IMPORTANTES :
+1. HORAIRES EXACTS : Si l'utilisateur dit une heure (ex: "8h 10h", "de 8h à 10h", "9h", "16h"), extrais impérativement l'heure exacte (heure_debut = "08:00", heure_fin = "10:00"). NE METS JAMAIS 14:00 si une heure a été dictée.
+2. TRAVAIL À FAIRE (TODO) : Le champ "travail_a_faire" ne doit contenir QUE les devoirs ou exercices demandés (ex: "Série 3 analyse"). Si aucun exercice n'est mentionné, mets impérativement null. NE METS JAMAIS la phrase de commande dans ce champ.
+3. MATIÈRE : Si aucune matière n'est spécifiée (ex: "ajoute une séance demain 8h 10h"), choisis "Étude / Révision".
+4. COMPRÉHENSION : Comprends parfaitement le français, l'arabe classique et le tunisien (Derja/Arabizi). Réponds de façon concise, naturelle et fluide.`;
 }
 
 // ============================================================
-// 3. EXÉCUTION DES OUTILS (ROUTEUR LOCAL & FIREBASE DATABASE)
+// 4. EXÉCUTION DES OUTILS SUR FIREBASE
 // ============================================================
 export async function executeJarvisToolCall(toolName, toolArgs) {
   const profile = state.currentUserProfile || {};
@@ -403,7 +464,7 @@ export async function executeJarvisToolCall(toolName, toolArgs) {
       const { matiere, jour, heure_debut, heure_fin, type_lieu, frequence, date_specifique, travail_a_faire } = toolArgs;
 
       // Calcul du jour index (0 à 6)
-      let dayIdx = 0;
+      let dayIdx = (new Date().getDay() + 6) % 7;
       if (typeof jour === "number") dayIdx = Math.max(0, Math.min(6, jour));
       else if (typeof jour === "string") {
         const jLow = jour.toLowerCase();
@@ -413,33 +474,21 @@ export async function executeJarvisToolCall(toolName, toolArgs) {
         else if (jLow.includes("jeu") || jLow.includes("khmi")) dayIdx = 3;
         else if (jLow.includes("ven") || jLow.includes("jem") || jLow.includes("jom")) dayIdx = 4;
         else if (jLow.includes("sam") || jLow.includes("seb")) dayIdx = 5;
-        else if (jLow.includes("dim") || jLow.includes("a7ad") || jLow.includes("ahad")) dayIdx = 6;
-        else if (jLow.includes("demain") || jLow.includes("ghodwa")) dayIdx = (new Date().getDay() + 6 + 1) % 7;
-        else if (jLow.includes("aujourd") || jLow.includes("lyoum")) dayIdx = (new Date().getDay() + 6) % 7;
+        else if (jLow.includes("dim") || jLow.includes("a7ad")) dayIdx = 6;
+        else if (jLow.includes("demain") || jLow.includes("ghodwa")) dayIdx = (dayIdx + 1) % 7;
       }
 
-      // Conversion des horaires en minutes depuis minuit
-      function parseTimeToMinutes(tStr, defaultMin) {
-        if (!tStr) return defaultMin;
-        if (typeof tStr === "number") return tStr * 60;
-        const match = tStr.match(/(\d{1,2})[h:]?(\d{2})?/i);
-        if (match) {
-          const h = parseInt(match[1], 10);
-          const m = match[2] ? parseInt(match[2], 10) : 0;
-          return h * 60 + m;
-        }
-        return defaultMin;
-      }
-
-      const sMin = parseTimeToMinutes(heure_debut, 14 * 60);
+      const sMin = parseTimeToMinutes(heure_debut, 8 * 60);
       const eMin = parseTimeToMinutes(heure_fin, sMin + 120);
 
       const targetDateKey = date_specifique || getSessionDateKey(dayIdx);
       const newId = Date.now().toString() + Math.floor(Math.random() * 1000);
 
+      const finalSubject = matiere && matiere.trim() ? matiere.trim() : "Étude / Révision";
+
       const sessionObj = {
         id: newId,
-        sub: matiere || "Mathématiques",
+        sub: finalSubject,
         day: dayIdx,
         s: sMin,
         e: Math.max(sMin + 30, eMin),
@@ -453,11 +502,12 @@ export async function executeJarvisToolCall(toolName, toolArgs) {
       if (!state.db) state.db = [];
       state.db.push(sessionObj);
 
-      // Ajout du travail à faire si précisé
-      if (travail_a_faire && travail_a_faire.trim()) {
+      // Enregistrement du travail à faire SEULEMENT si non nul et non vide
+      const cleanTodo = travail_a_faire ? cleanDuplicateWords(travail_a_faire.trim()) : null;
+      if (cleanTodo && cleanTodo.length > 1 && !cleanTodo.includes("ajoute") && !cleanTodo.includes("séance")) {
         const todoKey = `${newId}_${targetDateKey}`;
         const todoObj = {
-          todo: cleanDuplicateWords(travail_a_faire.trim()),
+          todo: cleanTodo,
           todoDone: false,
           date: targetDateKey,
           sessionId: newId,
@@ -470,9 +520,10 @@ export async function executeJarvisToolCall(toolName, toolArgs) {
       if (render) render();
 
       const dayNames = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"];
+      const timeStr = `${formatM(sMin)} - ${formatM(eMin)}`;
       return {
         succes: true,
-        message: `Séance de ${matiere} ajoutée avec succès pour le ${dayNames[dayIdx]} de ${formatM(sMin)} à ${formatM(eMin)} (${type_lieu || "À la maison"})${travail_a_faire ? ` avec travail : "${travail_a_faire}"` : ""}.`,
+        message: `Séance de ${finalSubject} ajoutée pour ${dayNames[dayIdx]} de ${timeStr} (${sessionObj.type})${cleanTodo ? ` avec devoir : "${cleanTodo}"` : ""}.`,
         details: sessionObj,
       };
     }
@@ -522,7 +573,7 @@ export async function executeJarvisToolCall(toolName, toolArgs) {
       };
     }
 
-    // --- 3. MODIFIER DEVOIRS D'UNE SÉANCE ---
+    // --- 3. MODIFIER DEVOIR SÉANCE ---
     case "modifier_devoir_seance": {
       if (state.isReadOnly) throw new Error("Accès en lecture seule.");
       const { seance_id, nouveau_travail, est_fait } = toolArgs;
@@ -532,9 +583,7 @@ export async function executeJarvisToolCall(toolName, toolArgs) {
         targetSession = (state.db || []).find((s) => s.sub.toLowerCase().includes(seance_id.toLowerCase()));
       }
 
-      if (!targetSession) {
-        throw new Error(`Séance non trouvée pour "${seance_id}".`);
-      }
+      if (!targetSession) throw new Error(`Séance non trouvée pour "${seance_id}".`);
 
       const dateKey = getSessionDateKey(targetSession.day);
       const todoKey = `${targetSession.id}_${dateKey}`;
@@ -555,11 +604,11 @@ export async function executeJarvisToolCall(toolName, toolArgs) {
 
       return {
         succes: true,
-        message: `Travail à faire pour la séance de ${targetSession.sub} mis à jour : "${updatedTodo.todo}" (${updatedTodo.todoDone ? "✅ Fait" : "⏳ À faire"}).`,
+        message: `Devoir de ${targetSession.sub} mis à jour : "${updatedTodo.todo}" (${updatedTodo.todoDone ? "✅ Fait" : "⏳ À faire"}).`,
       };
     }
 
-    // --- 4. PROGRAMMER UN EXAMEN ---
+    // --- 4. PROGRAMMER EXAMEN ---
     case "programmer_examen": {
       if (state.isReadOnly) throw new Error("Accès en lecture seule.");
       const { matiere, type_examen, date, programme } = toolArgs;
@@ -570,7 +619,7 @@ export async function executeJarvisToolCall(toolName, toolArgs) {
         sub: matiere || "Mathématiques",
         type: type_examen || "Devoir de Contrôle (DC)",
         date: date || new Date().toISOString().split("T")[0],
-        desc: programme || "Planifié par JARVIS Suprême",
+        desc: programme || "Planifié via l'Assistant IA",
       };
 
       await set(ref(database, getStudentPath("examens/" + newId)), examObj);
@@ -581,12 +630,12 @@ export async function executeJarvisToolCall(toolName, toolArgs) {
 
       return {
         succes: true,
-        message: `${examObj.type} de ${examObj.sub} programmé avec succès pour le ${examObj.date}.`,
+        message: `${examObj.type} de ${examObj.sub} programmé pour le ${examObj.date}.`,
         examen: examObj,
       };
     }
 
-    // --- 5. RÉGLER ET LANCER LE MINUTEUR ---
+    // --- 5. RÉGLER MINUTEUR ---
     case "regler_minuteur": {
       const { heures, minutes, demarrer_immediatement } = toolArgs;
       const h = parseInt(heures, 10) || 0;
@@ -601,14 +650,14 @@ export async function executeJarvisToolCall(toolName, toolArgs) {
 
       return {
         succes: true,
-        message: `Minuteur de concentration réglé sur ${h > 0 ? h + "h " : ""}${m} minutes et lancé.`,
+        message: `Minuteur réglé sur ${h > 0 ? h + "h " : ""}${m} minutes et lancé.`,
       };
     }
 
-    // --- 6. SUPPRIMER UNE SÉANCE ---
+    // --- 6. SUPPRIMER SÉANCE ---
     case "supprimer_seance": {
       if (state.isReadOnly) throw new Error("Accès en lecture seule.");
-      const { seance_id, matiere, jour } = toolArgs;
+      const { seance_id, matiere } = toolArgs;
 
       let found = (state.db || []).find((s) => s.id === seance_id);
       if (!found && matiere) {
@@ -624,11 +673,11 @@ export async function executeJarvisToolCall(toolName, toolArgs) {
 
       return {
         succes: true,
-        message: `Séance de ${found.sub} (${formatM(found.s)} - ${formatM(found.e)}) supprimée du planning.`,
+        message: `Séance de ${found.sub} supprimée du planning.`,
       };
     }
 
-    // --- 7. VIDER LE PLANNING ---
+    // --- 7. VIDER PLANNING ---
     case "vider_planning": {
       if (state.isReadOnly) throw new Error("Accès en lecture seule.");
       await remove(ref(database, getStudentPath("seances")));
@@ -640,17 +689,15 @@ export async function executeJarvisToolCall(toolName, toolArgs) {
 
       return {
         succes: true,
-        message: "L'emploi du temps a été intégralement vidé.",
+        message: "L'emploi du temps a été intégralement réinitialisé.",
       };
     }
 
     // ============================================================
-    // --- PILIER 3 : SUPERVISION & CONTRÔLE GLOBAL ADMIN ---
+    // --- PILIER ADMIN SÉCURISÉ (RÉSERVÉ EXCLUSIVEMENT ADMIN) ---
     // ============================================================
     case "approuver_demande_compte": {
-      if (!isAdmin) {
-        throw new Error("🚫 Accès Refusé : Cette commande est strictement réservée aux Administrateurs.");
-      }
+      if (!isAdmin) throw new Error("🚫 Commande réservée aux Administrateurs.");
       const { email_ou_nom } = toolArgs;
       const query = (email_ou_nom || "").toLowerCase().trim();
 
@@ -672,23 +719,19 @@ export async function executeJarvisToolCall(toolName, toolArgs) {
         });
       }
 
-      if (!targetUid) {
-        throw new Error(`Aucun utilisateur trouvé correspondant à "${email_ou_nom}".`);
-      }
+      if (!targetUid) throw new Error(`Aucun utilisateur trouvé correspondant à "${email_ou_nom}".`);
 
       await update(ref(database, `users/${targetUid}`), { status: "approved" });
       await loadAdminKPIs();
 
       return {
         succes: true,
-        message: `Compte de ${targetUser.displayName || targetUser.email} (${targetUser.email}) validé avec succès. L'utilisateur peut désormais se connecter !`,
+        message: `Compte de ${targetUser.displayName || targetUser.email} validé avec succès.`,
       };
     }
 
     case "refuser_ou_supprimer_compte": {
-      if (!isAdmin) {
-        throw new Error("🚫 Accès Refusé : Cette commande est strictement réservée aux Administrateurs.");
-      }
+      if (!isAdmin) throw new Error("🚫 Commande réservée aux Administrateurs.");
       const { user_uid_ou_email } = toolArgs;
       const query = (user_uid_ou_email || "").toLowerCase().trim();
 
@@ -710,9 +753,7 @@ export async function executeJarvisToolCall(toolName, toolArgs) {
         });
       }
 
-      if (!targetUid) {
-        throw new Error(`Utilisateur introuvable pour "${user_uid_ou_email}".`);
-      }
+      if (!targetUid) throw new Error(`Compte introuvable pour "${user_uid_ou_email}".`);
 
       await remove(ref(database, `users/${targetUid}`));
       await remove(ref(database, `student_data/${targetUid}`));
@@ -723,14 +764,12 @@ export async function executeJarvisToolCall(toolName, toolArgs) {
 
       return {
         succes: true,
-        message: `Compte de ${targetUser.displayName || targetUser.email} et l'ensemble de ses données ont été supprimés avec succès.`,
+        message: `Compte de ${targetUser.displayName || targetUser.email} supprimé.`,
       };
     }
 
     case "activer_option_ia_compte": {
-      if (!isAdmin) {
-        throw new Error("🚫 Accès Refusé : Cette commande est strictement réservée aux Administrateurs.");
-      }
+      if (!isAdmin) throw new Error("🚫 Commande réservée aux Administrateurs.");
       const { user_uid_ou_email, statut } = toolArgs;
       const query = (user_uid_ou_email || "").toLowerCase().trim();
 
@@ -759,14 +798,12 @@ export async function executeJarvisToolCall(toolName, toolArgs) {
 
       return {
         succes: true,
-        message: `Accès IA pour ${targetUser.displayName || targetUser.email} ${statut ? "activé ✅" : "désactivé 🔒"}.`,
+        message: `Option IA de ${targetUser.displayName || targetUser.email} ${statut ? "activée" : "désactivée"}.`,
       };
     }
 
     case "publier_annonce_globale": {
-      if (!isAdmin) {
-        throw new Error("🚫 Accès Refusé : Cette commande est strictement réservée aux Administrateurs.");
-      }
+      if (!isAdmin) throw new Error("🚫 Commande réservée aux Administrateurs.");
       const { titre, contenu } = toolArgs;
       const newId = Date.now().toString();
 
@@ -782,14 +819,12 @@ export async function executeJarvisToolCall(toolName, toolArgs) {
 
       return {
         succes: true,
-        message: `Annonce globale "${titre}" diffusée avec succès à tous les utilisateurs.`,
+        message: `Annonce "${titre}" publiée avec succès.`,
       };
     }
 
     case "inspecter_planning_eleve": {
-      if (!isAdmin) {
-        throw new Error("🚫 Accès Refusé : Cette commande est strictement réservée aux Administrateurs.");
-      }
+      if (!isAdmin) throw new Error("🚫 Commande réservée aux Administrateurs.");
       const { student_uid_ou_nom } = toolArgs;
       const query = (student_uid_ou_nom || "").toLowerCase().trim();
 
@@ -819,17 +854,17 @@ export async function executeJarvisToolCall(toolName, toolArgs) {
 
       return {
         succes: true,
-        message: `Vous supervisez désormais en direct l'emploi du temps de : ${targetUser.displayName || targetUser.email}.`,
+        message: `Supervision active pour : ${targetUser.displayName || targetUser.email}.`,
       };
     }
 
     default:
-      throw new Error(`Outil inconnu : "${toolName}".`);
+      throw new Error(`Outil non reconnu : "${toolName}".`);
   }
 }
 
 // ============================================================
-// 4. MOTEUR D'ORCHESTRATION JARVIS SUPRÊME
+// 5. ORCHESTRATEUR VOCAL & EXÉCUTION DIRECTE
 // ============================================================
 export async function executeJarvisCommand(userText) {
   const cleanInput = cleanDuplicateWords((userText || "").trim());
@@ -838,20 +873,25 @@ export async function executeJarvisCommand(userText) {
     return;
   }
 
-  showLoading("JARVIS Suprême analyse votre commande...");
+  showLoading("Exécution intelligente de votre commande...");
   const feedbackBox = document.getElementById("aiFeedbackBox");
 
   const apiKey = getAiApiKey();
   const modelName = getAiModelName();
+  const profile = state.currentUserProfile || {};
+  const isAdmin = profile.role === "admin";
 
-  let executedToolName = null;
-  let toolResult = null;
   let finalAssistantMessage = "";
 
   try {
     if (apiKey) {
       const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
       const systemInstruction = buildJarvisLiveContext();
+
+      // Séparation stricte des outils : Seul l'Admin a accès aux outils d'administration
+      const activeTools = isAdmin
+        ? STUDENT_TOOLS_DECLARATIONS.concat(ADMIN_TOOLS_DECLARATIONS)
+        : STUDENT_TOOLS_DECLARATIONS;
 
       const requestBody = {
         contents: [
@@ -865,11 +905,11 @@ export async function executeJarvisCommand(userText) {
         },
         tools: [
           {
-            function_declarations: JARVIS_TOOLS_DECLARATIONS,
+            function_declarations: activeTools,
           },
         ],
         generationConfig: {
-          temperature: 0.2,
+          temperature: 0.1,
         },
       };
 
@@ -880,7 +920,7 @@ export async function executeJarvisCommand(userText) {
       });
 
       if (!response.ok) {
-        throw new Error(`Gemini API Error ${response.status}`);
+        throw new Error(`Gemini API HTTP Error ${response.status}`);
       }
 
       const resData = await response.json();
@@ -892,12 +932,11 @@ export async function executeJarvisCommand(userText) {
 
       if (functionCallPart) {
         const call = functionCallPart.functionCall;
-        executedToolName = call.name;
         const callArgs = call.args || {};
 
         try {
-          toolResult = await executeJarvisToolCall(call.name, callArgs);
-          finalAssistantMessage = toolResult.message || `Action "${call.name}" exécutée avec succès.`;
+          const toolResult = await executeJarvisToolCall(call.name, callArgs);
+          finalAssistantMessage = toolResult.message || `Action exécutée avec succès.`;
         } catch (execErr) {
           finalAssistantMessage = `⚠️ ${execErr.message}`;
         }
@@ -905,15 +944,16 @@ export async function executeJarvisCommand(userText) {
         finalAssistantMessage = parts.map((p) => p.text || "").join(" ").trim();
       }
     } else {
-      finalAssistantMessage = await fallbackLocalJarvisHandler(cleanInput);
+      finalAssistantMessage = await fallbackLocalAiHandler(cleanInput);
     }
   } catch (err) {
-    console.warn("Jarvis Gemini calling fallback:", err);
-    finalAssistantMessage = await fallbackLocalJarvisHandler(cleanInput);
+    console.warn("Fallback IA local suite à exception API:", err);
+    finalAssistantMessage = await fallbackLocalAiHandler(cleanInput);
   }
 
   hideLoading();
 
+  // Affichage du résultat dans le HUD sans badge admin pour les élèves
   if (feedbackBox) {
     feedbackBox.style.display = "block";
     feedbackBox.style.background = "#0f172a";
@@ -921,38 +961,48 @@ export async function executeJarvisCommand(userText) {
     feedbackBox.style.border = "1.5px solid #38bdf8";
     feedbackBox.style.boxShadow = "0 8px 24px rgba(56, 189, 248, 0.25)";
 
+    const headerTitle = isAdmin ? "🛡️ JARVIS Copilote Admin" : "🎙️ Assistant IA Baccalauréat";
+
     feedbackBox.innerHTML = `
       <div style="display:flex; flex-direction:column; gap:8px;">
         <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(56,189,248,0.3); padding-bottom:6px;">
           <span style="font-size:13.5px; font-weight:800; color:#38bdf8; display:flex; align-items:center; gap:6px;">
-            🤖 JARVIS Suprême
+            ${headerTitle}
           </span>
           <button type="button" id="btnJarvisAudioToggle" onclick="window.toggleJarvisSpeechMute()" style="background:rgba(56,189,248,0.15); color:#38bdf8; border:1px solid #38bdf8; padding:3px 8px; border-radius:6px; font-size:11px; cursor:pointer; font-weight:700;">
             ${isJarvisAudioMuted ? "🔇 Voix Coupée" : "🔊 Voix Active"}
           </button>
         </div>
         <div style="font-size:13px; line-height:1.5; color:#e2e8f0;">
-          ${formatJarvisResponseText(finalAssistantMessage)}
+          ${formatResponseText(finalAssistantMessage)}
         </div>
       </div>
     `;
   }
 
+  // Synthèse vocale de la confirmation
   speakJarvisResponse(finalAssistantMessage);
 
   return finalAssistantMessage;
 }
 
-// Fallback heuristique local
-async function fallbackLocalJarvisHandler(text) {
+// Fallback heuristique local infaillible
+async function fallbackLocalAiHandler(text) {
   const low = text.toLowerCase();
 
+  // 1. Consultation du planning
   if (low.includes("qu'est-ce que j'ai") || low.includes("programme") || low.includes("planning") || low.includes("3andi")) {
-    const res = await executeJarvisToolCall("consulter_planning_jour", { jour: "aujourd'hui" });
-    if (res.total_seances === 0) return `Vous n'avez aucun cours planifié pour ${res.jour} (${res.date}). Profitez-en pour réviser !`;
-    return `Programme de ${res.jour} : vous avez ${res.total_seances} séance(s) :\n` + res.programme.map((s) => `- ${s.matiere} (${s.debut} - ${s.fin}) [${s.type}]${s.travail ? ` - Devoir: ${s.travail}` : ""}`).join("\n");
+    const res = await executeJarvisToolCall("consulter_planning_jour", {
+      jour: low.includes("demain") || low.includes("ghodwa") ? "demain" : "aujourd'hui",
+    });
+    if (res.total_seances === 0) return `Vous n'avez aucune séance planifiée pour ${res.jour} (${res.date}).`;
+    return (
+      `Programme de ${res.jour} : vous avez ${res.total_seances} séance(s) :\n` +
+      res.programme.map((s) => `- ${s.matiere} (${s.debut} - ${s.fin}) [${s.type}]${s.travail ? ` (Devoir: ${s.travail})` : ""}`).join("\n")
+    );
   }
 
+  // 2. Minuteur
   if (low.includes("minuteur") || low.includes("chrono") || low.includes("pomodoro")) {
     const mMatch = low.match(/(\d{1,3})\s*(?:min|minute)/i);
     const mins = mMatch ? parseInt(mMatch[1], 10) : 25;
@@ -960,21 +1010,41 @@ async function fallbackLocalJarvisHandler(text) {
     return res.message;
   }
 
+  // 3. Détection intelligente de séance avec heure exacte
+  const timeInfo = extractTimeRangeFromText(text);
+  const cleanTodo = extractCleanTodo(text);
+
+  let subject = "Étude / Révision";
+  if (/math|mathematique|رياضيات|مات|alg|analyse/i.test(low)) subject = "Mathématiques";
+  else if (/phys|physique|chimie|فيزياء|فيزيك/i.test(low)) subject = "Sciences Physiques";
+  else if (/svt|science|3ouloum|علوم|bio/i.test(low)) subject = "Sciences SVT";
+  else if (/info|informatique|tic|algo|python|sql|اعلامية/i.test(low)) subject = "Informatique";
+  else if (/philo|philosophie|falsafa|فلسفة/i.test(low)) subject = "Philosophie";
+  else if (/arabe|3arbi|عربية|نصوص/i.test(low)) subject = "Arabe";
+  else if (/franc|french|فرنسية/i.test(low)) subject = "Français";
+  else if (/angl|english|انقليزية/i.test(low)) subject = "Anglais";
+  else if (/eco|gestion|اقتصاد/i.test(low)) subject = "Économie & Gestion";
+  else if (/histoire|geo|hg|تاريخ/i.test(low)) subject = "Histoire-Géo";
+  else if (/sport|eps|رياضة/i.test(low)) subject = "Sport";
+
+  const isPart = /particulier|etude|étude|dar el prof|chez prof|برتيكولي/i.test(low);
+
   try {
     const res = await executeJarvisToolCall("ajouter_seance", {
-      matiere: low.includes("phys") ? "Sciences Physiques" : low.includes("svt") ? "Sciences SVT" : low.includes("info") ? "Informatique" : "Mathématiques",
+      matiere: subject,
       jour: low.includes("ghodwa") || low.includes("demain") ? "Demain" : "Aujourd'hui",
-      heure_debut: "14:00",
-      heure_fin: "16:00",
-      travail_a_faire: text,
+      heure_debut: timeInfo.startStr,
+      heure_fin: timeInfo.endStr,
+      type_lieu: isPart ? "Particulier" : "À la maison",
+      travail_a_faire: cleanTodo,
     });
     return res.message;
   } catch (e) {
-    return `J'ai bien reçu votre consigne : "${text}". Pour une compréhension optimale avec Tool Calling illimité, connectez votre clé API Google Gemini dans les paramètres ⚙️.`;
+    return `Instruction reçue : "${text}". Connectez votre clé API Google Gemini dans les paramètres ⚙️ pour une compréhension totale illimitée.`;
   }
 }
 
-function formatJarvisResponseText(txt) {
+function formatResponseText(txt) {
   if (!txt) return "";
   return txt
     .replace(/\n/g, "<br>")
@@ -982,6 +1052,6 @@ function formatJarvisResponseText(txt) {
     .replace(/\*(.*?)\*/g, "<i>$1</i>");
 }
 
-// Enregistrement des fonctions dans window
+// Bindings globaux
 window.executeJarvisCommand = executeJarvisCommand;
 window.toggleJarvisSpeechMute = toggleJarvisSpeechMute;
