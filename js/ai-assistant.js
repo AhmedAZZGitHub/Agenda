@@ -21,10 +21,10 @@ export function getAiApiKey() {
 
 export function getAiModelName() {
   const saved = localStorage.getItem("gemini_model_name");
-  if (saved && saved.trim() && !saved.includes("3.6") && !saved.includes("3.7") && !saved.includes("3.1")) {
+  if (saved && saved.trim()) {
     return saved.trim();
   }
-  return "gemini-2.5-flash"; // Modèle Google Gemini 2.5 Flash officiel et gratuit
+  return "gemini-3.6-flash"; // Modèle Google Gemini officiel actif
 }
 
 export function openAiSettingsModal() {
@@ -39,10 +39,11 @@ export function openAiSettingsModal() {
   const customInput = document.getElementById("aiCustomModelInput");
 
   const standardModels = [
-    "gemini-2.5-flash",
-    "gemini-2.5-pro",
+    "gemini-3.6-flash",
     "gemini-2.0-flash",
     "gemini-1.5-flash",
+    "gemini-2.5-flash",
+    "gemini-2.5-pro",
     "gemini-1.5-pro",
   ];
   if (standardModels.includes(currentModel)) {

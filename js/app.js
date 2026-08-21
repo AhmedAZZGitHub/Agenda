@@ -15,11 +15,11 @@ import "./admin.js?v=18.8";
 import "./tutor-ai.js?v=18.8";
 import { initNotificationsSystem } from "./notifications.js?v=18.8";
 
-// Initialisation par défaut du modèle officiel Google Gemini 2.5 Flash
+// Initialisation par défaut du modèle officiel Google Gemini
 try {
   const curM = localStorage.getItem("gemini_model_name");
-  if (!curM || curM.includes("3.6") || curM.includes("3.7") || curM.includes("3.1")) {
-    localStorage.setItem("gemini_model_name", "gemini-2.5-flash");
+  if (!curM || curM.includes("2.5-flash")) {
+    localStorage.setItem("gemini_model_name", "gemini-3.6-flash");
   }
 } catch (e) {}
 

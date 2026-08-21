@@ -726,50 +726,44 @@ RÈGLES STRICTES :
       ? STUDENT_TOOLS_DECLARATIONS.concat(ADMIN_TOOLS_DECLARATIONS)
       : STUDENT_TOOLS_DECLARATIONS;
 
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
+    const candidateModels = [
+      modelName,
+      "gemini-3.6-flash",
+      "gemini-2.0-flash",
+      "gemini-1.5-flash",
+      "gemini-2.5-flash",
+    ].filter((m, idx, arr) => m && arr.indexOf(m) === idx);
 
-    const requestBody = {
-      contents: [
-        {
-          role: "user",
-          parts: [{ text: text }],
-        },
-      ],
-      system_instruction: {
-        parts: [{ text: systemInstruction }],
-      },
-      tools: [
-        {
-          function_declarations: activeTools,
-        },
-      ],
-      generationConfig: {
-        temperature: 0.1,
-      },
-    };
+    let response = null;
+    let successfulModel = "";
+    let lastErrorDetails = "";
 
-    let response = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(requestBody),
-    });
+    for (const curMod of candidateModels) {
+      const targetUrl = `https://generativelanguage.googleapis.com/v1beta/models/${curMod}:generateContent?key=${apiKey}`;
+      try {
+        const res = await fetch(targetUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(requestBody),
+        });
 
-    if (response.status === 404 && modelName !== "gemini-2.5-flash") {
-      console.warn("Modèle non trouvé (404), repli automatique sur gemini-2.5-flash...");
-      const fallbackUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
-      response = await fetch(fallbackUrl, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(requestBody),
-      });
-      if (response.ok) {
-        localStorage.setItem("gemini_model_name", "gemini-2.5-flash");
+        if (res.ok) {
+          response = res;
+          successfulModel = curMod;
+          localStorage.setItem("gemini_model_name", curMod);
+          break;
+        } else {
+          const errData = await res.json().catch(() => ({}));
+          lastErrorDetails = errData.error?.message || `HTTP ${res.status}`;
+          console.warn(`Modèle ${curMod} indisponible (${res.status}):`, lastErrorDetails);
+        }
+      } catch (fErr) {
+        lastErrorDetails = fErr.message;
       }
     }
 
-    if (!response.ok) {
-      const errJson = await response.json().catch(() => ({}));
-      throw new Error(`Erreur API Gemini (${response.status}) : ${errJson.error?.message || response.statusText}`);
+    if (!response || !response.ok) {
+      throw new Error(`Erreur API Gemini : ${lastErrorDetails || "Aucun modèle n'a pu répondre."}`);
     }
 
     const resData = await response.json();
