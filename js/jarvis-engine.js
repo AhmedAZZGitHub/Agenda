@@ -726,6 +726,26 @@ RÈGLES STRICTES :
       ? STUDENT_TOOLS_DECLARATIONS.concat(ADMIN_TOOLS_DECLARATIONS)
       : STUDENT_TOOLS_DECLARATIONS;
 
+    const requestBody = {
+      contents: [
+        {
+          role: "user",
+          parts: [{ text: text }],
+        },
+      ],
+      systemInstruction: {
+        parts: [{ text: systemInstruction }],
+      },
+      tools: [
+        {
+          functionDeclarations: activeTools,
+        },
+      ],
+      generationConfig: {
+        temperature: 0.1,
+      },
+    };
+
     const candidateModels = [
       modelName,
       "gemini-3.6-flash",
@@ -770,10 +790,10 @@ RÈGLES STRICTES :
     const candidate = resData.candidates?.[0]?.content;
     const parts = candidate?.parts || [];
 
-    const functionCallPart = parts.find((p) => p.functionCall);
+    const functionCallPart = parts.find((p) => p.functionCall || p.function_call);
 
     if (functionCallPart) {
-      const call = functionCallPart.functionCall;
+      const call = functionCallPart.functionCall || functionCallPart.function_call;
       const callArgs = call.args || {};
 
       try {
