@@ -1,9 +1,9 @@
 // js/ai-assistant.js
 // Assistant Vocal Multilingue Continu (Tounsi / Arabe / Français), Gemini Pro & Vision Scanner
 
-import { database, ref, set } from "./firebase-config.js?v=16.5";
-import { state, getStudentPath, showLoading, hideLoading } from "./state.js?v=16.5";
-import { getSessionDateKey, render } from "./calendar.js?v=16.5";
+import { database, ref, set } from "./firebase-config.js?v=17.7";
+import { state, getStudentPath, showLoading, hideLoading } from "./state.js?v=17.7";
+import { getSessionDateKey, render } from "./calendar.js?v=17.7";
 
 let selectedAiSpeechLang = "ar-TN";
 let aiSpeechRecognition = null;
