@@ -332,11 +332,13 @@ export function renderUserProfileBar() {
   const btnParent = document.getElementById("btnMyParentCode");
   const pCtrl = document.getElementById("parentChildControls");
   const btnAdmin = document.getElementById("btnAdminConsole");
+  const btnJarvis = document.getElementById("btnJarvisAdmin");
   const btnProf = document.getElementById("btnMyProfile");
 
   if (btnParent) btnParent.style.display = state.currentUserProfile.role === "student" || state.currentUserProfile.role === "admin" ? "inline-flex" : "none";
   if (pCtrl) pCtrl.style.display = state.currentUserProfile.role === "parent" ? "inline-flex" : "none";
   if (btnAdmin) btnAdmin.style.display = state.currentUserProfile.role === "admin" ? "inline-flex" : "none";
+  if (btnJarvis) btnJarvis.style.display = state.currentUserProfile.role === "admin" ? "inline-flex" : "none";
   if (btnProf) btnProf.style.display = "inline-flex";
 
   const pCodeDisp = document.getElementById("myParentCodeDisplay");

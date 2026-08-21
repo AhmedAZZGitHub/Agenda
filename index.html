@@ -163,7 +163,7 @@
       if (viewImport) viewImport.style.display = tab === "import" ? "flex" : "none";
     };
   </script>
-  <link rel="stylesheet" href="css/styles.css?v=18.2" />
+  <link rel="stylesheet" href="css/styles.css?v=18.3" />
 </head>
 
 <body>
@@ -686,6 +686,11 @@
         <button class="btn-action btn-accent" id="btnAdminConsole" onclick="window.openOverlay('adminOverlay')"
           style="display: none">
           🛡️ Console Admin
+        </button>
+        <button class="btn-action" id="btnJarvisAdmin" onclick="window.openJarvisAdminModal()"
+          style="display: none; background: linear-gradient(135deg, #0f172a, #1e293b); border: 1.5px solid #38bdf8; color: #38bdf8; font-weight: 800; box-shadow: 0 4px 12px rgba(56, 189, 248, 0.25);"
+          title="Copilote Vocal et Administration JARVIS Suprême">
+          🤖 JARVIS Admin
         </button>
       </div>
 
@@ -1323,6 +1328,71 @@
     </div>
   </div>
 
+  <!-- MODALE EXCLUSIVE COPILOTE VOCAL ADMIN : JARVIS SUPRÊME -->
+  <div class="modal" id="jarvisAdminModal">
+    <div class="modal-box" style="max-width: 580px; gap: 14px; background: #0f172a; color: #f8fafc; border: 2px solid #38bdf8; box-shadow: 0 20px 50px rgba(56, 189, 248, 0.35);">
+      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(56, 189, 248, 0.3); padding-bottom: 8px;">
+        <span style="font-weight: 900; font-size: 17px; display: flex; align-items: center; gap: 8px; color: #38bdf8;">
+          🤖 JARVIS Suprême — Console Vocale & Administration
+        </span>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <button type="button" class="btn-action" style="padding: 4px 10px; font-size: 11.5px; font-weight: 700; background: rgba(56,189,248,0.15); color: #38bdf8; border: 1px solid #38bdf8;" onclick="window.toggleJarvisSpeechMute()">
+            🔊 Voix
+          </button>
+          <span onclick="window.closeJarvisAdminModal()" style="cursor: pointer; color: #ef4444; font-size: 20px; font-weight: 800; line-height: 1;">✕</span>
+        </div>
+      </div>
+
+      <!-- STATUS BAR & STATS RAPIDES ADMIN -->
+      <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+        <span style="background: rgba(234, 88, 12, 0.2); border: 1px solid #ea580c; color: #fb923c; padding: 4px 10px; border-radius: 99px; font-size: 11.5px; font-weight: 800;">
+          ⏳ Demandes en attente : <b id="jarvisPendingCount">0</b>
+        </span>
+        <span style="background: rgba(56, 189, 248, 0.15); border: 1px solid #38bdf8; color: #38bdf8; padding: 4px 10px; border-radius: 99px; font-size: 11.5px; font-weight: 800;">
+          🛡️ Mode Super-Administrateur Actif
+        </span>
+      </div>
+
+      <!-- BOUTON MICROPHONE JARVIS ADMIN -->
+      <div style="text-align: center; padding: 6px 0 10px 0;">
+        <button type="button" class="ai-mic-btn" id="jarvisAdminMicBtn" onclick="window.toggleJarvisAdminRecording()" style="border-color: #38bdf8; box-shadow: 0 0 20px rgba(56, 189, 248, 0.4);" title="Parler à JARVIS">
+          🎙️
+        </button>
+        <div id="jarvisMicStatusText" style="font-size: 12px; font-weight: 700; color: #94a3b8; margin-top: 10px; line-height: 1.4;">
+          Dictez vos ordres d'administration (approbation, suppression, annonces, inspection).
+        </div>
+      </div>
+
+      <!-- TEXTE SAISI / DICTÉ -->
+      <div>
+        <label style="font-size: 11px; font-weight: 700; color: #94a3b8; display: block; margin-bottom: 4px;">
+          ⚡ Ordre vocal ou commande textuelle :
+        </label>
+        <textarea id="jarvisAdminInput" class="input" style="width: 100%; height: 75px; resize: none; font-size: 13px; background: #1e293b; color: #f8fafc; border-color: rgba(56, 189, 248, 0.4);"
+          placeholder="Ex: Approuve la demande de Sami / Supprime le compte de test@gmail.com / Publie l'annonce : Révision Bac / Tous les devoirs sont en ligne..."></textarea>
+      </div>
+
+      <!-- EXEMPLES EXCLUSIFS ADMIN -->
+      <div>
+        <div style="font-size: 11px; font-weight: 700; color: #94a3b8; margin-bottom: 6px;">💡 Exemples d'ordres administrateur :</div>
+        <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+          <span class="example-chip" style="background: #1e293b; color: #38bdf8; border-color: rgba(56,189,248,0.4);" onclick="document.getElementById('jarvisAdminInput').value='Approuve la demande d\'inscription de Sami'">✅ Approuver compte</span>
+          <span class="example-chip" style="background: #1e293b; color: #38bdf8; border-color: rgba(56,189,248,0.4);" onclick="document.getElementById('jarvisAdminInput').value='Publie une annonce globale : Rappel Devoir / Le DS de Maths aura lieu samedi à 9h'">📢 Publier annonce</span>
+          <span class="example-chip" style="background: #1e293b; color: #38bdf8; border-color: rgba(56,189,248,0.4);" onclick="document.getElementById('jarvisAdminInput').value='Inspecte le planning de l\'élève Ahmed'">👁️ Inspecter élève</span>
+          <span class="example-chip" style="background: #1e293b; color: #38bdf8; border-color: rgba(56,189,248,0.4);" onclick="document.getElementById('jarvisAdminInput').value='Active l\'accès IA pour l\'élève Karim'">🔓 Activer option IA</span>
+        </div>
+      </div>
+
+      <div id="jarvisAdminFeedbackBox" style="display: none; padding: 12px; border-radius: 12px; font-size: 13px; font-weight: 700; line-height: 1.4; background: rgba(56, 189, 248, 0.1); border: 1.5px solid #38bdf8; color: #38bdf8;"></div>
+
+      <div style="display: flex; gap: 8px;">
+        <button type="button" class="btn-add" style="flex: 1; justify-content: center; padding: 12px; font-size: 13.5px; background: linear-gradient(135deg, #0284c7, #4f46e5);" onclick="window.executeJarvisAdminCommandDirect()">
+          ⚡ Exécuter l'Ordre Administrateur
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- MODALE PARAMÈTRES IA & CLÉ GOOGLE GEMINI -->
   <div class="modal" id="aiSettingsModal">
     <div class="modal-box" style="max-width: 500px; gap: 14px;">
@@ -1585,7 +1655,7 @@
   </div>
 
   <!-- SCRIPT APPLICATION -->
-  <script type="module" src="js/app.js?v=18.2"></script>
+  <script type="module" src="js/app.js?v=18.3"></script>
 </body>
 
 </html>

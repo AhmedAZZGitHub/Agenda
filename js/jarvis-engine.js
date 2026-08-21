@@ -806,6 +806,123 @@ RÈGLES STRICTES :
   return finalAssistantMessage;
 }
 
+// ============================================================
+// 4. CONTRÔLEURS DE LA MODALE EXCLUSIVE JARVIS ADMIN
+// ============================================================
+let isJarvisAdminRecording = false;
+
+export function openJarvisAdminModal() {
+  if (!state.currentUserProfile || state.currentUserProfile.role !== "admin") {
+    return alert("Accès réservé à l'administrateur.");
+  }
+  const pendingEl = document.getElementById("jarvisPendingCount");
+  if (pendingEl) {
+    const pendingList = (state.allUsersCache || []).filter((u) => u.status === "pending");
+    pendingEl.innerText = pendingList.length;
+  }
+  const fb = document.getElementById("jarvisAdminFeedbackBox");
+  if (fb) fb.style.display = "none";
+  window.openModal("jarvisAdminModal");
+}
+
+export function closeJarvisAdminModal() {
+  stopJarvisAdminRecording();
+  window.closeModal("jarvisAdminModal");
+}
+
+export function toggleJarvisAdminRecording() {
+  if (isJarvisAdminRecording) {
+    stopJarvisAdminRecording();
+  } else {
+    startJarvisAdminRecording();
+  }
+}
+
+export function startJarvisAdminRecording() {
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognition) return alert("Reconnaissance vocale non supportée sur ce navigateur.");
+
+  const input = document.getElementById("jarvisAdminInput");
+  const micBtn = document.getElementById("jarvisAdminMicBtn");
+  const statusTxt = document.getElementById("jarvisMicStatusText");
+
+  try {
+    const rec = new SpeechRecognition();
+    rec.lang = "fr-FR";
+    rec.continuous = false;
+    rec.interimResults = true;
+
+    rec.onstart = () => {
+      isJarvisAdminRecording = true;
+      if (micBtn) micBtn.classList.add("listening");
+      if (statusTxt) {
+        statusTxt.innerHTML = "🔴 <b>JARVIS écoute vos ordres administrateur...</b>";
+        statusTxt.style.color = "#38bdf8";
+      }
+    };
+
+    rec.onresult = (event) => {
+      let text = "";
+      for (let i = 0; i < event.results.length; i++) {
+        text += event.results[i][0].transcript;
+      }
+      if (input) input.value = text;
+    };
+
+    rec.onerror = () => {
+      stopJarvisAdminRecording();
+    };
+
+    rec.onend = () => {
+      stopJarvisAdminRecording();
+      executeJarvisAdminCommandDirect();
+    };
+
+    rec.start();
+    window._jarvisAdminRec = rec;
+  } catch (e) {
+    console.warn("JARVIS Admin voice error:", e);
+  }
+}
+
+export function stopJarvisAdminRecording() {
+  isJarvisAdminRecording = false;
+  const micBtn = document.getElementById("jarvisAdminMicBtn");
+  const statusTxt = document.getElementById("jarvisMicStatusText");
+  if (micBtn) micBtn.classList.remove("listening");
+  if (statusTxt) {
+    statusTxt.innerHTML = "Dictez vos ordres d'administration (approbation, suppression, annonces, inspection).";
+    statusTxt.style.color = "#94a3b8";
+  }
+  if (window._jarvisAdminRec) {
+    try {
+      window._jarvisAdminRec.stop();
+    } catch (e) {}
+    window._jarvisAdminRec = null;
+  }
+}
+
+export async function executeJarvisAdminCommandDirect() {
+  const input = document.getElementById("jarvisAdminInput");
+  const rawText = input ? input.value.trim() : "";
+  if (!rawText) return;
+
+  const fb = document.getElementById("jarvisAdminFeedbackBox");
+  if (fb) {
+    fb.style.display = "block";
+    fb.innerHTML = "⏳ Exécution de l'ordre administrateur...";
+  }
+
+  const result = await executeJarvisCommand(rawText);
+  if (fb) {
+    fb.innerHTML = `⚡ <b>Résultat JARVIS :</b><br>${result.replace(/\n/g, "<br>")}`;
+  }
+}
+
 // Bindings globaux
 window.executeJarvisCommand = executeJarvisCommand;
 window.toggleJarvisSpeechMute = toggleJarvisSpeechMute;
+window.openJarvisAdminModal = openJarvisAdminModal;
+window.closeJarvisAdminModal = closeJarvisAdminModal;
+window.toggleJarvisAdminRecording = toggleJarvisAdminRecording;
+window.executeJarvisAdminCommandDirect = executeJarvisAdminCommandDirect;

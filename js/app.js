@@ -66,6 +66,7 @@ onAuthStateChanged(auth, async (user) => {
     const btnParent = document.getElementById("btnMyParentCode");
     const pCtrl = document.getElementById("parentChildControls");
     const btnAdmin = document.getElementById("btnAdminConsole");
+    const btnJarvis = document.getElementById("btnJarvisAdmin");
     const btnProf = document.getElementById("btnMyProfile");
 
     if (nameEl) nameEl.innerText = "Non connecté";
@@ -77,6 +78,7 @@ onAuthStateChanged(auth, async (user) => {
     if (btnParent) btnParent.style.display = "none";
     if (pCtrl) pCtrl.style.display = "none";
     if (btnAdmin) btnAdmin.style.display = "none";
+    if (btnJarvis) btnJarvis.style.display = "none";
     if (btnProf) btnProf.style.display = "none";
 
     updateReadOnlyUI();
