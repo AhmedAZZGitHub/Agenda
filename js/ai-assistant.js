@@ -570,36 +570,43 @@ export async function callGeminiTunisianParser(userText, apiKey) {
   const currentDayName = ["Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi"][now.getDay()];
   const todayIso = now.toISOString().split("T")[0];
 
-  const systemPrompt = `Tu es un assistant IA spécialisé pour les élèves du Baccalauréat tunisien (toutes sections : Math, Sciences, Informatique, Éco-Gestion, Technique, Lettres, Sport).
-Tu comprends parfaitement le dialecte tunisien (Derja en lettres arabes ou arabizi : 3=ع, 7=ح, 9=ق, 5=خ, 2=ء), l'arabe classique et le français.
+  const systemPrompt = `Tu es une Intelligence Artificielle puissante et naturelle conçue pour comprendre n'importe quelle demande d'un élève ou parent du Baccalauréat tunisien (toutes sections).
+Tu comprends TOUTES les expressions, formulations spontanées, le langage parlé, les phrases libres, le dialecte tunisien (Derja en lettres arabes ou arabizi : 3=ع, 7=ح, 9=ق, 5=خ, 2=ء), le français et l'arabe classique.
+
+L'utilisateur ne doit être lié à AUCUNE formule ou syntaxe précise. Tu dois faire preuve d'intelligence contextuelle pour comprendre ce qu'il désire et déduire au mieux :
+- La Matière concernée (par exemple Mathématiques, Physique, SVT, Informatique, Philo, Arabe, Français, Anglais, Économie-Gestion, Histoire-Géo, etc.). Si non précisée, choisis la plus logique ou "Mathématiques".
+- Le Jour et la Date : déduis si c'est pour aujourd'hui, demain (ghodwa), un jour spécifique de la semaine ou une date.
+- L'Horaire : si l'heure est mentionnée, extrais début et fin (ex: 10h-12h). Si l'heure n'est pas spécifiée, propose automatiquement un créneau adapté (ex: 14h-16h l'après-midi ou 10h-12h le matin).
+- Le Type / Lieu : cours particulier, au lycée, à la maison ou en ligne.
+- Le Travail à faire / Devoirs / Exercices : extrais n'importe quelle consigne ou devoir mentionné (ex: exercices de conjugaison, série d'analyse, révision chapitre, etc.).
+
 Aujourd'hui nous sommes ${currentDayName} ${todayIso}.
 
-Extrais TOUTES les informations de la demande de l'élève (Matière, Horaires début/fin, Jour/Date, Type de cours/Lieu, et le Travail à faire / Devoirs / Exercices).
-Réponds STRICTEMENT avec un JSON valide sans formatage markdown, respectant ce schéma exact :
+Réponds STRICTEMENT avec un JSON valide :
 {
   "action": "add_session" ou "add_exam",
   "subject": "Mathématiques" | "Sciences Physiques" | "Sciences SVT" | "Informatique" | "Philosophie" | "Arabe" | "Français" | "Anglais" | "Économie & Gestion" | "Histoire-Géo" | "Sport" | "Option",
   "dayIndex": nombre de 0 (Lundi) à 6 (Dimanche),
-  "dateStr": "YYYY-MM-DD" (date exacte de la séance),
-  "startHour": nombre de 8 à 23 (ex: 14 pour 14h),
-  "startMinute": nombre de 0 à 59 (ex: 0 ou 30),
-  "endHour": nombre de 8 à 24 (si non précisé, calcule début + 2h),
+  "dateStr": "YYYY-MM-DD" (date calculée),
+  "startHour": nombre de 0 à 23,
+  "startMinute": nombre de 0 à 59,
+  "endHour": nombre de 0 à 23,
   "endMinute": nombre de 0 à 59,
   "type": "À la maison" | "Lycée" | "Particulier" | "En ligne",
   "location": { "address": "Nom du lieu ou ville", "lat": 36.8065, "lng": 10.1815 },
-  "todo": "Texte complet du travail à faire, devoirs, exercices ou chapitres demandés (ex: Série 3 analyse exercices 1 et 4), ou null si aucun travail mentionné",
+  "todo": "Texte clair du travail à faire / exercices / devoirs mentionnés, ou null",
   "freq": "Chaque semaine" ou "Ce jour seulement",
   "examType": "Devoir de Contrôle (DC)" ou "Devoir de Synthèse (DS)" ou "Examen Blanc",
-  "replyMessage": "Message de confirmation amical et motivant bilingue tunisien/français récapitulant la séance, l'horaire, le type et les exercices enregistrés"
+  "replyMessage": "Message de confirmation amical, naturel et encourageant récapitulant la séance enregistrée"
 }`;
 
   const res = await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      contents: [{ parts: [{ text: `${systemPrompt}\n\nCommande élève : "${userText}"` }] }],
+      contents: [{ parts: [{ text: `${systemPrompt}\n\nMessage de l'utilisateur : "${userText}"` }] }],
       generationConfig: {
-        temperature: 0.1,
+        temperature: 0.2,
       },
     }),
   });
@@ -614,14 +621,14 @@ Réponds STRICTEMENT avec un JSON valide sans formatage markdown, respectant ce 
 export function parseTunisianNaturalLanguageLocally(rawText) {
   const text = rawText.toLowerCase();
 
-  let subject = null;
+  let subject = "Mathématiques";
   if (/math|mathematique|رياضيات|مات|alg|geometrie|analyse/i.test(text)) subject = "Mathématiques";
   else if (/phys|physique|chimie|فيزياء|فيزيك|chim/i.test(text)) subject = "Sciences Physiques";
   else if (/svt|science|3ouloum|علوم|nature|bio|genetique/i.test(text)) subject = "Sciences SVT";
   else if (/info|informatique|tic|algo|python|sql|انفورماتيك|اعلامية/i.test(text)) subject = "Informatique";
   else if (/philo|philosophie|falsafa|فلسفة/i.test(text)) subject = "Philosophie";
   else if (/arabe|3arbi|3arabia|عربية|نصوص|ادب/i.test(text)) subject = "Arabe";
-  else if (/franc|french|فرنسية/i.test(text)) subject = "Français";
+  else if (/franc|french|فرنسية|conjug|gramm/i.test(text)) subject = "Français";
   else if (/angl|english|انقليزية/i.test(text)) subject = "Anglais";
   else if (/eco|gestion|compta|اقتصاد|تصرف/i.test(text)) subject = "Économie & Gestion";
   else if (/histoire|geo|hg|تاريخ|جغرافيا/i.test(text)) subject = "Histoire-Géo";
