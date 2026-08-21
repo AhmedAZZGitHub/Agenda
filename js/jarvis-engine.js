@@ -33,43 +33,74 @@ export function toggleJarvisSpeechMute() {
   return !isJarvisAudioMuted;
 }
 
-export function speakJarvisResponse(text) {
+export function speakJarvisVoice(text) {
   if (isJarvisAudioMuted || !("speechSynthesis" in window) || !text) return;
   try {
-    window.speechSynthesis.cancel();
-    const cleanSpeech = text
+    window.speechSynthesis.cancel(); // Stoppe toute lecture en cours
+
+    const cleanText = text
       .replace(/<[^>]*>/g, " ")
-      .replace(/[\*\_#`~]/g, "")
+      .replace(/[*#_`~]/g, "")
       .replace(/([0-9]{1,2})h([0-9]{2})/gi, "$1 heures $2")
       .replace(/([0-9]{1,2})h\b/gi, "$1 heures")
       .replace(/\s{2,}/g, " ")
       .trim();
 
-    if (!cleanSpeech) return;
+    if (!cleanText) return;
 
-    const utterance = new SpeechSynthesisUtterance(cleanSpeech);
+    const utterance = new SpeechSynthesisUtterance(cleanText);
     utterance.lang = "fr-FR";
-    utterance.rate = 1.05;
-    utterance.pitch = 1.0;
 
+    // Calibrage JARVIS : Rapide (1.18x) et ton masculin posé
+    utterance.rate = 1.18;  // Débit vif et réactif sans bégaiement
+    utterance.pitch = 0.92; // Tonalité masculine légèrement plus grave
+
+    // Sélection de la meilleure voix masculine disponible sur le système
     const voices = window.speechSynthesis.getVoices();
-    const frVoice = voices.find(
+    const maleFrenchVoice = voices.find(
       (v) =>
         v.lang.startsWith("fr") &&
-        (v.name.includes("Google") ||
-          v.name.includes("Natural") ||
-          v.name.includes("Thomas") ||
+        (v.name.includes("Google français") ||
           v.name.includes("Henri") ||
-          v.name.includes("Julie") ||
-          v.name.includes("Audrey") ||
-          v.name.includes("Aurelie"))
-    );
-    if (frVoice) utterance.voice = frVoice;
+          v.name.includes("Mathieu") ||
+          v.name.includes("Paul") ||
+          v.name.includes("Thomas") ||
+          v.name.includes("Male") ||
+          v.name.includes("Natural") ||
+          v.name.includes("Claude") ||
+          v.name.includes("Antoine")) &&
+        !v.name.includes("Female") &&
+        !v.name.includes("Julie") &&
+        !v.name.includes("Audrey") &&
+        !v.name.includes("Denise") &&
+        !v.name.includes("Aurelie") &&
+        !v.name.includes("Hortense") &&
+        !v.name.includes("Brigitte")
+    ) || voices.find(
+      (v) =>
+        v.lang.startsWith("fr") &&
+        (v.name.includes("Google") || v.name.includes("Male") || v.name.includes("Henri") || v.name.includes("Paul") || v.name.includes("Thomas"))
+    ) || voices.find((v) => v.lang.startsWith("fr"));
+
+    if (maleFrenchVoice) {
+      utterance.voice = maleFrenchVoice;
+    }
 
     window.speechSynthesis.speak(utterance);
   } catch (err) {
     console.warn("Synthèse vocale non disponible:", err);
   }
+}
+
+export const speakJarvisResponse = speakJarvisVoice;
+
+// Préchargement asynchrone des voix pour éviter les délais
+if (typeof window !== "undefined" && "speechSynthesis" in window) {
+  window.speechSynthesis.onvoiceschanged = () => {
+    try {
+      window.speechSynthesis.getVoices();
+    } catch (e) {}
+  };
 }
 
 // ============================================================
@@ -838,8 +869,8 @@ RÈGLES STRICTES :
     `;
   }
 
-  // Confirmation vocale automatique
-  speakJarvisResponse(finalAssistantMessage);
+  // Confirmation vocale automatique avec la voix masculine JARVIS
+  speakJarvisVoice(finalAssistantMessage);
 
   return finalAssistantMessage;
 }
@@ -982,6 +1013,8 @@ export async function executeJarvisAdminCommandDirect() {
 }
 
 // Bindings globaux
+window.speakJarvisVoice = speakJarvisVoice;
+window.speakJarvisResponse = speakJarvisVoice;
 window.executeJarvisCommand = executeJarvisCommand;
 window.toggleJarvisSpeechMute = toggleJarvisSpeechMute;
 window.openJarvisAdminModal = openJarvisAdminModal;

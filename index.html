@@ -32,7 +32,7 @@
     // Initialisation Service Worker pour PWA avec mise à jour immédiate
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", () => {
-        navigator.serviceWorker.register("./sw.js?v=19.2").then((reg) => {
+        navigator.serviceWorker.register("./sw.js?v=19.3").then((reg) => {
           reg.update();
           console.log("PWA Service Worker actif:", reg.scope);
         }).catch((err) => {
@@ -44,7 +44,7 @@
     if ("caches" in window) {
       caches.keys().then((names) => {
         names.forEach((name) => {
-          if (name !== "agenda-bac-v19.2") {
+          if (name !== "agenda-bac-v19.3") {
             caches.delete(name);
           }
         });
@@ -174,7 +174,7 @@
       if (viewImport) viewImport.style.display = tab === "import" ? "flex" : "none";
     };
   </script>
-  <link rel="stylesheet" href="css/styles.css?v=19.2" />
+  <link rel="stylesheet" href="css/styles.css?v=19.3" />
 </head>
 
 <body>
@@ -1814,7 +1814,7 @@
   </div>
 
   <!-- SCRIPT APPLICATION -->
-  <script type="module" src="js/app.js?v=19.2"></script>
+  <script type="module" src="js/app.js?v=19.3"></script>
 </body>
 
 </html>
