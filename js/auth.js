@@ -189,7 +189,13 @@ export function formatAuthError(code = "") {
 
 export async function loadUserProfile(uid) {
   try {
-    showLoading("Chargement de votre profil...");
+    showLoading("Chargement de votre profil et de votre emploi du temps...");
+    
+    // Définition immédiate de l'UID actif et attachement des écouteurs de données
+    state.activeStudentUid = uid;
+    state.isReadOnly = false;
+    attachStudentDataListeners(uid);
+
     let userSnap = null;
     try {
       userSnap = await get(ref(database, `users/${uid}`));
@@ -706,6 +712,21 @@ export function attachStudentDataListeners(sUid) {
   state.activeDataListeners.push({ refPath: seancesTodosRef, callback: onSeancesTodos });
 }
 
+export function resetToOwnSchedule() {
+  if (!state.currentUser) return;
+  const ownUid = state.currentUser.uid;
+  state.activeStudentUid = ownUid;
+  state.activeStudentProfile = state.currentUserProfile;
+  state.isReadOnly = false;
+
+  const banner = document.getElementById("viewContextBanner");
+  if (banner) banner.style.display = "none";
+
+  updateReadOnlyUI();
+  attachStudentDataListeners(ownUid);
+  render();
+}
+
 // Global Window Bindings
 window.showAuthModal = showAuthModal;
 window.switchAuthTab = switchAuthTab;
@@ -725,3 +746,4 @@ window.linkChildWithCode = linkChildWithCode;
 window.onParentSelectChild = onParentSelectChild;
 window.updateReadOnlyUI = updateReadOnlyUI;
 window.attachStudentDataListeners = attachStudentDataListeners;
+window.resetToOwnSchedule = resetToOwnSchedule;

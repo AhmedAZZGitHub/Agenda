@@ -25,8 +25,9 @@ export const state = {
 };
 
 export function getStudentPath(subPath = "") {
-  const uid = state.activeStudentUid || state.currentUser?.uid || "guest_demo";
-  return `student_data/${uid}/${subPath}`.replace(/\/+$/, "");
+  const uid = state.activeStudentUid || (state.currentUser && state.currentUser.uid) || "guest_demo";
+  const cleanSub = (subPath || "").replace(/^\/+/, "");
+  return cleanSub ? `student_data/${uid}/${cleanSub}` : `student_data/${uid}`;
 }
 
 export function getMon(d) {

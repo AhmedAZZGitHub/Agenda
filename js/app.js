@@ -31,6 +31,7 @@ onAuthStateChanged(auth, async (user) => {
 
   if (user) {
     state.currentUser = user;
+    state.activeStudentUid = user.uid; // Compte actif par défaut dès l'ouverture
     if (authOverlay) authOverlay.style.display = "none";
     if (mainApp) mainApp.style.display = "flex";
     if (authBtn) {

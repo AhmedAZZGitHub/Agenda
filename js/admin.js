@@ -222,14 +222,24 @@ export async function adminResetUserPassword(email) {
 }
 
 export async function inspectStudentByAdmin(studentUid) {
+  if (!studentUid) return;
+  showLoading("Connexion au planning de l'élève...");
   state.activeStudentUid = studentUid;
   const sSnap = await get(ref(database, `users/${studentUid}`));
-  state.activeStudentProfile = sSnap.val();
+  state.activeStudentProfile = sSnap.val() || { uid: studentUid };
   state.isReadOnly = false;
-  window.updateReadOnlyUI();
+  
+  const banner = document.getElementById("viewContextBanner");
+  const bannerText = document.getElementById("viewContextText");
+  if (banner) banner.style.display = "flex";
+  if (bannerText) {
+    bannerText.innerHTML = `👁️ <b>Supervision :</b> Planning de <b>${state.activeStudentProfile?.displayName || state.activeStudentProfile?.email || studentUid}</b>`;
+  }
+
   window.attachStudentDataListeners(studentUid);
+  hideLoading();
   window.closeOverlay("adminOverlay");
-  alert(`Vous supervisez le tableau de bord de : ${state.activeStudentProfile?.displayName || studentUid}`);
+  window.render();
 }
 
 export async function deleteUserByAdmin(uid, parentCode) {
