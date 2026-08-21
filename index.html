@@ -32,7 +32,7 @@
     // Initialisation Service Worker pour PWA avec mise à jour immédiate
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", () => {
-        navigator.serviceWorker.register("./sw.js?v=19.3").then((reg) => {
+        navigator.serviceWorker.register("./sw.js?v=19.4").then((reg) => {
           reg.update();
           console.log("PWA Service Worker actif:", reg.scope);
         }).catch((err) => {
@@ -44,7 +44,7 @@
     if ("caches" in window) {
       caches.keys().then((names) => {
         names.forEach((name) => {
-          if (name !== "agenda-bac-v19.3") {
+          if (name !== "agenda-bac-v19.4") {
             caches.delete(name);
           }
         });
@@ -174,7 +174,7 @@
       if (viewImport) viewImport.style.display = tab === "import" ? "flex" : "none";
     };
   </script>
-  <link rel="stylesheet" href="css/styles.css?v=19.3" />
+  <link rel="stylesheet" href="css/styles.css?v=19.4" />
 </head>
 
 <body>
@@ -1365,67 +1365,75 @@
     </div>
   </div>
 
-  <!-- MODALE EXCLUSIVE COPILOTE VOCAL ADMIN : JARVIS SUPRÊME -->
+  <!-- MODALE EXCLUSIVE COPILOTE VOCAL ADMIN : JARVIS SUPRÊME (HUD HOLOGRAPHIQUE) -->
   <div class="modal" id="jarvisAdminModal">
-    <div class="modal-box" style="max-width: 580px; gap: 14px; background: #0f172a; color: #f8fafc; border: 2px solid #38bdf8; box-shadow: 0 20px 50px rgba(56, 189, 248, 0.35);">
-      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(56, 189, 248, 0.3); padding-bottom: 8px;">
-        <span style="font-weight: 900; font-size: 17px; display: flex; align-items: center; gap: 8px; color: #38bdf8;">
-          🤖 JARVIS Suprême — Console Vocale & Administration
-        </span>
+    <div class="modal-box jarvis-modal-box" style="max-width: 540px; gap: 12px;">
+      <!-- HEADER HUD -->
+      <div class="jarvis-hud-header">
+        <div class="jarvis-hud-title">
+          <span>🤖 JARVIS SUPRÊME // HUD COMMAND</span>
+        </div>
         <div style="display: flex; align-items: center; gap: 8px;">
-          <button type="button" class="btn-action" style="padding: 4px 10px; font-size: 11.5px; font-weight: 700; background: rgba(56,189,248,0.15); color: #38bdf8; border: 1px solid #38bdf8;" onclick="window.toggleJarvisSpeechMute()">
+          <button type="button" id="btnJarvisAudioToggleModal" class="btn-action" style="padding: 4px 10px; font-size: 11.5px; font-weight: 700; background: rgba(0, 240, 255, 0.15); color: #00f0ff; border: 1px solid #00f0ff;" onclick="window.toggleJarvisSpeechMute()">
             🔊 Voix
           </button>
-          <span onclick="window.closeJarvisAdminModal()" style="cursor: pointer; color: #ef4444; font-size: 20px; font-weight: 800; line-height: 1;">✕</span>
+          <span onclick="window.closeJarvisAdminModal()" style="cursor: pointer; color: #ef4444; font-size: 22px; font-weight: 800; line-height: 1;">✕</span>
         </div>
       </div>
 
       <!-- STATUS BAR & STATS RAPIDES ADMIN -->
-      <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-        <span style="background: rgba(234, 88, 12, 0.2); border: 1px solid #ea580c; color: #fb923c; padding: 4px 10px; border-radius: 99px; font-size: 11.5px; font-weight: 800;">
-          ⏳ Demandes en attente : <b id="jarvisPendingCount">0</b>
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
+        <span style="background: rgba(234, 88, 12, 0.2); border: 1px solid #ea580c; color: #fb923c; padding: 3px 10px; border-radius: 99px; font-size: 11px; font-weight: 800;">
+          ⏳ En attente : <b id="jarvisPendingCount">0</b>
         </span>
-        <span style="background: rgba(56, 189, 248, 0.15); border: 1px solid #38bdf8; color: #38bdf8; padding: 4px 10px; border-radius: 99px; font-size: 11.5px; font-weight: 800;">
-          🛡️ Mode Super-Administrateur Actif
+        <span style="background: rgba(0, 240, 255, 0.15); border: 1px solid #00f0ff; color: #00f0ff; padding: 3px 10px; border-radius: 99px; font-size: 11px; font-weight: 800;">
+          🛡️ Super-Admin Actif
         </span>
       </div>
 
-      <!-- BOUTON MICROPHONE JARVIS ADMIN -->
-      <div style="text-align: center; padding: 6px 0 10px 0;">
-        <button type="button" class="ai-mic-btn" id="jarvisAdminMicBtn" onclick="window.toggleJarvisAdminRecording()" style="border-color: #38bdf8; box-shadow: 0 0 20px rgba(56, 189, 248, 0.4);" title="Parler à JARVIS">
-          🎙️
-        </button>
-        <div id="jarvisMicStatusText" style="font-size: 12px; font-weight: 700; color: #94a3b8; margin-top: 10px; line-height: 1.4;">
-          Dictez vos ordres d'administration (approbation, suppression, annonces, inspection).
+      <!-- ORBE HOLOGRAPHIQUE CENTRAL ANIMÉ -->
+      <div class="jarvis-orb-stage">
+        <div class="jarvis-orb-container jarvis-idle" id="jarvisOrbContainer" onclick="window.toggleJarvisAdminRecording()" title="Touchez l'orbe pour parler à JARVIS">
+          <div class="jarvis-ring ring-1"></div>
+          <div class="jarvis-ring ring-2"></div>
+          <div class="jarvis-ring ring-3"></div>
+          <div class="jarvis-core" id="jarvisCore">
+            <span>JARVIS</span>
+          </div>
         </div>
-      </div>
 
-      <!-- TEXTE SAISI / DICTÉ -->
-      <div>
-        <label style="font-size: 11px; font-weight: 700; color: #94a3b8; display: block; margin-bottom: 4px;">
-          ⚡ Ordre vocal ou commande textuelle :
-        </label>
-        <textarea id="jarvisAdminInput" class="input" style="width: 100%; height: 75px; resize: none; font-size: 13px; background: #1e293b; color: #f8fafc; border-color: rgba(56, 189, 248, 0.4);"
-          placeholder="Ex: Approuve la demande de Sami / Supprime le compte de test@gmail.com / Publie l'annonce : Révision Bac / Tous les devoirs sont en ligne..."></textarea>
-      </div>
-
-      <!-- EXEMPLES EXCLUSIFS ADMIN -->
-      <div>
-        <div style="font-size: 11px; font-weight: 700; color: #94a3b8; margin-bottom: 6px;">💡 Exemples d'ordres administrateur :</div>
-        <div style="display: flex; gap: 6px; flex-wrap: wrap;">
-          <span class="example-chip" style="background: #1e293b; color: #38bdf8; border-color: rgba(56,189,248,0.4);" onclick="document.getElementById('jarvisAdminInput').value='Approuve la demande d\'inscription de Sami'">✅ Approuver compte</span>
-          <span class="example-chip" style="background: #1e293b; color: #38bdf8; border-color: rgba(56,189,248,0.4);" onclick="document.getElementById('jarvisAdminInput').value='Publie une annonce globale : Rappel Devoir / Le DS de Maths aura lieu samedi à 9h'">📢 Publier annonce</span>
-          <span class="example-chip" style="background: #1e293b; color: #38bdf8; border-color: rgba(56,189,248,0.4);" onclick="document.getElementById('jarvisAdminInput').value='Inspecte le planning de l\'élève Ahmed'">👁️ Inspecter élève</span>
-          <span class="example-chip" style="background: #1e293b; color: #38bdf8; border-color: rgba(56,189,248,0.4);" onclick="document.getElementById('jarvisAdminInput').value='Active l\'accès IA pour l\'élève Karim'">🔓 Activer option IA</span>
+        <!-- ONDES SONORES / VISUALIZER -->
+        <div class="jarvis-waves-bar" id="jarvisWavesBar">
+          <div class="jarvis-wave-line"></div>
+          <div class="jarvis-wave-line"></div>
+          <div class="jarvis-wave-line"></div>
+          <div class="jarvis-wave-line"></div>
+          <div class="jarvis-wave-line"></div>
         </div>
+
+        <!-- STATUT HUD DIRECT -->
+        <div class="jarvis-status-text" id="jarvisStatusText">CONNEXION ÉTABLIE // EN ATTENTE</div>
+        <div class="jarvis-status-sub">⚡ Touchez l'orbe pour parler ou dictez directement</div>
       </div>
 
-      <div id="jarvisAdminFeedbackBox" style="display: none; padding: 12px; border-radius: 12px; font-size: 13px; font-weight: 700; line-height: 1.4; background: rgba(56, 189, 248, 0.1); border: 1.5px solid #38bdf8; color: #38bdf8;"></div>
+      <!-- ZONE DE TRANSCRIPTION & RÉPONSE DIRECTE HUD -->
+      <div class="jarvis-transcript-box" id="jarvisLiveTranscript" style="display: none;"></div>
 
-      <div style="display: flex; gap: 8px;">
-        <button type="button" class="btn-add" style="flex: 1; justify-content: center; padding: 12px; font-size: 13.5px; background: linear-gradient(135deg, #0284c7, #4f46e5);" onclick="window.executeJarvisAdminCommandDirect()">
-          ⚡ Exécuter l'Ordre Administrateur
+      <!-- SAISIE TEXTUELLE DIRECTE / FALLBACK -->
+      <form onsubmit="event.preventDefault(); window.executeJarvisAdminCommandDirect();" style="display: flex; gap: 8px; align-items: center;">
+        <input type="text" id="jarvisAdminInput" class="input" style="flex: 1; font-size: 13px; background: rgba(15, 23, 42, 0.9); color: #f8fafc; border-color: rgba(0, 240, 255, 0.35); padding: 9px 12px;"
+          placeholder="Ex: Séance de français vendredi 10h-12h / Approuve Sami / Publie annonce..." autocomplete="off" />
+        <button type="submit" class="btn-add" style="padding: 9px 16px; font-weight: 800; font-size: 13px; background: linear-gradient(135deg, #00f0ff, #4f46e5); color: #ffffff; border: none;">
+          ⚡ Ordre
         </button>
+      </form>
+
+      <!-- EXEMPLES RAPIDES ADMIN & PLANNING -->
+      <div style="display: flex; gap: 5px; flex-wrap: wrap;">
+        <span class="example-chip" style="background: rgba(15,23,42,0.8); color: #00f0ff; border-color: rgba(0,240,255,0.3); font-size: 11px; padding: 3px 8px;" onclick="document.getElementById('jarvisAdminInput').value='Séance de français vendredi de 10h à 12h'; window.executeJarvisAdminCommandDirect();">📚 Français ven 10h-12h</span>
+        <span class="example-chip" style="background: rgba(15,23,42,0.8); color: #00ffa3; border-color: rgba(0,255,163,0.3); font-size: 11px; padding: 3px 8px;" onclick="document.getElementById('jarvisAdminInput').value='Approuve la demande d\'inscription de Sami'; window.executeJarvisAdminCommandDirect();">✅ Approuver Sami</span>
+        <span class="example-chip" style="background: rgba(15,23,42,0.8); color: #38bdf8; border-color: rgba(56,189,248,0.3); font-size: 11px; padding: 3px 8px;" onclick="document.getElementById('jarvisAdminInput').value='Publie une annonce globale : Révision Bac / Séances en ligne ouvertes'; window.executeJarvisAdminCommandDirect();">📢 Publier annonce</span>
+        <span class="example-chip" style="background: rgba(15,23,42,0.8); color: #a78bfa; border-color: rgba(167,139,250,0.3); font-size: 11px; padding: 3px 8px;" onclick="document.getElementById('jarvisAdminInput').value='Inspecte le planning de l\'élève Ahmed'; window.executeJarvisAdminCommandDirect();">👁️ Inspecter élève</span>
       </div>
     </div>
   </div>
@@ -1814,7 +1822,7 @@
   </div>
 
   <!-- SCRIPT APPLICATION -->
-  <script type="module" src="js/app.js?v=19.3"></script>
+  <script type="module" src="js/app.js?v=19.4"></script>
 </body>
 
 </html>

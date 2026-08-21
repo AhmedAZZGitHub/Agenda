@@ -33,8 +33,50 @@ export function toggleJarvisSpeechMute() {
   return !isJarvisAudioMuted;
 }
 
+export function setJarvisOrbState(stateName, statusText) {
+  const container = document.getElementById("jarvisOrbContainer");
+  const statusEl = document.getElementById("jarvisStatusText");
+
+  if (container) {
+    container.classList.remove("jarvis-idle", "jarvis-listening", "jarvis-thinking", "jarvis-speaking");
+    container.classList.add(`jarvis-${stateName}`);
+  }
+
+  if (statusEl) {
+    if (statusText) {
+      statusEl.innerHTML = statusText;
+    } else {
+      switch (stateName) {
+        case "listening":
+          statusEl.innerHTML = "À L'ÉCOUTE...";
+          break;
+        case "thinking":
+          statusEl.innerHTML = "ANALYSE DE L'ORDRE...";
+          break;
+        case "speaking":
+          statusEl.innerHTML = "TRANSMISSION VOCALE...";
+          break;
+        default:
+          statusEl.innerHTML = "CONNEXION ÉTABLIE // EN ATTENTE";
+          break;
+      }
+    }
+
+    if (stateName === "listening") {
+      statusEl.style.color = "#00ffa3";
+    } else if (stateName === "thinking") {
+      statusEl.style.color = "#818cf8";
+    } else {
+      statusEl.style.color = "#00f0ff";
+    }
+  }
+}
+
 export function speakJarvisVoice(text) {
-  if (isJarvisAudioMuted || !("speechSynthesis" in window) || !text) return;
+  if (isJarvisAudioMuted || !("speechSynthesis" in window) || !text) {
+    setJarvisOrbState("idle", "CONNEXION ÉTABLIE // EN ATTENTE");
+    return;
+  }
   try {
     window.speechSynthesis.cancel(); // Stoppe toute lecture en cours
 
@@ -46,14 +88,17 @@ export function speakJarvisVoice(text) {
       .replace(/\s{2,}/g, " ")
       .trim();
 
-    if (!cleanText) return;
+    if (!cleanText) {
+      setJarvisOrbState("idle", "CONNEXION ÉTABLIE // EN ATTENTE");
+      return;
+    }
 
     const utterance = new SpeechSynthesisUtterance(cleanText);
     utterance.lang = "fr-FR";
 
-    // Calibrage JARVIS : Rapide (1.18x) et ton masculin posé
-    utterance.rate = 1.18;  // Débit vif et réactif sans bégaiement
-    utterance.pitch = 0.92; // Tonalité masculine légèrement plus grave
+    // Calibrage JARVIS : Rapide (1.20x) et ton masculin posé (0.90)
+    utterance.rate = 1.20;  // Débit vif et réactif sans bégaiement
+    utterance.pitch = 0.90; // Tonalité masculine posée et grave
 
     // Sélection de la meilleure voix masculine disponible sur le système
     const voices = window.speechSynthesis.getVoices();
@@ -86,9 +131,22 @@ export function speakJarvisVoice(text) {
       utterance.voice = maleFrenchVoice;
     }
 
+    utterance.onstart = () => {
+      setJarvisOrbState("speaking", "TRANSMISSION VOCALE...");
+    };
+
+    utterance.onend = () => {
+      setJarvisOrbState("idle", "CONNEXION ÉTABLIE // EN ATTENTE");
+    };
+
+    utterance.onerror = () => {
+      setJarvisOrbState("idle", "CONNEXION ÉTABLIE // EN ATTENTE");
+    };
+
     window.speechSynthesis.speak(utterance);
   } catch (err) {
     console.warn("Synthèse vocale non disponible:", err);
+    setJarvisOrbState("idle", "CONNEXION ÉTABLIE // EN ATTENTE");
   }
 }
 
@@ -708,14 +766,12 @@ export async function executeJarvisCommand(rawUserText) {
   }
 
   showLoading("Gemini analyse directement votre demande...");
+  setJarvisOrbState("thinking", "ANALYSE DE L'ORDRE...");
   const feedbackBox = document.getElementById("aiFeedbackBox");
 
   const apiKey = getAiApiKey();
   const rawModel = getAiModelName();
-  let modelName = rawModel;
-  if (!modelName || modelName.includes("3.6") || modelName.includes("3.7") || modelName.includes("3.1")) {
-    modelName = "gemini-2.5-flash";
-  }
+  let modelName = rawModel || "gemini-3.6-flash";
 
   const profile = state.currentUserProfile || {};
   const email = (state.currentUser?.email || profile.email || "").toLowerCase().trim();
@@ -869,6 +925,16 @@ RÈGLES STRICTES :
     `;
   }
 
+  // Mise à jour de la zone de transcription HUD directe
+  const transcriptEl = document.getElementById("jarvisLiveTranscript");
+  if (transcriptEl) {
+    transcriptEl.style.display = "block";
+    transcriptEl.innerHTML = `
+      <div class="user-text">🗣️ <b>Ordre :</b> ${text}</div>
+      <div class="jarvis-text">🤖 <b>JARVIS :</b> ${finalAssistantMessage}</div>
+    `;
+  }
+
   // Confirmation vocale automatique avec la voix masculine JARVIS
   speakJarvisVoice(finalAssistantMessage);
 
@@ -901,13 +967,14 @@ export function openJarvisAdminModal() {
     const pendingList = (state.allUsersCache || []).filter((u) => u.status === "pending");
     pendingEl.innerText = pendingList.length;
   }
-  const fb = document.getElementById("jarvisAdminFeedbackBox");
-  if (fb) fb.style.display = "none";
+
+  setJarvisOrbState("idle", "CONNEXION ÉTABLIE // EN ATTENTE");
   window.openModal("jarvisAdminModal");
 }
 
 export function closeJarvisAdminModal() {
   stopJarvisAdminRecording();
+  if (window.speechSynthesis) window.speechSynthesis.cancel();
   window.closeModal("jarvisAdminModal");
 }
 
@@ -924,8 +991,7 @@ export function startJarvisAdminRecording() {
   if (!SpeechRecognition) return alert("Reconnaissance vocale non supportée sur ce navigateur.");
 
   const input = document.getElementById("jarvisAdminInput");
-  const micBtn = document.getElementById("jarvisAdminMicBtn");
-  const statusTxt = document.getElementById("jarvisMicStatusText");
+  const transcriptEl = document.getElementById("jarvisLiveTranscript");
 
   try {
     const rec = new SpeechRecognition();
@@ -938,11 +1004,7 @@ export function startJarvisAdminRecording() {
     rec.onstart = () => {
       isJarvisAdminRecording = true;
       finalTranscript = "";
-      if (micBtn) micBtn.classList.add("listening");
-      if (statusTxt) {
-        statusTxt.innerHTML = "🔴 <b>JARVIS écoute vos ordres (planning & admin)...</b>";
-        statusTxt.style.color = "#38bdf8";
-      }
+      setJarvisOrbState("listening", "À L'ÉCOUTE DE VOS ORDRES...");
     };
 
     rec.onresult = (event) => {
@@ -957,6 +1019,10 @@ export function startJarvisAdminRecording() {
       const combined = (finalTranscript + interim).trim();
       if (input && combined) {
         input.value = combined;
+      }
+      if (transcriptEl && combined) {
+        transcriptEl.style.display = "block";
+        transcriptEl.innerHTML = `<div class="user-text">🗣️ <b>Dictée :</b> ${combined}</div>`;
       }
     };
 
@@ -980,13 +1046,6 @@ export function startJarvisAdminRecording() {
 
 export function stopJarvisAdminRecording() {
   isJarvisAdminRecording = false;
-  const micBtn = document.getElementById("jarvisAdminMicBtn");
-  const statusTxt = document.getElementById("jarvisMicStatusText");
-  if (micBtn) micBtn.classList.remove("listening");
-  if (statusTxt) {
-    statusTxt.innerHTML = "Dictez vos ordres d'administration (approbation, suppression, annonces, inspection).";
-    statusTxt.style.color = "#94a3b8";
-  }
   if (window._jarvisAdminRec) {
     try {
       window._jarvisAdminRec.stop();
@@ -1000,19 +1059,18 @@ export async function executeJarvisAdminCommandDirect() {
   const rawText = input ? input.value.trim() : "";
   if (!rawText) return;
 
-  const fb = document.getElementById("jarvisAdminFeedbackBox");
-  if (fb) {
-    fb.style.display = "block";
-    fb.innerHTML = "⏳ Exécution de l'ordre administrateur...";
+  setJarvisOrbState("thinking", "ANALYSE DE L'ORDRE VIA GEMINI...");
+  const transcriptEl = document.getElementById("jarvisLiveTranscript");
+  if (transcriptEl) {
+    transcriptEl.style.display = "block";
+    transcriptEl.innerHTML = `<div class="user-text">⚡ <b>Ordre en cours :</b> ${rawText}</div>`;
   }
 
-  const result = await executeJarvisCommand(rawText);
-  if (fb) {
-    fb.innerHTML = `⚡ <b>Résultat JARVIS :</b><br>${result.replace(/\n/g, "<br>")}`;
-  }
+  await executeJarvisCommand(rawText);
 }
 
 // Bindings globaux
+window.setJarvisOrbState = setJarvisOrbState;
 window.speakJarvisVoice = speakJarvisVoice;
 window.speakJarvisResponse = speakJarvisVoice;
 window.executeJarvisCommand = executeJarvisCommand;
