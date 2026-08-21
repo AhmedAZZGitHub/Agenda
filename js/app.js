@@ -1,19 +1,19 @@
 // js/app.js
 // Point d'Entrée Principal de l'Application
 
-import { auth, onAuthStateChanged } from "./firebase-config.js?v=18.0";
-import { state } from "./state.js?v=18.0";
-import { loadUserProfile, detachAllDataListeners, renderUserProfileBar, updateReadOnlyUI } from "./auth.js?v=18.0";
-import { render, updateBacCountdown, updateHomeStreak } from "./calendar.js?v=18.0";
-import { initBacArchiveTabs, switchTrimester } from "./grades.js?v=18.0";
+import { auth, onAuthStateChanged } from "./firebase-config.js?v=18.8";
+import { state } from "./state.js?v=18.8";
+import { loadUserProfile, detachAllDataListeners, renderUserProfileBar, updateReadOnlyUI } from "./auth.js?v=18.8";
+import { render, updateBacCountdown, updateHomeStreak } from "./calendar.js?v=18.8";
+import { initBacArchiveTabs, switchTrimester } from "./grades.js?v=18.8";
 
 // Import modules to register window bindings
-import "./maps.js?v=18.0";
-import "./ai-assistant.js?v=18.0";
-import "./jarvis-engine.js?v=18.0";
-import "./admin.js?v=18.0";
-import "./tutor-ai.js?v=18.0";
-import { initNotificationsSystem } from "./notifications.js?v=18.0";
+import "./maps.js?v=18.8";
+import "./ai-assistant.js?v=18.8";
+import "./jarvis-engine.js?v=18.8";
+import "./admin.js?v=18.8";
+import "./tutor-ai.js?v=18.8";
+import { initNotificationsSystem } from "./notifications.js?v=18.8";
 
 // Initialisation par défaut du modèle officiel Google Gemini Vision recommandé
 try {
@@ -78,7 +78,6 @@ onAuthStateChanged(auth, async (user) => {
     if (btnParent) btnParent.style.display = "none";
     if (pCtrl) pCtrl.style.display = "none";
     if (btnAdmin) btnAdmin.style.display = "none";
-    const btnJarvis = document.getElementById("btnJarvisAdmin");
     if (btnJarvis) btnJarvis.style.display = "inline-flex";
     if (btnProf) btnProf.style.display = "none";
 
