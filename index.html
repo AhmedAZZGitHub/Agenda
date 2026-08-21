@@ -163,7 +163,7 @@
       if (viewImport) viewImport.style.display = tab === "import" ? "flex" : "none";
     };
   </script>
-  <link rel="stylesheet" href="css/styles.css?v=18.3" />
+  <link rel="stylesheet" href="css/styles.css?v=18.4" />
 </head>
 
 <body>
@@ -309,7 +309,13 @@
           Validation des demandes d'accès, gestion globale des comptes et annonces
         </div>
       </div>
-      <button class="btn-close" onclick="window.closeOverlay('adminOverlay')">Fermer ✕</button>
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <button class="btn-action" id="btnJarvisAdminConsole" onclick="window.openJarvisAdminModal()"
+          style="background: linear-gradient(135deg, #0f172a, #1e293b); border: 1.5px solid #38bdf8; color: #38bdf8; font-weight: 800; box-shadow: 0 4px 12px rgba(56, 189, 248, 0.25);">
+          🤖 Copilote JARVIS
+        </button>
+        <button class="btn-close" onclick="window.closeOverlay('adminOverlay')">Fermer ✕</button>
+      </div>
     </div>
 
     <div style="max-width: 1150px; margin: 0 auto; width: 100%; display: flex; flex-direction: column; gap: 16px">
@@ -759,7 +765,12 @@
           onchange="window.handleImageUpload(event)" />
         <button class="btn-vision student-action-btn" onclick="document.getElementById('photoInput').click()">📸 Scanner</button>
         <button class="btn-action student-action-btn" onclick="window.openShareScheduleModal()" style="font-weight: 800; border-color: var(--primary); color: var(--primary);">📋 Copier Planning</button>
-        <button class="btn-mic student-action-btn" id="mainMicBtn" onclick="window.voiceInput()">🎙️ Micro IA</button>
+        <button class="btn-mic student-action-btn" id="mainMicBtn" onclick="window.voiceInput()" title="Assistant vocal pour dicter vos cours et devoirs">🎙️ Micro IA</button>
+        <button class="btn-action student-action-btn" id="mainJarvisAdminBtn" onclick="window.openJarvisAdminModal()"
+          style="display: none; background: linear-gradient(135deg, #0f172a, #1e293b); border: 1.5px solid #38bdf8; color: #38bdf8; font-weight: 800; box-shadow: 0 4px 12px rgba(56, 189, 248, 0.25);"
+          title="Copilote Vocal et Administration JARVIS Suprême">
+          🤖 JARVIS Admin
+        </button>
         <button class="btn-add student-action-btn" onclick="window.openModal('addModal')">+ Séance</button>
         <button class="btn-action student-action-btn" onclick="window.clearAllData()"
           style="color: #ef4444; border-color: #fca5a5">
@@ -1655,7 +1666,7 @@
   </div>
 
   <!-- SCRIPT APPLICATION -->
-  <script type="module" src="js/app.js?v=18.3"></script>
+  <script type="module" src="js/app.js?v=18.4"></script>
 </body>
 
 </html>

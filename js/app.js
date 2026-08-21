@@ -78,7 +78,9 @@ onAuthStateChanged(auth, async (user) => {
     if (btnParent) btnParent.style.display = "none";
     if (pCtrl) pCtrl.style.display = "none";
     if (btnAdmin) btnAdmin.style.display = "none";
-    if (btnJarvis) btnJarvis.style.display = "none";
+    document.querySelectorAll("#btnJarvisAdmin, #mainJarvisAdminBtn, #btnJarvisAdminConsole").forEach((btn) => {
+      btn.style.display = "none";
+    });
     if (btnProf) btnProf.style.display = "none";
 
     updateReadOnlyUI();

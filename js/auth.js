@@ -331,14 +331,19 @@ export function renderUserProfileBar() {
 
   const btnParent = document.getElementById("btnMyParentCode");
   const pCtrl = document.getElementById("parentChildControls");
-  const btnAdmin = document.getElementById("btnAdminConsole");
-  const btnJarvis = document.getElementById("btnJarvisAdmin");
-  const btnProf = document.getElementById("btnMyProfile");
+  const isAdmin =
+    state.currentUserProfile.role === "admin" ||
+    isMasterAdmin(state.currentUser?.email, state.currentUser?.uid) ||
+    (state.currentUser?.email && state.currentUser.email.toLowerCase().includes("ahmedazzouzi72"));
 
-  if (btnParent) btnParent.style.display = state.currentUserProfile.role === "student" || state.currentUserProfile.role === "admin" ? "inline-flex" : "none";
+  if (btnParent) btnParent.style.display = state.currentUserProfile.role === "student" || isAdmin ? "inline-flex" : "none";
   if (pCtrl) pCtrl.style.display = state.currentUserProfile.role === "parent" ? "inline-flex" : "none";
-  if (btnAdmin) btnAdmin.style.display = state.currentUserProfile.role === "admin" ? "inline-flex" : "none";
-  if (btnJarvis) btnJarvis.style.display = state.currentUserProfile.role === "admin" ? "inline-flex" : "none";
+  if (btnAdmin) btnAdmin.style.display = isAdmin ? "inline-flex" : "none";
+
+  const jarvisButtons = document.querySelectorAll("#btnJarvisAdmin, #mainJarvisAdminBtn, #btnJarvisAdminConsole");
+  jarvisButtons.forEach((btn) => {
+    btn.style.display = isAdmin ? "inline-flex" : "none";
+  });
   if (btnProf) btnProf.style.display = "inline-flex";
 
   const pCodeDisp = document.getElementById("myParentCodeDisplay");
