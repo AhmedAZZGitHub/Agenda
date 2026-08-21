@@ -163,7 +163,7 @@
       if (viewImport) viewImport.style.display = tab === "import" ? "flex" : "none";
     };
   </script>
-  <link rel="stylesheet" href="css/styles.css?v=18.4" />
+  <link rel="stylesheet" href="css/styles.css?v=18.5" />
 </head>
 
 <body>
@@ -662,55 +662,51 @@
 
   <!-- INTERFACE PRINCIPALE (AFFICHÉE UNIQUEMENT APRÈS APPROBATION ET CONNEXION) -->
   <div class="main-wrap" id="mainAppWrap" style="display: none;">
-    <!-- BARRE UTILISATEUR TOP -->
+    <!-- ============================================================
+         1. NAVBAR SUPÉRIEURE ÉPURÉE (LIGNE 1 UNIQUE)
+         ============================================================ -->
     <div class="user-top-bar" id="userTopBar">
-      <div class="user-info-group">
-        <div class="user-avatar" id="userAvatarIco" onclick="window.openUserProfileModal()" style="cursor: pointer;" title="Ouvrir mon profil">👤</div>
-        <div class="user-name-role" onclick="window.openUserProfileModal()" style="cursor: pointer;" title="Ouvrir mon profil">
+      <div class="user-info-clickable" onclick="window.openUserProfileModal()" title="Ouvrir mon profil & gestion">
+        <div class="user-avatar" id="userAvatarIco">👤</div>
+        <div class="user-name-role">
           <span class="user-name" id="userNameLabel">Visiteur</span>
           <span class="role-badge role-student" id="userRoleBadge">ÉLÈVE</span>
         </div>
-
-        <button class="btn-action" id="btnMyProfile" onclick="window.openUserProfileModal()" style="display: none; font-weight: 700;">
-          👤 Mon Profil
-        </button>
-
-        <button class="btn-action btn-accent" id="btnMyParentCode" onclick="window.openStudentCodeModal()"
-          style="display: none">
-          🔗 Mon Code Parent
-        </button>
-
-        <div id="parentChildControls" style="display: none; align-items: center; gap: 6px; flex-wrap: wrap">
-          <span style="font-size: 11.5px; font-weight: 800; color: var(--muted)">👶 Élève :</span>
-          <select id="parentChildSelect" class="input" style="padding: 4px 8px; font-weight: 700"
-            onchange="window.onParentSelectChild(this.value)">
-            <option value="">Aucun enfant associé</option>
-          </select>
-          <button class="btn-action" onclick="window.openModal('linkChildModal')">+ Lier un élève</button>
-        </div>
-
-        <button class="btn-action btn-accent" id="btnAdminConsole" onclick="window.openOverlay('adminOverlay')"
-          style="display: none">
-          🛡️ Console Admin
-        </button>
-        <button class="btn-action" id="btnJarvisAdmin" onclick="window.openJarvisAdminModal()"
-          style="display: none; background: linear-gradient(135deg, #0f172a, #1e293b); border: 1.5px solid #38bdf8; color: #38bdf8; font-weight: 800; box-shadow: 0 4px 12px rgba(56, 189, 248, 0.25);"
-          title="Copilote Vocal et Administration JARVIS Suprême">
-          🤖 JARVIS Admin
-        </button>
       </div>
 
-      <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap">
-        <button class="btn-action btn-pwa-install" onclick="window.installPWA()" style="padding: 6px 12px; font-size: 12px; font-weight: 800; background: linear-gradient(135deg, #0284c7, #4f46e5); color: #ffffff; border: none; display: inline-flex; align-items: center; gap: 4px; border-radius: 10px;" title="Installer l'application sur votre appareil">📲 Installer l'App</button>
-        <button class="btn-action student-action-btn" id="btnTopShareSchedule" onclick="window.openShareScheduleModal()" style="padding: 6px 12px; font-size: 12px; font-weight: 800; border-color: var(--primary); color: var(--primary); display: flex; align-items: center; gap: 4px;" title="Copier ou partager un emploi du temps avec un code">📋 Copier Planning</button>
-        <button class="btn-action" id="btnToggleNotifications" style="padding: 6px 12px; font-size: 12px; font-weight: 800;" onclick="window.requestNotificationPermission ? window.requestNotificationPermission() : null" title="Activer / Gérer les rappels de cours et d'étude">🔔 Activer Rappels</button>
-        <button class="btn-action" id="btnToggleDark" onclick="window.toggleDarkMode()">🌙 Mode Sombre</button>
-        <button class="btn-action" id="authActionBtn" style="color: var(--primary);" onclick="window.showAuthModal()">
+      <div class="user-top-actions">
+        <!-- SÉLECTEUR ENFANT SI COMPTE PARENT (DISCRET) -->
+        <div id="parentChildControls" style="display: none; align-items: center; gap: 4px;">
+          <select id="parentChildSelect" class="input" style="padding: 4px 8px; font-weight: 700; font-size: 11px;"
+            onchange="window.onParentSelectChild(this.value)">
+            <option value="">👶 Aucun enfant</option>
+          </select>
+        </div>
+
+        <!-- 🤖 BOUTON JARVIS ADMIN MIS EN VALEUR (STRICTEMENT ADMIN) -->
+        <button class="btn-jarvis-nav" id="btnJarvisAdmin" onclick="window.openJarvisAdminModal()"
+          style="display: none;" title="Copilote Vocal & Administration JARVIS Suprême">
+          🤖 JARVIS Admin
+        </button>
+
+        <!-- ⚙️ BOUTON HUB GESTION / PROFIL -->
+        <button class="btn-icon-nav" id="btnOpenProfileHub" onclick="window.openUserProfileModal()" title="Profil, Gestion & Options">
+          ⚙️
+        </button>
+
+        <!-- 🌙 / ☀️ TOGGLE THÈME COMPACT (ICÔNE SEULE) -->
+        <button class="btn-icon-nav" id="btnToggleDark" onclick="window.toggleDarkMode()" title="Changer de thème">
+          🌙
+        </button>
+
+        <!-- BOUTON CONNEXION (SI NON CONNECTÉ) -->
+        <button class="btn-nav-login" id="authActionBtn" onclick="window.showAuthModal()">
           🔑 Connexion
         </button>
       </div>
     </div>
 
+    <!-- BANNIÈRES D'ÉTAT & ANNONCES -->
     <div class="view-context-banner" id="viewContextBanner" style="display: none">
       <span id="viewContextText">👁️ Mode Consultation en Direct</span>
       <span style="font-size: 11px; opacity: 0.9">Lecture seule</span>
@@ -722,7 +718,7 @@
         onclick="document.getElementById('activeAnnouncementBar').style.display='none'">✕</span>
     </div>
 
-    <!-- BANDEAU BAC & STREAK -->
+    <!-- BANDEAU BAC & COMPTE À REBOURS -->
     <div class="top-stats-row">
       <div class="bac-countdown-bar">
         <div class="bac-countdown-title">
@@ -737,43 +733,56 @@
       </div>
     </div>
 
-    <div class="header">
-      <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap">
+    <!-- ============================================================
+         2. BARRE DES MODULES BAC (LIGNE 2 - CHIPS ARRONDIS)
+         ============================================================ -->
+    <div class="bac-modules-bar">
+      <button class="module-chip highlight" onclick="window.openBacArchiveOverlay ? window.openBacArchiveOverlay() : window.openOverlay('bacArchiveOverlay')">
+        📚 Annales (2000-2026)
+      </button>
+      <button class="module-chip" onclick="window.openExamsOverlay ? window.openExamsOverlay() : window.openOverlay('examsOverlay')">
+        📝 Examens & DS
+      </button>
+      <button class="module-chip" onclick="window.openGradesOverlay ? window.openGradesOverlay() : window.openOverlay('gradesOverlay')">
+        🎯 Carnet de Notes
+      </button>
+      <button class="module-chip" onclick="window.openStats ? window.openStats() : window.openOverlay('statsOverlay')">
+        📊 Répartition
+      </button>
+      <button class="module-chip" onclick="window.openTimer ? window.openTimer() : window.openOverlay('timerOverlay')">
+        ⏱️ Minuteur
+      </button>
+    </div>
+
+    <!-- ============================================================
+         3. BARRE DU PLANNING (LIGNE 3 - JUSTE AU-DESSUS DE L'AGENDA)
+         ============================================================ -->
+    <div class="schedule-toolbar">
+      <div class="schedule-toolbar-left">
         <div class="switch-mode">
           <button class="btn-toggle" id="btnMob" onclick="window.setLayout('mobile')">📱 Mobile</button>
           <button class="btn-toggle" id="btnPc" onclick="window.setLayout('pc')">💻 PC</button>
         </div>
-        <button class="btn-action" onclick="window.goToToday ? window.goToToday() : null">Aujourd'hui</button>
-        <button class="btn-action" style="border-color: #0284c7; color: #0284c7; font-weight: 800;"
-          onclick="window.openBacArchiveOverlay ? window.openBacArchiveOverlay() : window.openOverlay('bacArchiveOverlay')">
-          📚 Annales Bac (2000-2026)
-        </button>
-        <button class="btn-action" onclick="window.openExamsOverlay ? window.openExamsOverlay() : window.openOverlay('examsOverlay')">📝 Examens & DS</button>
-        <button class="btn-action" onclick="window.openGradesOverlay ? window.openGradesOverlay() : window.openOverlay('gradesOverlay')">🎯 Carnet Trimestriel</button>
-        <button class="btn-action" onclick="window.openStats ? window.openStats() : window.openOverlay('statsOverlay')">📊 Répartition</button>
-        <button class="btn-action" onclick="window.openTimer ? window.openTimer() : window.openOverlay('timerOverlay')">⏱️ Minuteur</button>
+        <div class="date-nav-row">
+          <button class="btn-circ" onclick="window.shift(-1)">&lt;</button>
+          <span id="dateLabel" style="font-weight: 800; font-size: 13px; min-width: 100px; text-align: center;">...</span>
+          <button class="btn-circ" onclick="window.shift(1)">&gt;</button>
+          <button class="btn-action" style="padding: 4px 10px; font-size: 11.5px;" onclick="window.goToToday ? window.goToToday() : null">Aujourd'hui</button>
+        </div>
       </div>
 
-      <div class="date-row">
-        <button class="btn-circ" onclick="window.shift(-1)">&lt;</button>
-        <span id="dateLabel">...</span>
-        <button class="btn-circ" onclick="window.shift(1)">&gt;</button>
-      </div>
-
-      <div style="display: flex; gap: 6px; flex-wrap: wrap; align-items: center">
-        <input type="file" id="photoInput" accept="image/*" style="display: none"
-          onchange="window.handleImageUpload(event)" />
-        <button class="btn-vision student-action-btn" onclick="document.getElementById('photoInput').click()">📸 Scanner</button>
-        <button class="btn-action student-action-btn" onclick="window.openShareScheduleModal()" style="font-weight: 800; border-color: var(--primary); color: var(--primary);">📋 Copier Planning</button>
-        <button class="btn-mic student-action-btn" id="mainMicBtn" onclick="window.voiceInput()" title="Assistant vocal pour dicter vos cours et devoirs">🎙️ Micro IA</button>
-        <button class="btn-action student-action-btn" id="mainJarvisAdminBtn" onclick="window.openJarvisAdminModal()"
-          style="display: none; background: linear-gradient(135deg, #0f172a, #1e293b); border: 1.5px solid #38bdf8; color: #38bdf8; font-weight: 800; box-shadow: 0 4px 12px rgba(56, 189, 248, 0.25);"
-          title="Copilote Vocal et Administration JARVIS Suprême">
-          🤖 JARVIS Admin
+      <div class="schedule-toolbar-right">
+        <input type="file" id="photoInput" accept="image/*" style="display: none" onchange="window.handleImageUpload(event)" />
+        <button class="btn-mic student-action-btn" id="mainMicBtn" onclick="window.voiceInput()" title="Assistant vocal pour dicter vos cours et devoirs">
+          🎙️ Micro IA
         </button>
-        <button class="btn-add student-action-btn" onclick="window.openModal('addModal')">+ Séance</button>
-        <button class="btn-action student-action-btn" onclick="window.clearAllData()"
-          style="color: #ef4444; border-color: #fca5a5">
+        <button class="btn-vision student-action-btn" onclick="document.getElementById('photoInput').click()" title="Scanner un emploi du temps">
+          📸 Scanner
+        </button>
+        <button class="btn-add student-action-btn" onclick="window.openModal('addModal')">
+          ➕ Séance
+        </button>
+        <button class="btn-action student-action-btn btn-danger-subtle" onclick="window.clearAllData()" title="Effacer l'emploi du temps">
           🗑️ Vider
         </button>
       </div>
@@ -1513,8 +1522,72 @@
         </div>
       </div>
 
+      <!-- ============================================================
+           HUB CENTRALISÉ "GESTION, OUTILS & PARAMÈTRES"
+           ============================================================ -->
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        <div style="font-weight: 800; font-size: 13px; color: var(--muted); display: flex; align-items: center; gap: 6px;">
+          ⚡ GESTION & OUTILS DU COMPTE
+        </div>
+        <div class="profile-hub-grid">
+          <!-- 1. INSTALLER L'APPLICATION -->
+          <div class="profile-hub-card" onclick="window.installPWA()">
+            <div class="card-icon" style="color: #0284c7;">📲</div>
+            <div>
+              <div style="font-weight: 800;">Installer l'App</div>
+              <div style="font-size: 10.5px; color: var(--muted);">PWA & Hors-ligne</div>
+            </div>
+          </div>
+
+          <!-- 2. COPIER / PARTAGER PLANNING -->
+          <div class="profile-hub-card" onclick="window.closeModal('userProfileModal'); window.openShareScheduleModal();">
+            <div class="card-icon" style="color: #6366f1;">📋</div>
+            <div>
+              <div style="font-weight: 800;">Partager Planning</div>
+              <div style="font-size: 10.5px; color: var(--muted);">Code & Copie</div>
+            </div>
+          </div>
+
+          <!-- 3. RAPPELS & NOTIFICATIONS -->
+          <div class="profile-hub-card" onclick="window.requestNotificationPermission ? window.requestNotificationPermission() : null">
+            <div class="card-icon" style="color: #f59e0b;">🔔</div>
+            <div>
+              <div style="font-weight: 800;">Notifications</div>
+              <div style="font-size: 10.5px; color: var(--muted);">Rappels de cours</div>
+            </div>
+          </div>
+
+          <!-- 4. CONFIGURATION IA & CLÉ GEMINI -->
+          <div class="profile-hub-card" onclick="window.closeModal('userProfileModal'); window.openAiSettingsModal();">
+            <div class="card-icon" style="color: #10b981;">⚙️</div>
+            <div>
+              <div style="font-weight: 800;">Configuration IA</div>
+              <div style="font-size: 10.5px; color: var(--muted);">Clé Google Gemini</div>
+            </div>
+          </div>
+
+          <!-- 5. CONSOLE D'ADMINISTRATION (SI ADMIN) -->
+          <div class="profile-hub-card" id="btnHubAdminConsole" style="display: none; border-color: #be185d; background: rgba(190, 24, 93, 0.05);" onclick="window.closeModal('userProfileModal'); window.openOverlay('adminOverlay');">
+            <div class="card-icon" style="color: #be185d;">🛡️</div>
+            <div>
+              <div style="font-weight: 800; color: #be185d;">Console Admin</div>
+              <div style="font-size: 10.5px; color: var(--muted);">Validation & Comptes</div>
+            </div>
+          </div>
+
+          <!-- 6. DÉCONNEXION DU COMPTE -->
+          <div class="profile-hub-card" style="border-color: rgba(239, 68, 68, 0.3); background: rgba(239, 68, 68, 0.04);" onclick="window.closeModal('userProfileModal'); window.logout();">
+            <div class="card-icon" style="color: #ef4444;">🚪</div>
+            <div>
+              <div style="font-weight: 800; color: #ef4444;">Déconnexion</div>
+              <div style="font-size: 10.5px; color: var(--muted);">Fermer ma session</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- FORMULAIRES INFOS ET MOT DE PASSE -->
-      <div style="display: flex; flex-direction: column; gap: 14px;">
+      <div style="display: flex; flex-direction: column; gap: 14px; border-top: 1.5px solid var(--dash); padding-top: 12px;">
         <!-- INFORMATIONS DU COMPTE -->
         <form onsubmit="window.handleUpdateProfileInfo(event)" style="display: flex; flex-direction: column; gap: 10px;">
           <div style="font-weight: 800; font-size: 13.5px;">📝 Informations Personnelles</div>
@@ -1666,7 +1739,7 @@
   </div>
 
   <!-- SCRIPT APPLICATION -->
-  <script type="module" src="js/app.js?v=18.4"></script>
+  <script type="module" src="js/app.js?v=18.5"></script>
 </body>
 
 </html>

@@ -344,6 +344,8 @@ export function renderUserProfileBar() {
   jarvisButtons.forEach((btn) => {
     btn.style.display = isAdmin ? "inline-flex" : "none";
   });
+  const hubAdminCard = document.getElementById("btnHubAdminConsole");
+  if (hubAdminCard) hubAdminCard.style.display = isAdmin ? "flex" : "none";
   if (btnProf) btnProf.style.display = "inline-flex";
 
   const pCodeDisp = document.getElementById("myParentCodeDisplay");
