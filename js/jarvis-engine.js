@@ -680,9 +680,19 @@ export async function executeJarvisCommand(rawUserText) {
   const feedbackBox = document.getElementById("aiFeedbackBox");
 
   const apiKey = getAiApiKey();
-  const modelName = getAiModelName();
+  const rawModel = getAiModelName();
+  let modelName = rawModel;
+  if (!modelName || modelName.includes("3.6") || modelName.includes("3.7") || modelName.includes("3.1")) {
+    modelName = "gemini-2.5-flash";
+  }
+
   const profile = state.currentUserProfile || {};
-  const isAdmin = profile.role === "admin";
+  const email = (state.currentUser?.email || profile.email || "").toLowerCase().trim();
+  const isAdmin =
+    profile.role === "admin" ||
+    email === "ahmedazzouzi72@gmail.com" ||
+    email === "admin@agenda.tn" ||
+    email === "admin@planningbac.tn";
 
   let finalAssistantMessage = "";
 
@@ -700,17 +710,17 @@ export async function executeJarvisCommand(rawUserText) {
     const currentTime = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
 
     // Prompt système direct exigé
-    const systemInstruction = `Tu es un assistant de planification d'élite et tuteur personnel du Baccalauréat tunisien.
+    const systemInstruction = `Tu es un assistant de planification d'élite et tuteur personnel du Baccalauréat tunisien ("JARVIS").
 Date actuelle : ${currentDayName} ${todayIso} à ${currentTime}.
-Utilisateur : ${profile.displayName || profile.email || "Élève"} (${profile.role || "student"}).
+Utilisateur : ${profile.displayName || profile.email || (isAdmin ? "Administrateur" : "Élève")} (${isAdmin ? "admin" : (profile.role || "student")}).
 
-Ton rôle est de comprendre la demande brute de l'utilisateur (même avec des hésitations, des répétitions ou en mélangeant français et dialecte tunisien) et d'extraire avec une précision chirurgicale les arguments exacts pour l'action demandée.
+Ton rôle est de comprendre la demande brute de l'utilisateur (même avec des hésitations, des répétitions ou en mélangeant français et dialecte tunisien) et d'exécuter l'outil adéquat (planning ou administration) avec une précision chirurgicale.
 
 RÈGLES STRICTES :
-1. HORAIRES EXACTS : Si l'utilisateur dit '8h 10h' ou 'de 8h à 10h', heure_debut = '08:00' et heure_fin = '10:00'. Si l'utilisateur dit '14h 16h', heure_debut = '14:00' et heure_fin = '16:00'. Ne mets jamais 14:00 par défaut quand une heure a été dictée.
+1. HORAIRES EXACTS : Si l'utilisateur dit '8h 10h' ou 'de 8h à 10h', heure_debut = '08:00' et heure_fin = '10:00'. Si l'utilisateur dit '10h à 12h' ou '10h 12', heure_debut = '10:00' et heure_fin = '12:00'. Ne mets jamais 14:00 par défaut quand une heure a été dictée.
 2. TRAVAIL À FAIRE (TODO) : Le champ devoir/todo ne doit contenir STRICTEMENT que le travail/exercice demandé (ex: 'Série 3 analyse'), et JAMAIS la phrase de commande elle-même. Si aucun travail n'est mentionné, mets impérativement null.
 3. MATIÈRE : Si aucune matière n'est mentionnée (ex: 'ajoute une séance demain 8h 10h'), choisis 'Étude / Révision'.
-4. VOCATION ORALE : Sois concis, naturel et encourageant.`;
+4. OUTILS COMPLETS : Tu disposes de TOUS les outils du planning (ajouter_seance, consulter_planning_jour, modifier_devoir_seance, programmer_examen, regler_minuteur, supprimer_seance, vider_planning) ainsi que des outils d'administration.`;
 
     const activeTools = isAdmin
       ? STUDENT_TOOLS_DECLARATIONS.concat(ADMIN_TOOLS_DECLARATIONS)
@@ -738,14 +748,28 @@ RÈGLES STRICTES :
       },
     };
 
-    const response = await fetch(url, {
+    let response = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(requestBody),
     });
 
+    if (response.status === 404 && modelName !== "gemini-2.5-flash") {
+      console.warn("Modèle non trouvé (404), repli automatique sur gemini-2.5-flash...");
+      const fallbackUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+      response = await fetch(fallbackUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(requestBody),
+      });
+      if (response.ok) {
+        localStorage.setItem("gemini_model_name", "gemini-2.5-flash");
+      }
+    }
+
     if (!response.ok) {
-      throw new Error(`Erreur API Gemini (${response.status})`);
+      const errJson = await response.json().catch(() => ({}));
+      throw new Error(`Erreur API Gemini (${response.status}) : ${errJson.error?.message || response.statusText}`);
     }
 
     const resData = await response.json();
@@ -864,21 +888,31 @@ export function startJarvisAdminRecording() {
     rec.continuous = false;
     rec.interimResults = true;
 
+    let finalTranscript = "";
+
     rec.onstart = () => {
       isJarvisAdminRecording = true;
+      finalTranscript = "";
       if (micBtn) micBtn.classList.add("listening");
       if (statusTxt) {
-        statusTxt.innerHTML = "🔴 <b>JARVIS écoute vos ordres administrateur...</b>";
+        statusTxt.innerHTML = "🔴 <b>JARVIS écoute vos ordres (planning & admin)...</b>";
         statusTxt.style.color = "#38bdf8";
       }
     };
 
     rec.onresult = (event) => {
-      let text = "";
-      for (let i = 0; i < event.results.length; i++) {
-        text += event.results[i][0].transcript;
+      let interim = "";
+      for (let i = event.resultIndex; i < event.results.length; ++i) {
+        if (event.results[i].isFinal) {
+          finalTranscript += event.results[i][0].transcript + " ";
+        } else {
+          interim += event.results[i][0].transcript;
+        }
       }
-      if (input) input.value = text;
+      const combined = (finalTranscript + interim).trim();
+      if (input && combined) {
+        input.value = combined;
+      }
     };
 
     rec.onerror = () => {
@@ -887,7 +921,9 @@ export function startJarvisAdminRecording() {
 
     rec.onend = () => {
       stopJarvisAdminRecording();
-      executeJarvisAdminCommandDirect();
+      if (input && input.value.trim()) {
+        executeJarvisAdminCommandDirect();
+      }
     };
 
     rec.start();

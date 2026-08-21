@@ -32,7 +32,7 @@
     // Initialisation Service Worker pour PWA avec mise à jour immédiate
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", () => {
-        navigator.serviceWorker.register("./sw.js?v=18.9").then((reg) => {
+        navigator.serviceWorker.register("./sw.js?v=19.0").then((reg) => {
           reg.update();
           console.log("PWA Service Worker actif:", reg.scope);
         }).catch((err) => {
@@ -44,7 +44,7 @@
     if ("caches" in window) {
       caches.keys().then((names) => {
         names.forEach((name) => {
-          if (name !== "agenda-bac-v18.9") {
+          if (name !== "agenda-bac-v19.0") {
             caches.delete(name);
           }
         });
@@ -174,7 +174,7 @@
       if (viewImport) viewImport.style.display = tab === "import" ? "flex" : "none";
     };
   </script>
-  <link rel="stylesheet" href="css/styles.css?v=18.9" />
+  <link rel="stylesheet" href="css/styles.css?v=19.0" />
 </head>
 
 <body>
@@ -1755,8 +1755,66 @@
     </div>
   </div>
 
+  <!-- MODALE PARAMÈTRES IA & CLÉ GEMINI -->
+  <div class="modal" id="aiSettingsModal">
+    <div class="modal-box" style="max-width: 480px; gap: 14px;">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <span style="font-weight: 800; font-size: 16px; display: flex; align-items: center; gap: 8px;">
+          ⚙️ Configuration IA & Clé Google Gemini
+        </span>
+        <span onclick="window.closeModal('aiSettingsModal')" style="cursor: pointer; color: #ef4444; font-size: 20px; font-weight: 800;">✕</span>
+      </div>
+
+      <div style="font-size: 12px; color: var(--muted); line-height: 1.5;">
+        L'application utilise l'API officielle Google Gemini avec Function Calling 100% gratuit pour le copilote vocal JARVIS et le tuteur.
+      </div>
+
+      <form onsubmit="window.handleSaveAiSettings(event)" style="display: flex; flex-direction: column; gap: 12px;">
+        <div>
+          <label style="font-size: 11.5px; font-weight: 700; color: var(--muted); display: block; margin-bottom: 4px;">
+            Clé API Google Gemini (Gratuite) :
+          </label>
+          <input type="password" id="aiApiKeyInput" class="input" style="width: 100%" placeholder="AIzaSy..." />
+          <div style="font-size: 11px; margin-top: 4px;">
+            👉 Obtenez votre clé gratuite sur <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color: var(--primary); font-weight: 700; text-decoration: underline;">Google AI Studio</a>.
+          </div>
+        </div>
+
+        <div>
+          <label style="font-size: 11.5px; font-weight: 700; color: var(--muted); display: block; margin-bottom: 4px;">
+            Modèle Gemini Actif :
+          </label>
+          <select id="aiModelSelect" class="input" style="width: 100%" onchange="window.onAiModelChange(this.value)">
+            <option value="gemini-2.5-flash">⚡ gemini-2.5-flash (Recommandé - Ultra rapide & Gratuit)</option>
+            <option value="gemini-2.5-pro">🧠 gemini-2.5-pro (Raisonnement avancé)</option>
+            <option value="gemini-2.0-flash">🚀 gemini-2.0-flash</option>
+            <option value="gemini-1.5-flash">📌 gemini-1.5-flash</option>
+            <option value="gemini-1.5-pro">🔬 gemini-1.5-pro</option>
+            <option value="custom">🛠️ Autre modèle personnalisé...</option>
+          </select>
+        </div>
+
+        <div id="customModelBox" style="display: none; flex-direction: column; gap: 4px;">
+          <label style="font-size: 11px; font-weight: 700; color: var(--muted);">Nom du modèle personnalisé :</label>
+          <input type="text" id="aiCustomModelInput" class="input" placeholder="ex: gemini-2.5-flash" />
+        </div>
+
+        <div id="aiTestFeedback" style="display: none; padding: 10px 12px; border-radius: 10px; font-size: 12px; font-weight: 700;"></div>
+
+        <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 6px;">
+          <button type="button" class="btn-action" style="flex: 1; padding: 10px; font-weight: 700; font-size: 12.5px;" onclick="window.testAiModelConnection()">
+            🧪 Tester la connexion
+          </button>
+          <button type="submit" class="btn-add" style="flex: 1; padding: 10px; font-weight: 800; font-size: 12.5px; justify-content: center;">
+            💾 Enregistrer
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- SCRIPT APPLICATION -->
-  <script type="module" src="js/app.js?v=18.9"></script>
+  <script type="module" src="js/app.js?v=19.0"></script>
 </body>
 
 </html>
