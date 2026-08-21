@@ -313,6 +313,26 @@ export function deleteAnnouncement(id) {
   );
 }
 
+export function openAdminOverlayDirect() {
+  const profile = state.currentUserProfile || {};
+  const email = (state.currentUser?.email || profile.email || "").toLowerCase().trim();
+  const isAdmin =
+    profile.role === "admin" ||
+    email === "ahmedazzouzi72@gmail.com" ||
+    email === "admin@agenda.tn" ||
+    email === "admin@planningbac.tn";
+
+  if (!isAdmin) {
+    if (confirm("🛡️ La gestion des comptes et la console d'administration sont réservées à l'Administrateur.\n\nSouhaitez-vous vous connecter en tant qu'Administrateur ?")) {
+      window.showAuthModal();
+    }
+    return;
+  }
+
+  loadAdminKPIs();
+  window.openOverlay("adminOverlay");
+}
+
 // Global Window Bindings
 window.switchAdminTab = switchAdminTab;
 window.renderAdminPendingTable = renderAdminPendingTable;
@@ -325,3 +345,4 @@ window.inspectStudentByAdmin = inspectStudentByAdmin;
 window.deleteUserByAdmin = deleteUserByAdmin;
 window.publishAdminAnnouncement = publishAdminAnnouncement;
 window.deleteAnnouncement = deleteAnnouncement;
+window.openAdminOverlayDirect = openAdminOverlayDirect;

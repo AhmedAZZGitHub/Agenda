@@ -163,7 +163,7 @@
       if (viewImport) viewImport.style.display = tab === "import" ? "flex" : "none";
     };
   </script>
-  <link rel="stylesheet" href="css/styles.css?v=18.6" />
+  <link rel="stylesheet" href="css/styles.css?v=18.7" />
 </head>
 
 <body>
@@ -682,6 +682,12 @@
             <option value="">👶 Aucun enfant</option>
           </select>
         </div>
+
+        <!-- 🛡️ BOUTON GESTION DES COMPTES (CONSOLE ADMIN DIRECTE) -->
+        <button class="btn-action btn-accent" id="btnAdminConsoleNav" onclick="window.openAdminOverlayDirect ? window.openAdminOverlayDirect() : window.openOverlay('adminOverlay')"
+          style="padding: 7px 12px; font-weight: 800; font-size: 12px; border-color: #be185d; color: #be185d; background: #fce7f3;" title="Gérer tous les comptes, valider les demandes et annonces">
+          🛡️ Gestion Comptes
+        </button>
 
         <!-- 🤖 BOUTON JARVIS ADMIN MIS EN VALEUR DANS LA NAVBAR -->
         <button class="btn-jarvis-nav" id="btnJarvisAdmin" onclick="window.openJarvisAdminModal()"
@@ -1739,7 +1745,7 @@
   </div>
 
   <!-- SCRIPT APPLICATION -->
-  <script type="module" src="js/app.js?v=18.6"></script>
+  <script type="module" src="js/app.js?v=18.7"></script>
 </body>
 
 </html>

@@ -338,7 +338,8 @@ export function renderUserProfileBar() {
 
   if (btnParent) btnParent.style.display = state.currentUserProfile.role === "student" || isAdmin ? "inline-flex" : "none";
   if (pCtrl) pCtrl.style.display = state.currentUserProfile.role === "parent" ? "inline-flex" : "none";
-  if (btnAdmin) btnAdmin.style.display = isAdmin ? "inline-flex" : "none";
+  const btnAdminNav = document.getElementById("btnAdminConsoleNav");
+  if (btnAdminNav) btnAdminNav.style.display = isAdmin ? "inline-flex" : "none";
 
   const btnJarvisNav = document.getElementById("btnJarvisAdmin");
   if (btnJarvisNav) btnJarvisNav.style.display = "inline-flex";
