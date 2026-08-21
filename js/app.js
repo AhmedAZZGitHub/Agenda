@@ -78,9 +78,8 @@ onAuthStateChanged(auth, async (user) => {
     if (btnParent) btnParent.style.display = "none";
     if (pCtrl) pCtrl.style.display = "none";
     if (btnAdmin) btnAdmin.style.display = "none";
-    document.querySelectorAll("#btnJarvisAdmin, #mainJarvisAdminBtn, #btnJarvisAdminConsole").forEach((btn) => {
-      btn.style.display = "none";
-    });
+    const btnJarvis = document.getElementById("btnJarvisAdmin");
+    if (btnJarvis) btnJarvis.style.display = "inline-flex";
     if (btnProf) btnProf.style.display = "none";
 
     updateReadOnlyUI();

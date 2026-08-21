@@ -340,10 +340,9 @@ export function renderUserProfileBar() {
   if (pCtrl) pCtrl.style.display = state.currentUserProfile.role === "parent" ? "inline-flex" : "none";
   if (btnAdmin) btnAdmin.style.display = isAdmin ? "inline-flex" : "none";
 
-  const jarvisButtons = document.querySelectorAll("#btnJarvisAdmin, #mainJarvisAdminBtn, #btnJarvisAdminConsole");
-  jarvisButtons.forEach((btn) => {
-    btn.style.display = isAdmin ? "inline-flex" : "none";
-  });
+  const btnJarvisNav = document.getElementById("btnJarvisAdmin");
+  if (btnJarvisNav) btnJarvisNav.style.display = "inline-flex";
+
   const hubAdminCard = document.getElementById("btnHubAdminConsole");
   if (hubAdminCard) hubAdminCard.style.display = isAdmin ? "flex" : "none";
   if (btnProf) btnProf.style.display = "inline-flex";

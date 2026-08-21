@@ -812,9 +812,21 @@ RÈGLES STRICTES :
 let isJarvisAdminRecording = false;
 
 export function openJarvisAdminModal() {
-  if (!state.currentUserProfile || state.currentUserProfile.role !== "admin") {
-    return alert("Accès réservé à l'administrateur.");
+  const profile = state.currentUserProfile || {};
+  const email = (state.currentUser?.email || profile.email || "").toLowerCase().trim();
+  const isAdmin =
+    profile.role === "admin" ||
+    email === "ahmedazzouzi72@gmail.com" ||
+    email === "admin@agenda.tn" ||
+    email === "admin@planningbac.tn";
+
+  if (!isAdmin) {
+    if (confirm("🤖 JARVIS Suprême est la console de commandement vocal réservée à l'Administrateur.\n\nSouhaitez-vous vous connecter avec vos identifiants Administrateur ?")) {
+      window.showAuthModal();
+    }
+    return;
   }
+
   const pendingEl = document.getElementById("jarvisPendingCount");
   if (pendingEl) {
     const pendingList = (state.allUsersCache || []).filter((u) => u.status === "pending");
