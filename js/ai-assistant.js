@@ -1,9 +1,10 @@
 // js/ai-assistant.js
 // Assistant Vocal Multilingue Continu (Tounsi / Arabe / Français), Gemini Pro & Vision Scanner
 
-import { database, ref, set } from "./firebase-config.js?v=17.7";
-import { state, getStudentPath, showLoading, hideLoading } from "./state.js?v=17.7";
-import { getSessionDateKey, render } from "./calendar.js?v=17.7";
+import { database, ref, set } from "./firebase-config.js?v=18.0";
+import { state, getStudentPath, showLoading, hideLoading } from "./state.js?v=18.0";
+import { getSessionDateKey, render } from "./calendar.js?v=18.0";
+import { executeJarvisCommand, toggleJarvisSpeechMute, isJarvisMuted } from "./jarvis-engine.js?v=18.0";
 
 let selectedAiSpeechLang = "ar-TN";
 let aiSpeechRecognition = null;
@@ -452,115 +453,14 @@ export async function executeAiCommand() {
   const rawText = input ? input.value.trim() : "";
   const text = cleanDuplicateWords(rawText);
   if (input) input.value = text;
-  const feedback = document.getElementById("aiFeedbackBox");
 
   if (!text) {
     alert("Veuillez d'abord dicter ou saisir une instruction.");
     return;
   }
 
-  showLoading("Analyse intelligente par l'Assistant IA...");
-  const geminiKey = getAiApiKey();
-  let parsedResult = null;
-
-  if (geminiKey) {
-    try {
-      parsedResult = await callGeminiTunisianParser(text, geminiKey);
-    } catch (e) {
-      console.warn("Gemini API call failed, fallback to native multilingual parser:", e);
-    }
-  }
-
-  if (!parsedResult) {
-    parsedResult = parseTunisianNaturalLanguageLocally(text);
-  }
-
-  hideLoading();
-
-  if (!parsedResult || !parsedResult.subject) {
-    if (feedback) {
-      feedback.style.display = "block";
-      feedback.style.background = "#fff1f2";
-      feedback.style.color = "#be123c";
-      feedback.style.border = "1.5px solid #fecdd3";
-      feedback.innerHTML = `⚠️ <b>Non compris</b> : L'IA n'a pas pu identifier la matière ou l'horaire.<br>Essayez par exemple : <i>"Zidli seance Math ghodwa 14h particulier w khedma serie 3"</i> ou <i>"Séance SVT samedi 9h au lycée travail à faire TP génétique"</i>.`;
-    }
-    return;
-  }
-
-  const dayNamesFr = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"];
-  const sH = typeof parsedResult.startHour === "number" ? parsedResult.startHour : 14;
-  const sM = typeof parsedResult.startMinute === "number" ? parsedResult.startMinute : 0;
-  const eH = typeof parsedResult.endHour === "number" ? parsedResult.endHour : Math.min(24, sH + 2);
-  const eM = typeof parsedResult.endMinute === "number" ? parsedResult.endMinute : sM;
-  const dayIdx = parsedResult.dayIndex !== undefined && parsedResult.dayIndex !== null ? Math.max(0, Math.min(6, parsedResult.dayIndex)) : (new Date().getDay() + 6) % 7;
-
-  const targetDateKey = parsedResult.dateStr || getSessionDateKey(dayIdx);
-  const newId = Date.now().toString();
-
-  if (parsedResult.action === "add_exam") {
-    const examObj = {
-      id: newId,
-      sub: parsedResult.subject,
-      type: parsedResult.examType || "Devoir de Contrôle (DC)",
-      date: parsedResult.dateStr || targetDateKey,
-      desc: parsedResult.todo || parsedResult.desc || "Planifié automatiquement par Assistant IA",
-    };
-    await set(ref(database, getStudentPath("examens/" + newId)), examObj);
-  } else {
-    const sessionObj = {
-      id: newId,
-      sub: parsedResult.subject,
-      day: dayIdx,
-      s: sH * 60 + sM,
-      e: eH * 60 + eM,
-      type: parsedResult.type || "À la maison",
-      freq: parsedResult.freq || (parsedResult.dateStr ? "Ce jour seulement" : "Chaque semaine"),
-      singleDate: parsedResult.singleDate || (parsedResult.freq === "Ce jour seulement" ? targetDateKey : null),
-      location: parsedResult.location || null,
-    };
-    await set(ref(database, getStudentPath("seances/" + newId)), sessionObj);
-
-    // Enregistrement du travail à faire / devoirs s'il est spécifié
-    if (parsedResult.todo && parsedResult.todo.trim()) {
-      const cleanedTodo = cleanDuplicateWords(parsedResult.todo.trim());
-      const todoKey = `${newId}_${targetDateKey}`;
-      const todoObj = {
-        todo: cleanedTodo,
-        todoDone: false,
-        date: targetDateKey,
-        sessionId: newId,
-      };
-      await set(ref(database, getStudentPath(`seances_todos/${todoKey}`)), todoObj);
-      if (!state.sessionDateTodos) state.sessionDateTodos = {};
-      state.sessionDateTodos[todoKey] = todoObj;
-    }
-  }
-
-  if (render) render();
-
-  if (feedback) {
-    feedback.style.display = "block";
-    feedback.style.background = "#ecfdf5";
-    feedback.style.color = "#047857";
-    feedback.style.border = "1.5px solid #a7f3d0";
-    const timeFmt = `${sH < 10 ? "0" + sH : sH}:${sM < 10 ? "0" + sM : sM} - ${eH < 10 ? "0" + eH : eH}:${eM < 10 ? "0" + eM : eM}`;
-    const locNotice = parsedResult.location?.address ? `<br>📍 <b>Lieu :</b> ${parsedResult.location.address}` : "";
-    const todoNotice = parsedResult.todo
-      ? `<div style="background:#fff7ed; border:1px solid #fdba74; padding:8px 12px; border-radius:8px; color:#c2410c; margin-top:6px; font-size:12.5px;">📝 <b>Travail à faire :</b> ${parsedResult.todo} <span style="font-size:11px; font-weight:800; color:#ea580c; display:block; margin-top:2px;">(Badge orange '⏳ Ex. À faire' actif sur la séance)</span></div>`
-      : "";
-
-    feedback.innerHTML = `
-      <div style="display:flex; flex-direction:column; gap:4px;">
-        <div style="font-size:14px; font-weight:800; color:#065f46;">🎉 Séance ajoutée avec succès au planning !</div>
-        <div>📚 <b>Matière :</b> ${parsedResult.subject}</div>
-        <div>🗓️ <b>Jour & Heure :</b> ${dayNamesFr[dayIdx]} (${targetDateKey}) • 🕒 ${timeFmt}</div>
-        <div>🏷️ <b>Type / Modalité :</b> ${parsedResult.type || "À la maison"}${locNotice}</div>
-        ${todoNotice}
-        ${parsedResult.replyMessage ? `<div style="font-style:italic; opacity:0.9; margin-top:4px; font-size:12px; border-top:1px dashed #a7f3d0; padding-top:4px;">💬 ${parsedResult.replyMessage}</div>` : ""}
-      </div>
-    `;
-  }
+  // Orchestration par le moteur JARVIS Suprême (Function Calling, Emploi du temps, Devoirs, Tuteur, Admin)
+  await executeJarvisCommand(text);
 }
 
 export async function callGeminiTunisianParser(userText, apiKey) {
