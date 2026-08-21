@@ -1,8 +1,8 @@
 // js/admin.js
 // Console d'Administration, Validation des Comptes et Annonces Globales
 
-import { database, auth, ref, get, set, remove, onValue, sendPasswordResetEmail } from "./firebase-config.js?v=18.8";
-import { state, showLoading, hideLoading } from "./state.js?v=18.8";
+import { database, auth, ref, get, set, remove, onValue, sendPasswordResetEmail } from "./firebase-config.js";
+import { state, showLoading, hideLoading } from "./state.js";
 
 export function switchAdminTab(tab) {
   const tabPending = document.getElementById("adminTabPending");

@@ -16,11 +16,11 @@ import {
   update,
   onValue,
   off,
-} from "./firebase-config.js?v=18.8";
-import { state, getStudentPath, showLoading, hideLoading } from "./state.js?v=18.8";
-import { loadAdminKPIs, listenToAnnouncements } from "./admin.js?v=18.8";
-import { render } from "./calendar.js?v=18.8";
-import { switchTrimester, selectBacSubject } from "./grades.js?v=18.8";
+} from "./firebase-config.js";
+import { state, getStudentPath, showLoading, hideLoading } from "./state.js";
+import { loadAdminKPIs, listenToAnnouncements } from "./admin.js";
+import { render } from "./calendar.js";
+import { switchTrimester, selectBacSubject } from "./grades.js";
 
 export const MASTER_ADMIN_EMAILS = [
   "ahmedazzouzi72@gmail.com",
@@ -275,21 +275,17 @@ export async function loadUserProfile(uid) {
     renderUserProfileBar();
 
     if (state.currentUserProfile.role === "student") {
-      state.activeStudentUid = uid;
       state.activeStudentProfile = state.currentUserProfile;
       state.isReadOnly = false;
       updateReadOnlyUI();
-      attachStudentDataListeners(uid);
     } else if (state.currentUserProfile.role === "parent") {
       state.isReadOnly = true;
       updateReadOnlyUI();
       await setupParentDashboard();
     } else if (state.currentUserProfile.role === "admin") {
-      state.activeStudentUid = uid;
       state.activeStudentProfile = state.currentUserProfile;
       state.isReadOnly = false;
       updateReadOnlyUI();
-      attachStudentDataListeners(uid);
       loadAdminKPIs();
     }
 

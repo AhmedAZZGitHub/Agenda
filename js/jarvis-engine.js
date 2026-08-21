@@ -2,11 +2,11 @@
 // 🤖 Moteur Vocal 100% Direct Google Gemini (gemini-2.5-flash) avec Function Calling & Firebase
 // Aucune règle locale ou regex : toute la compréhension est déléguée directement à l'Intelligence Artificielle
 
-import { database, auth, ref, set, get, remove, update } from "./firebase-config.js?v=18.8";
-import { state, getStudentPath, showLoading, hideLoading, formatM } from "./state.js?v=18.8";
-import { getSessionDateKey, render, openTimer, setTimerPreset, toggleTimer } from "./calendar.js?v=18.8";
-import { loadAdminKPIs } from "./admin.js?v=18.8";
-import { getAiModelName, getAiApiKey } from "./ai-assistant.js?v=18.8";
+import { database, auth, ref, set, get, remove, update } from "./firebase-config.js";
+import { state, getStudentPath, showLoading, hideLoading, formatM } from "./state.js";
+import { getSessionDateKey, render, openTimer, setTimerPreset, toggleTimer } from "./calendar.js";
+import { loadAdminKPIs } from "./admin.js";
+import { getAiModelName, getAiApiKey } from "./ai-assistant.js";
 
 // État de la synthèse vocale (Audio TTS activé par défaut)
 let isJarvisAudioMuted = false;
