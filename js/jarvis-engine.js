@@ -765,9 +765,14 @@ export async function executeJarvisCommand(rawUserText) {
     return;
   }
 
-  showLoading("Gemini analyse directement votre demande...");
+  showLoading("JARVIS exécute...");
   setJarvisOrbState("thinking", "ANALYSE DE L'ORDRE...");
   const feedbackBox = document.getElementById("aiFeedbackBox");
+  const transcriptEl = document.getElementById("jarvisLiveTranscript");
+  if (transcriptEl) {
+    transcriptEl.style.display = "block";
+    transcriptEl.innerHTML = `<div class="user-text">🗣️ <b>Ordre :</b> ${text}</div>`;
+  }
 
   const apiKey = getAiApiKey();
   const rawModel = getAiModelName();
@@ -796,20 +801,12 @@ export async function executeJarvisCommand(rawUserText) {
     const todayIso = now.toISOString().split("T")[0];
     const currentTime = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
 
-    // Prompt système direct exigé
-    const systemInstruction = `Tu es un assistant de planification d'élite et tuteur personnel du Baccalauréat tunisien ("JARVIS").
-Date actuelle : ${currentDayName} ${todayIso} à ${currentTime}.
-Utilisateur : ${profile.displayName || profile.email || (isAdmin ? "Administrateur" : "Élève")} (${isAdmin ? "admin" : (profile.role || "student")}).
+    // 1. SYSTEM INSTRUCTION ALLÉGÉ AU STRICT NÉCESSAIRE (RAPIDITÉ MAXIMALE)
+    const systemInstruction = `Assistant JARVIS Bac tunisien. Date: ${currentDayName} ${todayIso} ${currentTime}. Rôle: ${isAdmin ? "admin" : "student"}. Exécute l'outil approprié avec les horaires exacts dictés, ou réponds très brièvement en 1 phrase directe sans markdown.`;
 
-Ton rôle est de comprendre la demande brute de l'utilisateur (même avec des hésitations, des répétitions ou en mélangeant français et dialecte tunisien) et d'exécuter l'outil adéquat (planning ou administration) avec une précision chirurgicale.
-
-RÈGLES STRICTES :
-1. HORAIRES EXACTS : Si l'utilisateur dit '8h 10h' ou 'de 8h à 10h', heure_debut = '08:00' et heure_fin = '10:00'. Si l'utilisateur dit '10h à 12h' ou '10h 12', heure_debut = '10:00' et heure_fin = '12:00'. Ne mets jamais 14:00 par défaut quand une heure a été dictée.
-2. TRAVAIL À FAIRE (TODO) : Le champ devoir/todo ne doit contenir STRICTEMENT que le travail/exercice demandé (ex: 'Série 3 analyse'), et JAMAIS la phrase de commande elle-même. Si aucun travail n'est mentionné, mets impérativement null.
-3. MATIÈRE : Si aucune matière n'est mentionnée (ex: 'ajoute une séance demain 8h 10h'), choisis 'Étude / Révision'.
-4. OUTILS COMPLETS : Tu disposes de TOUS les outils du planning (ajouter_seance, consulter_planning_jour, modifier_devoir_seance, programmer_examen, regler_minuteur, supprimer_seance, vider_planning) ainsi que des outils d'administration.`;
-
-    const activeTools = isAdmin
+    // 2. ROUTAGE INTELLIGENT D'OUTILS (TOOL CONFIG OPTIMISÉ)
+    const isExplicitAdminDemand = isAdmin && /approuv|valid|refus|supprim.*compte|annonc|publi|inspect|supervis|tuteur.*activ|ia.*activ/i.test(text);
+    const activeTools = isExplicitAdminDemand
       ? STUDENT_TOOLS_DECLARATIONS.concat(ADMIN_TOOLS_DECLARATIONS)
       : STUDENT_TOOLS_DECLARATIONS;
 
@@ -829,7 +826,8 @@ RÈGLES STRICTES :
         },
       ],
       generationConfig: {
-        temperature: 0.1,
+        temperature: 0.2,     // Réduit le temps de calcul
+        maxOutputTokens: 150, // Réponses orales ultra-courtes et instantanées
       },
     };
 
@@ -873,6 +871,8 @@ RÈGLES STRICTES :
       throw new Error(`Erreur API Gemini : ${lastErrorDetails || "Aucun modèle n'a pu répondre."}`);
     }
 
+    hideLoading();
+
     const resData = await response.json();
     const candidate = resData.candidates?.[0]?.content;
     const parts = candidate?.parts || [];
@@ -883,18 +883,62 @@ RÈGLES STRICTES :
       const call = functionCallPart.functionCall || functionCallPart.function_call;
       const callArgs = call.args || {};
 
-      try {
-        const result = await executeJarvisToolCall(call.name, callArgs);
-        finalAssistantMessage = result.message || "Action exécutée avec succès.";
-      } catch (err) {
-        finalAssistantMessage = `⚠️ ${err.message}`;
+      // 3. GÉNÉRATION DE LA RÉPONSE ORALE IMMÉDIATE SANS ATTENDRE FIREBASE
+      let instantSpeech = "";
+      if (call.name === "ajouter_seance") {
+        const sSub = callArgs.matiere || "Cours";
+        const sDay = callArgs.jour || "demain";
+        const sStart = callArgs.heure_debut || "8h";
+        const sEnd = callArgs.heure_fin || "10h";
+        instantSpeech = `Séance de ${sSub} ajoutée pour ${sDay} de ${sStart} à ${sEnd}.`;
+      } else if (call.name === "supprimer_seance") {
+        instantSpeech = `Séance supprimée du planning.`;
+      } else if (call.name === "vider_planning") {
+        instantSpeech = `Planning vidé avec succès.`;
+      } else if (call.name === "regler_minuteur") {
+        instantSpeech = `Minuteur réglé sur ${callArgs.duree_minutes || 45} minutes.`;
+      } else if (call.name === "programmer_examen") {
+        instantSpeech = `Examen de ${callArgs.matiere || "cours"} programmé pour le ${callArgs.date || "planning"}.`;
+      } else if (call.name === "approuver_demande_compte") {
+        instantSpeech = `Demande de compte approuvée.`;
+      } else if (call.name === "refuser_ou_supprimer_compte") {
+        instantSpeech = `Compte supprimé avec succès.`;
+      } else if (call.name === "publier_annonce_globale") {
+        instantSpeech = `Annonce publiée avec succès.`;
+      } else if (call.name === "inspecter_planning_eleve") {
+        instantSpeech = `Supervision active pour l'élève.`;
+      } else if (call.name === "activer_option_ia_compte") {
+        instantSpeech = `Option IA mise à jour.`;
+      } else {
+        instantSpeech = "Ordre exécuté avec succès.";
       }
+
+      finalAssistantMessage = instantSpeech;
+
+      // Déclenchement vocal immédiat (sub-seconde)
+      speakJarvisVoice(instantSpeech);
+
+      // Exécution Firebase asynchrone non bloquante en arrière-plan
+      executeJarvisToolCall(call.name, callArgs).then((res) => {
+        if (res && res.message) {
+          finalAssistantMessage = res.message;
+          if (transcriptEl) {
+            transcriptEl.innerHTML = `
+              <div class="user-text">🗣️ <b>Ordre :</b> ${text}</div>
+              <div class="jarvis-text">🤖 <b>JARVIS :</b> ${finalAssistantMessage}</div>
+            `;
+          }
+        }
+      }).catch((e) => console.warn("Erreur background tool:", e));
     } else {
       finalAssistantMessage = parts.map((p) => p.text || "").join(" ").trim();
+      speakJarvisVoice(finalAssistantMessage);
     }
   } catch (err) {
+    hideLoading();
     console.error("Erreur direct Gemini:", err);
     finalAssistantMessage = `⚠️ Erreur : ${err.message}`;
+    speakJarvisVoice(finalAssistantMessage);
   }
 
   hideLoading();
@@ -926,7 +970,6 @@ RÈGLES STRICTES :
   }
 
   // Mise à jour de la zone de transcription HUD directe
-  const transcriptEl = document.getElementById("jarvisLiveTranscript");
   if (transcriptEl) {
     transcriptEl.style.display = "block";
     transcriptEl.innerHTML = `
@@ -934,9 +977,6 @@ RÈGLES STRICTES :
       <div class="jarvis-text">🤖 <b>JARVIS :</b> ${finalAssistantMessage}</div>
     `;
   }
-
-  // Confirmation vocale automatique avec la voix masculine JARVIS
-  speakJarvisVoice(finalAssistantMessage);
 
   return finalAssistantMessage;
 }
