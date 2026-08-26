@@ -32,7 +32,7 @@
     // Initialisation Service Worker pour PWA avec mise à jour immédiate
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", () => {
-        navigator.serviceWorker.register("./sw.js?v=19.8").then((reg) => {
+        navigator.serviceWorker.register("./sw.js?v=20.0").then((reg) => {
           reg.update();
           console.log("PWA Service Worker actif:", reg.scope);
         }).catch((err) => {
@@ -44,7 +44,7 @@
     if ("caches" in window) {
       caches.keys().then((names) => {
         names.forEach((name) => {
-          if (name !== "agenda-bac-v19.8") {
+          if (name !== "agenda-bac-v20.0") {
             caches.delete(name);
           }
         });
@@ -174,10 +174,10 @@
       if (viewImport) viewImport.style.display = tab === "import" ? "flex" : "none";
     };
   </script>
-  <link rel="stylesheet" href="css/styles.css?v=19.8" />
+  <link rel="stylesheet" href="css/styles.css?v=20.0" />
 </head>
 
-<body>
+<body class="dark-mode">
   <!-- OVERLAY AUTHENTIFICATION -->
   <!-- OVERLAY AUTHENTIFICATION / PREMIÈRE PAGE -->
   <div class="auth-overlay" id="authOverlay" style="display: flex">
@@ -671,157 +671,230 @@
     </div>
   </div>
 
-  <!-- INTERFACE PRINCIPALE (AFFICHÉE UNIQUEMENT APRÈS APPROBATION ET CONNEXION) -->
+  <!-- INTERFACE PRINCIPALE (AFFICHÉE APRÈS CONNEXION OU ACCÈS DIRECT) -->
   <div class="main-wrap" id="mainAppWrap" style="display: none;">
     <!-- ============================================================
-         1. NAVBAR SUPÉRIEURE ÉPURÉE (LIGNE 1 UNIQUE)
+         SIDEBAR GAUCHE COMPLÈTE (BAC+ & MODULES)
          ============================================================ -->
-    <div class="user-top-bar" id="userTopBar">
-      <div class="user-info-clickable" onclick="window.openUserProfileModal()" title="Ouvrir mon profil & gestion">
-        <div class="user-avatar" id="userAvatarIco">👤</div>
-        <div class="user-name-role">
-          <span class="user-name" id="userNameLabel">Visiteur</span>
-          <span class="role-badge role-student" id="userRoleBadge">ÉLÈVE</span>
+    <aside class="app-left-sidebar" id="appLeftSidebar">
+      <!-- Logo Brand BAC+ -->
+      <div class="sidebar-brand">
+        <div class="brand-badge">🎓</div>
+        <span class="brand-title">BAC+</span>
+      </div>
+
+      <div class="sidebar-scroll-area">
+        <!-- Bouton Accueil (Actif) -->
+        <button class="sidebar-item-accueil active" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
+          <span class="nav-ico">🏠</span>
+          <span>Accueil</span>
+        </button>
+
+        <!-- 5 Modules d'étude numérotés -->
+        <div class="sidebar-modules-group" id="pedagogicToolsBar">
+          <!-- 1. Annales (2000–2026) -->
+          <button class="sidebar-module-card" onclick="window.openBacArchiveOverlay ? window.openBacArchiveOverlay() : window.openOverlay('bacArchiveOverlay')" title="Annales (2000–2026)">
+            <div class="module-square square-teal">📚</div>
+            <div class="module-text-wrap">
+              <span class="module-num-title">1. Annales (2000–2026)</span>
+              <span class="module-subtext">Sujets d'examens passés et corrigés.</span>
+            </div>
+          </button>
+
+          <!-- 2. Examens & DS -->
+          <button class="sidebar-module-card" onclick="window.openExamsOverlay ? window.openExamsOverlay() : window.openOverlay('examsOverlay')" title="Examens & DS">
+            <div class="module-square square-purple">📝</div>
+            <div class="module-text-wrap">
+              <span class="module-num-title">2. Examens & DS</span>
+              <span class="module-subtext">Devoirs de contrôle et devoirs de synthèse.</span>
+            </div>
+          </button>
+
+          <!-- 3. Carnet de Notes -->
+          <button class="sidebar-module-card" onclick="window.openGradesOverlay ? window.openGradesOverlay() : window.openOverlay('gradesOverlay')" title="Carnet de Notes">
+            <div class="module-square square-orange">🎯</div>
+            <div class="module-text-wrap">
+              <span class="module-num-title">3. Carnet de Notes</span>
+              <span class="module-subtext">Suivi des moyennes et évaluations.</span>
+            </div>
+          </button>
+
+          <!-- 4. Répartition -->
+          <button class="sidebar-module-card" onclick="window.openStats ? window.openStats() : window.openOverlay('statsOverlay')" title="Répartition">
+            <div class="module-square square-blue">📊</div>
+            <div class="module-text-wrap">
+              <span class="module-num-title">4. Répartition</span>
+              <span class="module-subtext">Statistiques et ventilation du temps de travail.</span>
+            </div>
+          </button>
+
+          <!-- 5. Minuteur -->
+          <button class="sidebar-module-card" onclick="window.openTimer ? window.openTimer() : window.openOverlay('timerOverlay')" title="Minuteur">
+            <div class="module-square square-pink">⏱️</div>
+            <div class="module-text-wrap">
+              <span class="module-num-title">5. Minuteur</span>
+              <span class="module-subtext">Outil de gestion du temps / Pomodoro.</span>
+            </div>
+          </button>
+        </div>
+
+        <!-- Menu Utilitaires du bas -->
+        <div class="sidebar-bottom-menu">
+          <button class="sidebar-util-btn" onclick="document.getElementById('scheduleToolbar').scrollIntoView({behavior: 'smooth'})">
+            <span class="util-ico">📅</span>
+            <span>Calendrier</span>
+          </button>
+          <button class="sidebar-util-btn" onclick="window.openStats ? window.openStats() : window.openOverlay('statsOverlay')">
+            <span class="util-ico">🔥</span>
+            <span>Série d'étude</span>
+          </button>
+          <button class="sidebar-util-btn" onclick="window.openUserProfileModal()">
+            <span class="util-ico">⚙️</span>
+            <span>Paramètres</span>
+          </button>
+          <button class="sidebar-util-btn" onclick="window.toggleDarkMode()">
+            <span class="util-ico" id="sidebarThemeIco">🌙</span>
+            <span id="sidebarThemeTxt">Mode Clair</span>
+          </button>
+          <button class="sidebar-util-btn util-logout" onclick="window.handleLogout ? window.handleLogout() : window.showAuthModal()">
+            <span class="util-ico">🚪</span>
+            <span>Déconnexion</span>
+          </button>
         </div>
       </div>
-
-      <div class="user-top-actions">
-        <!-- SÉLECTEUR ENFANT SI COMPTE PARENT (DISCRET) -->
-        <div id="parentChildControls" style="display: none; align-items: center; gap: 4px;">
-          <select id="parentChildSelect" class="input" style="padding: 4px 8px; font-weight: 700; font-size: 11px;"
-            onchange="window.onParentSelectChild(this.value)">
-            <option value="">👶 Aucun enfant</option>
-          </select>
-        </div>
-
-        <!-- 🛡️ BOUTON GESTION DES COMPTES (CONSOLE ADMIN DIRECTE) -->
-        <button class="btn-action btn-accent" id="btnAdminConsoleNav" onclick="window.openAdminOverlayDirect ? window.openAdminOverlayDirect() : window.openOverlay('adminOverlay')"
-          style="padding: 7px 12px; font-weight: 800; font-size: 12px; border-color: #be185d; color: #be185d; background: #fce7f3;" title="Gérer tous les comptes, valider les demandes et annonces">
-          🛡️ Gestion Comptes
-        </button>
-
-        <!-- 🤖 BOUTON JARVIS ADMIN MIS EN VALEUR DANS LA NAVBAR -->
-        <button class="btn-jarvis-nav" id="btnJarvisAdmin" onclick="window.openJarvisAdminModal()"
-          title="Copilote Vocal & Administration JARVIS Suprême">
-          🤖 JARVIS Admin
-        </button>
-
-        <!-- ⚙️ BOUTON HUB GESTION / PROFIL -->
-        <button class="btn-icon-nav" id="btnOpenProfileHub" onclick="window.openUserProfileModal()" title="Profil, Gestion & Options">
-          ⚙️
-        </button>
-
-        <!-- 🌙 / ☀️ TOGGLE THÈME COMPACT (ICÔNE SEULE) -->
-        <button class="btn-icon-nav" id="btnToggleDark" onclick="window.toggleDarkMode()" title="Changer de thème">
-          🌙
-        </button>
-
-        <!-- BOUTON CONNEXION (SI NON CONNECTÉ) -->
-        <button class="btn-nav-login" id="authActionBtn" onclick="window.showAuthModal()">
-          🔑 Connexion
-        </button>
-      </div>
-    </div>
-
-    <!-- BANNIÈRES D'ÉTAT & ANNONCES -->
-    <div class="view-context-banner" id="viewContextBanner" style="display: none; justify-content: space-between; align-items: center; background: linear-gradient(135deg, #1e1b4b, #312e81); border: 1.5px solid #6366f1; color: #e0e7ff; padding: 10px 16px; border-radius: 12px; margin-bottom: 12px;">
-      <span id="viewContextText">👁️ Mode Consultation en Direct</span>
-      <button type="button" class="btn-action" style="padding: 5px 12px; font-size: 11.5px; font-weight: 800; background: #6366f1; color: white; border: none; border-radius: 8px; cursor: pointer;" onclick="window.resetToOwnSchedule()">
-        ⬅️ Revenir à mon planning
-      </button>
-    </div>
-
-    <div class="announcement-bar" id="activeAnnouncementBar" style="display: none">
-      <span id="activeAnnouncementText">📢 Bienvenue sur l'application Planning Baccalauréat !</span>
-      <span style="cursor: pointer; opacity: 0.8"
-        onclick="document.getElementById('activeAnnouncementBar').style.display='none'">✕</span>
-    </div>
-
-    <!-- BANDEAU BAC & COMPTE À REBOURS -->
-    <div class="top-stats-row">
-      <div class="bac-countdown-bar">
-        <div class="bac-countdown-title">
-          <span>🎓</span>
-          <span>Épreuves Nationales du Baccalauréat :</span>
-        </div>
-        <div class="bac-countdown-digits" id="bacCountdownText">Calcul en cours...</div>
-      </div>
-      <div class="streak-badge" id="streakBadgeDisplay">
-        <span>🔥</span>
-        <span>Série d'étude (Maison/Ligne) : <b id="streakDaysCount">1</b> j</span>
-      </div>
-    </div>
+    </aside>
 
     <!-- ============================================================
-         2. BARRE DES MODULES BAC (LIGNE 2 - CHIPS ARRONDIS)
+         CONTENU PRINCIPAL À DROITE (HEADER + STATS + PLANNING)
          ============================================================ -->
-    <div class="bac-modules-bar">
-      <button class="module-chip highlight" onclick="window.openBacArchiveOverlay ? window.openBacArchiveOverlay() : window.openOverlay('bacArchiveOverlay')">
-        📚 Annales (2000-2026)
-      </button>
-      <button class="module-chip" onclick="window.openExamsOverlay ? window.openExamsOverlay() : window.openOverlay('examsOverlay')">
-        📝 Examens & DS
-      </button>
-      <button class="module-chip" onclick="window.openGradesOverlay ? window.openGradesOverlay() : window.openOverlay('gradesOverlay')">
-        🎯 Carnet de Notes
-      </button>
-      <button class="module-chip" onclick="window.openStats ? window.openStats() : window.openOverlay('statsOverlay')">
-        📊 Répartition
-      </button>
-      <button class="module-chip" onclick="window.openTimer ? window.openTimer() : window.openOverlay('timerOverlay')">
-        ⏱️ Minuteur
-      </button>
-    </div>
-
-    <!-- ============================================================
-         3. BARRE DU PLANNING (LIGNE 3 - JUSTE AU-DESSUS DE L'AGENDA)
-         ============================================================ -->
-    <div class="schedule-toolbar">
-      <div class="schedule-toolbar-left">
-        <div class="switch-mode">
-          <button class="btn-toggle" id="btnMob" onclick="window.setLayout('mobile')">📱 Mobile</button>
-          <button class="btn-toggle" id="btnPc" onclick="window.setLayout('pc')">💻 PC</button>
+    <main class="app-main-content">
+      <!-- 1. NAVBAR SUPÉRIEURE -->
+      <div class="user-top-bar" id="userTopBar">
+        <div class="user-info-clickable" onclick="window.openUserProfileModal()" title="Ouvrir mon profil & gestion">
+          <div class="user-avatar" id="userAvatarIco">A</div>
+          <div class="user-name-role">
+            <span class="user-name" id="userNameLabel">ahmed azzouzi</span>
+            <span class="role-badge role-admin" id="userRoleBadge">🛡️ ADMINISTRATEUR</span>
+          </div>
         </div>
-        <div class="date-nav-row">
-          <button class="btn-circ" onclick="window.shift(-1)">&lt;</button>
-          <span id="dateLabel" style="font-weight: 800; font-size: 13px; min-width: 100px; text-align: center;">...</span>
-          <button class="btn-circ" onclick="window.shift(1)">&gt;</button>
-          <button class="btn-action" style="padding: 4px 10px; font-size: 11.5px;" onclick="window.goToToday ? window.goToToday() : null">Aujourd'hui</button>
+
+        <div class="user-top-actions">
+          <!-- SÉLECTEUR ENFANT SI COMPTE PARENT (DISCRET) -->
+          <div id="parentChildControls" style="display: none; align-items: center; gap: 4px;">
+            <select id="parentChildSelect" class="input" style="padding: 4px 8px; font-weight: 700; font-size: 11px;"
+              onchange="window.onParentSelectChild(this.value)">
+              <option value="">👶 Aucun enfant</option>
+            </select>
+          </div>
+
+          <!-- 🛡️ BOUTON GESTION DES COMPTES -->
+          <button class="btn-top-pill pill-admin" id="btnAdminConsoleNav" onclick="window.openAdminOverlayDirect ? window.openAdminOverlayDirect() : window.openOverlay('adminOverlay')"
+            title="Gérer tous les comptes, valider les demandes et annonces">
+            🛡️ Gestion Comptes
+          </button>
+
+          <!-- 🤖 BOUTON JARVIS ADMIN -->
+          <button class="btn-top-pill pill-jarvis" id="btnJarvisAdmin" onclick="window.openJarvisAdminModal()"
+            title="Copilote Vocal & Administration JARVIS Suprême">
+            🤖 JARVIS Admin
+          </button>
+
+          <!-- ⚙️ BOUTON PARAMÈTRES ICONIQUE -->
+          <button class="btn-icon-nav" id="btnOpenProfileHub" onclick="window.openUserProfileModal()" title="Paramètres & Gestion">
+            ⚙️
+          </button>
+
+          <!-- 🚪 BOUTON DÉCONNEXION -->
+          <button class="btn-top-pill pill-logout" id="authActionBtn" onclick="window.handleLogout ? window.handleLogout() : window.showAuthModal()" title="Déconnexion">
+            🚪 Déconnexion
+          </button>
+        </div>
+      </div>
+
+      <!-- BANNIÈRES D'ÉTAT & ANNONCES -->
+      <div class="view-context-banner" id="viewContextBanner" style="display: none; justify-content: space-between; align-items: center; background: linear-gradient(135deg, #1e1b4b, #312e81); border: 1.5px solid #6366f1; color: #e0e7ff; padding: 10px 16px; border-radius: 12px; margin-bottom: 12px;">
+        <span id="viewContextText">👁️ Mode Consultation en Direct</span>
+        <button type="button" class="btn-action" style="padding: 5px 12px; font-size: 11.5px; font-weight: 800; background: #6366f1; color: white; border: none; border-radius: 8px; cursor: pointer;" onclick="window.resetToOwnSchedule()">
+          ⬅️ Revenir à mon planning
+        </button>
+      </div>
+
+      <div class="announcement-bar" id="activeAnnouncementBar" style="display: none">
+        <span id="activeAnnouncementText">📢 Bienvenue sur l'application Planning Baccalauréat !</span>
+        <span style="cursor: pointer; opacity: 0.8"
+          onclick="document.getElementById('activeAnnouncementBar').style.display='none'">✕</span>
+      </div>
+
+      <!-- 2. STATS ROW (CARTE BLEUE BAC + CARTE ORANGE SÉRIE) -->
+      <div class="top-stats-row">
+        <!-- CARTE BLEUE BAC -->
+        <div class="bac-countdown-card">
+          <div class="bac-countdown-label">
+            <span class="ico-cap">🎓</span>
+            <span>Épreuves Nationales du Baccalauréat :</span>
+          </div>
+          <div class="bac-countdown-badge" id="bacCountdownText">
+            ⏳ J-287 • 16h 14m restants (2027)
+          </div>
+        </div>
+
+        <!-- CARTE ORANGE SÉRIE -->
+        <div class="streak-card" id="streakBadgeDisplay">
+          <span class="ico-flame">🔥</span>
+          <span>Série d'étude (Maison/Ligne) : <b id="streakDaysCount">0</b> j</span>
         </div>
       </div>
 
-      <div class="schedule-toolbar-right">
-        <input type="file" id="photoInput" accept="image/*" style="display: none" onchange="window.handleImageUpload(event)" />
-        <button class="btn-mic student-action-btn" id="mainMicBtn" onclick="window.voiceInput()" title="Assistant vocal pour dicter vos cours et devoirs">
-          🎙️ Micro IA
-        </button>
-        <button class="btn-vision student-action-btn" onclick="document.getElementById('photoInput').click()" title="Scanner un emploi du temps">
-          📸 Scanner
-        </button>
-        <button class="btn-add student-action-btn" onclick="window.openModal('addModal')">
-          ➕ Séance
-        </button>
-        <button class="btn-action student-action-btn btn-danger-subtle" onclick="window.clearAllData()" title="Effacer l'emploi du temps">
-          🗑️ Vider
-        </button>
-      </div>
-    </div>
+      <!-- 3. CALENDAR TOOLBAR -->
+      <div class="schedule-toolbar" id="scheduleToolbar">
+        <div class="schedule-toolbar-left">
+          <div class="switch-mode">
+            <button class="btn-toggle" id="btnMob" onclick="window.setLayout('mobile')">📱 Mobile</button>
+            <button class="btn-toggle active" id="btnPc" onclick="window.setLayout('pc')">💻 PC</button>
+          </div>
+          <div class="date-nav-row">
+            <button class="btn-circ" onclick="window.shift(-1)" title="Période précédente">&lt;</button>
+            <span id="dateLabel" class="date-active-label">24 AOÛT – 30 AOÛT</span>
+            <button class="btn-circ" onclick="window.shift(1)" title="Période suivante">&gt;</button>
+            <button class="btn-today" onclick="window.goToToday ? window.goToToday() : null">Aujourd'hui</button>
+          </div>
+        </div>
 
-    <div id="pcView">
-      <div style="display: grid; grid-template-columns: 55px repeat(7, 1fr); gap: 6px; margin-bottom: 6px;"
-        id="pcHeader"></div>
-      <div class="pc-grid">
-        <div class="grid-table">
-          <div class="col-time" id="timeCol"></div>
-          <div style="display: flex; flex-grow: 1" id="daysCol"></div>
+        <div class="schedule-toolbar-right">
+          <input type="file" id="photoInput" accept="image/*" style="display: none" onchange="window.handleImageUpload(event)" />
+          <button class="btn-pill-action btn-pill-mic student-action-btn" id="mainMicBtn" onclick="window.voiceInput()" title="Assistant vocal IA">
+            🎙️ Micro IA
+          </button>
+          <button class="btn-pill-action btn-pill-scan student-action-btn" onclick="document.getElementById('photoInput').click()" title="Scanner un emploi du temps">
+            📸 Scanner
+          </button>
+          <button class="btn-pill-action btn-pill-add student-action-btn" onclick="window.openModal('addModal')" title="Ajouter une séance">
+            ➕ Séance
+          </button>
+          <button class="btn-pill-action btn-pill-clear student-action-btn" onclick="window.clearAllData()" title="Effacer l'emploi du temps">
+            🗑️ Vider
+          </button>
         </div>
       </div>
-    </div>
 
-    <div id="mobView" style="display: none; flex-direction: column; gap: 12px">
-      <div class="mob-scroller" id="mobScroller"></div>
-      <div class="mob-list" id="mobList"></div>
-    </div>
+      <!-- 4. PC CALENDAR GRID -->
+      <div id="pcView">
+        <div style="display: grid; grid-template-columns: 55px repeat(7, 1fr); gap: 6px; margin-bottom: 6px;"
+          id="pcHeader"></div>
+        <div class="pc-grid">
+          <div class="grid-table">
+            <div class="col-time" id="timeCol"></div>
+            <div style="display: flex; flex-grow: 1" id="daysCol"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5. MOBILE VIEW -->
+      <div id="mobView" style="display: none; flex-direction: column; gap: 12px">
+        <div class="mob-scroller" id="mobScroller"></div>
+        <div class="mob-list" id="mobList"></div>
+      </div>
+    </main>
   </div>
 
   <!-- MODALE CRÉATION SÉANCE -->

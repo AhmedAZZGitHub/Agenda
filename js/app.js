@@ -35,7 +35,8 @@ onAuthStateChanged(auth, async (user) => {
     if (authOverlay) authOverlay.style.display = "none";
     if (mainApp) mainApp.style.display = "flex";
     if (authBtn) {
-      authBtn.innerText = "🚪 Déconnexion";
+      authBtn.innerHTML = '<span style="margin-right:4px;">🚪</span>Déconnexion';
+      authBtn.title = "Déconnexion";
       authBtn.style.color = "#ef4444";
       authBtn.onclick = window.handleLogout;
     }
@@ -56,7 +57,8 @@ onAuthStateChanged(auth, async (user) => {
     if (authOverlay) authOverlay.style.display = "flex";
     if (mainApp) mainApp.style.display = "none";
     if (authBtn) {
-      authBtn.innerText = "🔑 Connexion";
+      authBtn.innerHTML = '<span style="margin-right:4px;">🔑</span>Connexion';
+      authBtn.title = "Connexion";
       authBtn.style.color = "var(--primary)";
       authBtn.onclick = window.showAuthModal;
     }
@@ -106,7 +108,10 @@ document.addEventListener("DOMContentLoaded", () => {
   if (savedDark === "true") {
     document.body.classList.add("dark-mode");
     const btn = document.getElementById("btnToggleDark");
-    if (btn) btn.innerText = "☀️ Mode Clair";
+    if (btn) {
+      btn.innerText = "☀️";
+      btn.title = "Activer le mode clair";
+    }
   }
 
   // Initialisations

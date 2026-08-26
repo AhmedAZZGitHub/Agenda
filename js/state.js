@@ -188,5 +188,12 @@ window.toggleDarkMode = function () {
   const isDark = document.body.classList.contains("dark-mode");
   localStorage.setItem("app_dark_mode", isDark ? "true" : "false");
   const btn = document.getElementById("btnToggleDark");
-  if (btn) btn.innerText = isDark ? "☀️ Mode Clair" : "🌙 Mode Sombre";
+  if (btn) {
+    btn.innerText = isDark ? "☀️" : "🌙";
+    btn.title = isDark ? "Activer le mode clair" : "Activer le mode sombre";
+  }
+  const sTxt = document.getElementById("sidebarThemeTxt");
+  const sIco = document.getElementById("sidebarThemeIco");
+  if (sTxt) sTxt.innerText = isDark ? "Mode Clair" : "Mode Sombre";
+  if (sIco) sIco.innerText = isDark ? "☀️" : "🌙";
 };

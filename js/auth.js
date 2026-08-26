@@ -324,7 +324,7 @@ export function renderUserProfileBar() {
   const roleLabels = {
     student: `🎓 Élève (${state.currentUserProfile.section || "Maths"})`,
     parent: "👨‍👩‍👧 Parent d'élève",
-    admin: "🛡️ Administrateur",
+    admin: "🛡️ ADMINISTRATEUR",
   };
   if (roleBadge) roleBadge.innerText = roleLabels[state.currentUserProfile.role] || "UTILISATEUR";
 
