@@ -2639,44 +2639,44 @@
       left: 0;
       width: 100vw;
       height: 100vh;
-      background: radial-gradient(circle at center, #0f172a 0%, #060911 100%);
-      z-index: 99999999;
+      background: rgba(6, 9, 17, 0.95);
+      z-index: 999999;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       padding: 24px;
       text-align: center;
       box-sizing: border-box;
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
     }
 
     .lock-content {
-      background: rgba(15, 23, 42, 0.9);
+      background: rgba(15, 23, 42, 0.85);
       border: 1.5px solid rgba(56, 189, 248, 0.35);
       border-radius: 24px;
-      padding: 32px 24px;
-      max-width: 360px;
+      padding: 36px 24px;
+      max-width: 380px;
       width: 90%;
       display: flex;
       flex-direction: column;
       align-items: center;
       gap: 16px;
-      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.7), 0 0 30px rgba(2, 132, 199, 0.25);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
+      box-shadow: 0 16px 50px rgba(0, 0, 0, 0.8), 0 0 35px rgba(2, 132, 199, 0.25);
     }
 
     .rotate-phone-animation {
       position: relative;
-      width: 90px;
-      height: 90px;
+      width: 100px;
+      height: 100px;
       display: flex;
       align-items: center;
       justify-content: center;
-      margin-bottom: 6px;
+      margin-bottom: 8px;
     }
 
     .phone-icon {
-      font-size: 50px;
+      font-size: 54px;
       display: inline-block;
       animation: phoneRotateAnim 2.6s cubic-bezier(0.4, 0, 0.2, 1) infinite;
       transform-origin: center center;
@@ -2687,7 +2687,7 @@
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      font-size: 26px;
+      font-size: 28px;
       opacity: 0.85;
       animation: arrowPulseAnim 2.6s ease-in-out infinite;
     }
@@ -2697,7 +2697,7 @@
         transform: rotate(0deg) scale(1);
       }
       45%, 70% {
-        transform: rotate(-90deg) scale(1.08);
+        transform: rotate(-90deg) scale(1.1);
       }
       90%, 100% {
         transform: rotate(0deg) scale(1);
@@ -2716,7 +2716,7 @@
     }
 
     .lock-content h2 {
-      font-size: 19px;
+      font-size: 20px;
       font-weight: 800;
       color: #ffffff;
       margin: 0;
@@ -2731,9 +2731,40 @@
       line-height: 1.5;
     }
 
-    /* Déclenchement automatique uniquement sur mobile et tablette tenue en portrait */
+    /* 1. EN MODE PORTRAIT SUR MOBILE : VERROUILLAGE ACTIF ET SCROLL BLOQUÉ */
     @media screen and (max-width: 900px) and (orientation: portrait) {
       .landscape-lock-overlay {
         display: flex !important;
+      }
+      body, html {
+        overflow: hidden !important;
+        height: 100vh !important;
+        touch-action: none !important;
+      }
+    }
+
+    /* 2. EN MODE PAYSAGE SUR MOBILE : MASQUAGE OVERLAY & GRILLE PC COMPLÈTE FORCÉE */
+    @media screen and (orientation: landscape) {
+      .landscape-lock-overlay {
+        display: none !important;
+      }
+
+      /* Sur smartphone paysage, forcer l'affichage de la semaine entière PC sans coupure */
+      #pcView {
+        display: block !important;
+      }
+
+      #mobView {
+        display: none !important;
+      }
+
+      .btn-toggle#btnPc {
+        background: #1d4ed8 !important;
+        color: #ffffff !important;
+      }
+
+      .btn-toggle#btnMob {
+        background: transparent !important;
+        color: var(--muted) !important;
       }
     }
