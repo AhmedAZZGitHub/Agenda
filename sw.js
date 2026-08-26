@@ -1,5 +1,5 @@
 // sw.js - Service Worker pour Application Agenda Bac PWA
-const CACHE_NAME = "agenda-bac-v20.0";
+const CACHE_NAME = "agenda-bac-v20.1";
 
 const STATIC_ASSETS = [
   "./",

@@ -32,7 +32,7 @@
     // Initialisation Service Worker pour PWA avec mise à jour immédiate
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", () => {
-        navigator.serviceWorker.register("./sw.js?v=20.0").then((reg) => {
+        navigator.serviceWorker.register("./sw.js?v=20.1").then((reg) => {
           reg.update();
           console.log("PWA Service Worker actif:", reg.scope);
         }).catch((err) => {
@@ -44,7 +44,7 @@
     if ("caches" in window) {
       caches.keys().then((names) => {
         names.forEach((name) => {
-          if (name !== "agenda-bac-v20.0") {
+          if (name !== "agenda-bac-v20.1") {
             caches.delete(name);
           }
         });
@@ -174,10 +174,22 @@
       if (viewImport) viewImport.style.display = tab === "import" ? "flex" : "none";
     };
   </script>
-  <link rel="stylesheet" href="css/styles.css?v=20.0" />
+  <link rel="stylesheet" href="css/styles.css?v=20.1" />
 </head>
 
 <body class="dark-mode">
+  <!-- ÉCRAN DE VERROUILLAGE MODE PORTRAIT (ORIENTATION LANDSCAPE ONLY SUR MOBILE) -->
+  <div id="landscapeLockOverlay" class="landscape-lock-overlay">
+    <div class="lock-content">
+      <div class="rotate-phone-animation">
+        <span class="phone-icon">📱</span>
+        <span class="rotate-arrow">🔄</span>
+      </div>
+      <h2>Veuillez tourner votre appareil</h2>
+      <p>Cette application est optimisée exclusivement en mode paysage pour une visibilité complète de l'emploi du temps.</p>
+    </div>
+  </div>
+
   <!-- OVERLAY AUTHENTIFICATION -->
   <!-- OVERLAY AUTHENTIFICATION / PREMIÈRE PAGE -->
   <div class="auth-overlay" id="authOverlay" style="display: flex">
