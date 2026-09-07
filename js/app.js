@@ -34,12 +34,16 @@ onAuthStateChanged(auth, async (user) => {
     state.activeStudentUid = user.uid; // Compte actif par défaut dès l'ouverture
     if (authOverlay) authOverlay.style.display = "none";
     if (mainApp) mainApp.style.display = "flex";
-    if (authBtn) {
-      authBtn.innerHTML = '<span class="pill-ico" style="margin-right:4px;">🚪</span><span class="pill-full">Déconnexion</span><span class="pill-short">Quitter</span>';
-      authBtn.title = "Déconnexion";
-      authBtn.style.color = "#ef4444";
-      authBtn.onclick = window.handleLogout;
-    }
+    const authBtn = document.getElementById("authActionBtn");
+    const authBtnMob = document.getElementById("authActionBtnMob");
+    [authBtn, authBtnMob].forEach((b) => {
+      if (b) {
+        b.innerHTML = '<span class="pill-ico" style="margin-right:4px;">🚪</span><span class="pill-full">Déconnexion</span><span class="pill-short">Quitter</span>';
+        b.title = "Déconnexion";
+        b.style.color = "#ef4444";
+        b.onclick = window.handleLogout;
+      }
+    });
     await loadUserProfile(user.uid);
     initNotificationsSystem();
   } else {
@@ -56,12 +60,16 @@ onAuthStateChanged(auth, async (user) => {
 
     if (authOverlay) authOverlay.style.display = "flex";
     if (mainApp) mainApp.style.display = "none";
-    if (authBtn) {
-      authBtn.innerHTML = '<span class="pill-ico" style="margin-right:4px;">🔑</span><span class="pill-full">Connexion</span><span class="pill-short">Entrer</span>';
-      authBtn.title = "Connexion";
-      authBtn.style.color = "var(--primary)";
-      authBtn.onclick = window.showAuthModal;
-    }
+    const authBtn = document.getElementById("authActionBtn");
+    const authBtnMob = document.getElementById("authActionBtnMob");
+    [authBtn, authBtnMob].forEach((b) => {
+      if (b) {
+        b.innerHTML = '<span class="pill-ico" style="margin-right:4px;">🔑</span><span class="pill-full">Connexion</span><span class="pill-short">Entrer</span>';
+        b.title = "Connexion";
+        b.style.color = "var(--primary)";
+        b.onclick = window.showAuthModal;
+      }
+    });
 
     const nameEl = document.getElementById("userNameLabel");
     const roleBadge = document.getElementById("userRoleBadge");

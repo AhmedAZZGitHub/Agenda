@@ -32,7 +32,7 @@
     // Initialisation Service Worker pour PWA avec mise à jour immédiate
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", () => {
-        navigator.serviceWorker.register("./sw.js?v=20.5").then((reg) => {
+        navigator.serviceWorker.register("./sw.js?v=20.6").then((reg) => {
           reg.update();
           console.log("PWA Service Worker actif:", reg.scope);
         }).catch((err) => {
@@ -44,7 +44,7 @@
     if ("caches" in window) {
       caches.keys().then((names) => {
         names.forEach((name) => {
-          if (name !== "agenda-bac-v20.5") {
+          if (name !== "agenda-bac-v20.6") {
             caches.delete(name);
           }
         });
@@ -174,7 +174,7 @@
       if (viewImport) viewImport.style.display = tab === "import" ? "flex" : "none";
     };
   </script>
-  <link rel="stylesheet" href="css/styles.css?v=20.5" />
+  <link rel="stylesheet" href="css/styles.css?v=20.6" />
 </head>
 
 <body class="dark-mode">
@@ -684,7 +684,7 @@
   </div>
 
   <!-- INTERFACE PRINCIPALE (AFFICHÉE APRÈS CONNEXION OU ACCÈS DIRECT) -->
-  <div class="main-wrap" id="mainAppWrap" style="display: none;">
+  <div class="main-wrap main-container" id="mainAppWrap" style="display: none;">
     <!-- ============================================================
          SIDEBAR GAUCHE COMPLÈTE (BAC+ & MODULES)
          ============================================================ -->
@@ -782,15 +782,26 @@
     <main class="app-main-content">
       <!-- 1. NAVBAR SUPÉRIEURE -->
       <div class="user-top-bar" id="userTopBar">
-        <div class="user-info-clickable" onclick="window.openUserProfileModal()" title="Ouvrir mon profil & gestion">
-          <div class="user-avatar" id="userAvatarIco">A</div>
-          <div class="user-name-role">
-            <span class="user-name" id="userNameLabel">ahmed azzouzi</span>
-            <span class="role-badge role-admin" id="userRoleBadge">🛡️ ADMINISTRATEUR</span>
+        <!-- Ligne 1 : Identité à gauche, Actions rapides (Paramètres, Déconnexion) à droite sur mobile -->
+        <div class="user-info-side">
+          <div class="user-info-clickable" onclick="window.openUserProfileModal()" title="Ouvrir mon profil & gestion">
+            <div class="user-avatar" id="userAvatarIco">A</div>
+            <div class="user-name-role">
+              <span class="user-name" id="userNameLabel">ahmed azzouzi</span>
+              <span class="role-badge role-admin" id="userRoleBadge">🛡️ ADMINISTRATEUR</span>
+            </div>
+          </div>
+          <div class="user-mobile-quick">
+            <button class="btn-icon-nav" onclick="window.openUserProfileModal()" title="Paramètres & Gestion">⚙️</button>
+            <button class="btn-top-pill pill-logout" id="authActionBtnMob" onclick="window.handleLogout ? window.handleLogout() : window.showAuthModal()" title="Déconnexion">
+              <span class="pill-ico">🚪</span>
+              <span>Quitter</span>
+            </button>
           </div>
         </div>
 
-        <div class="user-top-actions">
+        <!-- Ligne 2 : Boutons d'administration côte à côte -->
+        <div class="user-actions-side user-top-actions">
           <!-- SÉLECTEUR ENFANT SI COMPTE PARENT (DISCRET) -->
           <div id="parentChildControls" style="display: none; align-items: center; gap: 4px;">
             <select id="parentChildSelect" class="input" style="padding: 4px 8px; font-weight: 700; font-size: 11px;"
@@ -800,7 +811,7 @@
           </div>
 
           <!-- 🛡️ BOUTON GESTION DES COMPTES -->
-          <button class="btn-top-pill pill-admin" id="btnAdminConsoleNav" onclick="window.openAdminOverlayDirect ? window.openAdminOverlayDirect() : window.openOverlay('adminOverlay')"
+          <button class="btn-top-pill pill-admin btn" id="btnAdminConsoleNav" onclick="window.openAdminOverlayDirect ? window.openAdminOverlayDirect() : window.openOverlay('adminOverlay')"
             title="Gérer tous les comptes, valider les demandes et annonces">
             <span class="pill-ico">🛡️</span>
             <span class="pill-full">Gestion Comptes</span>
@@ -808,20 +819,20 @@
           </button>
 
           <!-- 🤖 BOUTON JARVIS ADMIN -->
-          <button class="btn-top-pill pill-jarvis" id="btnJarvisAdmin" onclick="window.openJarvisAdminModal()"
+          <button class="btn-top-pill pill-jarvis btn" id="btnJarvisAdmin" onclick="window.openJarvisAdminModal()"
             title="Copilote Vocal & Administration JARVIS Suprême">
             <span class="pill-ico">🤖</span>
             <span class="pill-full">JARVIS Admin</span>
             <span class="pill-short">JARVIS</span>
           </button>
 
-          <!-- ⚙️ BOUTON PARAMÈTRES ICONIQUE -->
-          <button class="btn-icon-nav" id="btnOpenProfileHub" onclick="window.openUserProfileModal()" title="Paramètres & Gestion">
+          <!-- ⚙️ BOUTON PARAMÈTRES ICONIQUE (PC) -->
+          <button class="btn-icon-nav pc-only-btn" id="btnOpenProfileHub" onclick="window.openUserProfileModal()" title="Paramètres & Gestion">
             ⚙️
           </button>
 
-          <!-- 🚪 BOUTON DÉCONNEXION -->
-          <button class="btn-top-pill pill-logout" id="authActionBtn" onclick="window.handleLogout ? window.handleLogout() : window.showAuthModal()" title="Déconnexion">
+          <!-- 🚪 BOUTON DÉCONNEXION (PC) -->
+          <button class="btn-top-pill pill-logout pc-only-btn" id="authActionBtn" onclick="window.handleLogout ? window.handleLogout() : window.showAuthModal()" title="Déconnexion">
             <span class="pill-ico">🚪</span>
             <span class="pill-full">Déconnexion</span>
             <span class="pill-short">Quitter</span>
@@ -846,7 +857,7 @@
       <!-- 2. STATS ROW (CARTE BLEUE BAC + CARTE ORANGE SÉRIE) -->
       <div class="top-stats-row">
         <!-- CARTE BLEUE BAC -->
-        <div class="bac-countdown-card">
+        <div class="bac-countdown-card bac-banner countdown-banner">
           <div class="bac-countdown-label">
             <span class="ico-cap">🎓</span>
             <span class="bac-label-full">Épreuves Nationales du Baccalauréat :</span>
@@ -866,7 +877,7 @@
 
       <!-- 3. CALENDAR TOOLBAR -->
       <div class="schedule-toolbar" id="scheduleToolbar">
-        <div class="schedule-toolbar-left">
+        <div class="schedule-toolbar-left calendar-nav-bar calendar-controls-wrap">
           <div class="switch-mode">
             <button class="btn-toggle" id="btnMob" onclick="window.setLayout('mobile')">📱 Mobile</button>
             <button class="btn-toggle active" id="btnPc" onclick="window.setLayout('pc')">💻 PC</button>
@@ -2020,7 +2031,7 @@
   </div>
 
   <!-- SCRIPT APPLICATION -->
-  <script type="module" src="js/app.js?v=20.5"></script>
+  <script type="module" src="js/app.js?v=20.6"></script>
 </body>
 
 </html>
