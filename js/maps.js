@@ -105,7 +105,7 @@ export function openMapViewer(sessionId) {
   const navBtn = document.getElementById("btnGoogleMapsNav");
   const copyBtn = document.getElementById("btnCopyMapAddr");
 
-  if (titleEl) titleEl.innerText = `📍 ${meta.ico} ${ev.sub} (Cours Particulier)`;
+  if (titleEl) titleEl.innerText = ev.teacher ? `📍 ${meta.ico} ${ev.sub} (Prof. ${ev.teacher})` : `📍 ${meta.ico} ${ev.sub} (Cours Particulier)`;
   if (addrEl) addrEl.innerText = loc.address || "Cours Particulier";
   if (timeEl) timeEl.innerText = `🕒 ${state.days[ev.day]} de ${formatM(ev.s)} à ${formatM(ev.e)}`;
 

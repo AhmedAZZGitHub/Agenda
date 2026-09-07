@@ -208,7 +208,7 @@ export function renderPc() {
               ${meta.ico} ${ev.sub}
             </div>
             <div style="margin-top:1px; display:flex; gap:2px; flex-wrap:wrap;">
-              ${isPart ? `<span class="tag-meta" style="background:#7c3aed; color:white; cursor:pointer;" onclick="event.stopPropagation(); window.openMapViewer('${ev.id}')" title="Voir l'emplacement sur la carte">📍 ${ev.location?.address ? (ev.location.address.length > 12 ? ev.location.address.substring(0, 12) + "..." : ev.location.address) : "Particulier"}</span>` : ev.type ? `<span class="tag-meta" style="${isHome ? "background:#059669; color:white;" : isOnline ? "background:#0891b2; color:white;" : ""}">${ev.type}</span>` : ""}
+              ${isPart ? `<span class="tag-meta" style="background:#7c3aed; color:white; cursor:pointer;" onclick="event.stopPropagation(); window.openMapViewer('${ev.id}')" title="Cours particulier ${ev.teacher ? `avec ${ev.teacher}` : ''} - Voir sur la carte">📍 ${ev.teacher ? "Prof: " + (ev.teacher.length > 10 ? ev.teacher.substring(0, 10) + "..." : ev.teacher) : (ev.location?.address ? (ev.location.address.length > 12 ? ev.location.address.substring(0, 12) + "..." : ev.location.address) : "Particulier")}</span>` : ev.type ? `<span class="tag-meta" style="${isHome ? "background:#059669; color:white;" : isOnline ? "background:#0891b2; color:white;" : ""}">${ev.type}</span>` : ""}
               ${isQuin ? `<span class="tag-meta" style="background:#f59e0b; color:white;">⏳ 1/2</span>` : ""}
               ${isSingle ? `<span class="tag-meta" style="background:#ec4899; color:white;">📍 Unique</span>` : ""}
               ${hasTodo ? `<span class="tag-meta" style="${isDone ? "background:#059669; color:white; font-weight:800;" : "background:#ea580c; color:white; font-weight:800;"}" onclick="event.stopPropagation(); window.toggleSessionTodoDone('${ev.id}', '${dateKey}', event)" title="Exercices pour le ${dateKey} : ${todoObj.todo.replace(/"/g, '&quot;')} (Cliquer pour basculer Fait/Non fait)">${isDone ? "✅ Ex. Fait" : "⏳ Ex. À faire"}</span>` : ""}
@@ -266,7 +266,7 @@ export function renderMob() {
           ${status.text}
           <div style="font-size:14px;font-weight:800;">${meta.ico} ${ev.sub}</div>
           <div style="margin:3px 0; display:flex; gap:3px; flex-wrap:wrap;">
-            ${isPart ? `<span class="tag-meta" style="background:#7c3aed; color:white; font-weight:800;">📍 ${ev.location?.address || "Cours Particulier"}</span>` : ev.type ? `<span class="tag-meta" style="${isHome ? "background:#059669; color:white;" : isOnline ? "background:#0891b2; color:white;" : ""}">${ev.type}</span>` : ""}
+            ${isPart ? `<span class="tag-meta" style="background:#7c3aed; color:white; font-weight:800;">📍 ${ev.teacher ? "Prof: " + ev.teacher : (ev.location?.address || "Cours Particulier")}</span>` : ev.type ? `<span class="tag-meta" style="${isHome ? "background:#059669; color:white;" : isOnline ? "background:#0891b2; color:white;" : ""}">${ev.type}</span>` : ""}
             ${isQuin ? `<span class="tag-meta" style="background:#f59e0b; color:white;">⏳ 1/2 quinzaine</span>` : ""}
             ${isSingle ? `<span class="tag-meta" style="background:#ec4899; color:white;">📍 Unique</span>` : ""}
             ${hasTodo ? `<span class="tag-meta" style="${isDone ? "background:#059669; color:white; font-weight:800;" : "background:#ea580c; color:white; font-weight:800;"}" onclick="event.stopPropagation(); window.toggleSessionTodoDone('${ev.id}', '${curDateKey}', event)" title="Cliquer pour basculer Fait/Non fait">${isDone ? "✅ Exercices Faits" : "⏳ Exercices À faire"}</span>` : ""}
@@ -338,7 +338,9 @@ export function saveEvent() {
   const newId = Date.now().toString();
 
   let locData = null;
+  let teacher = null;
   if (type === "Particulier") {
+    teacher = document.getElementById("mTeacherName")?.value.trim() || null;
     const addr = document.getElementById("mLocationText")?.value.trim() || "Cours Particulier";
     const lat = parseFloat(document.getElementById("mLocationLat")?.value) || 36.8065;
     const lng = parseFloat(document.getElementById("mLocationLng")?.value) || 10.1815;
@@ -356,9 +358,12 @@ export function saveEvent() {
     baseWeekParity,
     singleDate,
     location: locData,
+    teacher: teacher || null,
   };
 
   set(ref(database, getStudentPath("seances/" + newId)), newEvent);
+  const mTeacherInp = document.getElementById("mTeacherName");
+  if (mTeacherInp) mTeacherInp.value = "";
   window.closeModal("addModal");
 }
 
@@ -471,9 +476,22 @@ export function openSessionDetails(id, explicitDateKey = null) {
     if (mapSec) mapSec.style.display = "none";
   }
 
+  // Affichage du nom du professeur dans la vue d'ensemble (si cours particulier)
+  const teacherBox = document.getElementById("sdParticularTeacherBox");
+  const teacherVal = document.getElementById("sdParticularTeacherVal");
+  if (teacherBox) {
+    if (isPart && ev.teacher) {
+      teacherBox.style.display = "flex";
+      if (teacherVal) teacherVal.innerText = ev.teacher;
+    } else {
+      teacherBox.style.display = "none";
+    }
+  }
+
   const editId = document.getElementById("sdEditId");
   const editSub = document.getElementById("sdEditSub");
   const editType = document.getElementById("sdEditType");
+  const editTeacher = document.getElementById("sdEditTeacher");
   const editFreq = document.getElementById("sdEditFreq");
   const editSingleDateBox = document.getElementById("sdEditSingleDateBox");
   const editSingleDateInput = document.getElementById("sdEditSingleDateInput");
@@ -487,6 +505,7 @@ export function openSessionDetails(id, explicitDateKey = null) {
   if (editId) editId.value = ev.id;
   if (editSub) editSub.value = ev.sub;
   if (editType) editType.value = ev.type || "À la maison";
+  if (editTeacher) editTeacher.value = ev.teacher || "";
   if (editFreq) {
     editFreq.value = ev.freq || "Chaque semaine";
     if (editSingleDateBox) {
@@ -639,7 +658,9 @@ export async function handleSaveEditedSession(e) {
   const [eH, eM] = (document.getElementById("sdEditEnd")?.value || "10:00").split(":").map(Number);
 
   let locData = null;
+  let teacher = null;
   if (type === "Particulier") {
+    teacher = document.getElementById("sdEditTeacher")?.value.trim() || null;
     const addr = document.getElementById("sdEditLocText")?.value.trim() || "Cours Particulier";
     const lat = parseFloat(document.getElementById("sdEditLocLat")?.value) || 36.8065;
     const lng = parseFloat(document.getElementById("sdEditLocLng")?.value) || 10.1815;
@@ -656,6 +677,7 @@ export async function handleSaveEditedSession(e) {
       s: sH * 60 + sM,
       e: eH * 60 + eM,
       location: locData,
+      teacher: teacher || null,
     });
     hideLoading();
     window.closeModal("sessionDetailModal");
@@ -723,7 +745,8 @@ export function handleDeleteActiveSession() {
   const delRecurDateThisOnly = document.getElementById("delRecurDateThisOnly");
   const delRecurDateFollowing = document.getElementById("delRecurDateFollowing");
 
-  if (delRecurSub) delRecurSub.innerText = ev.sub;
+  const subDisplay = ev.teacher ? `${ev.sub} (Prof. ${ev.teacher})` : ev.sub;
+  if (delRecurSub) delRecurSub.innerText = subDisplay;
   if (delRecurIco) delRecurIco.innerText = meta.ico || "📚";
   if (delRecurFreqSubtitle) delRecurFreqSubtitle.innerText = `Séance récurrente (${ev.freq || "Chaque semaine"})`;
   if (delRecurDateInfo) {

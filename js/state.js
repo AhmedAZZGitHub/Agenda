@@ -139,11 +139,13 @@ window.openModal = function (id, day = state.curDayIdx, h = 8) {
     const mFreq = document.getElementById("mFreq");
     const singleDateBox = document.getElementById("singleDateBox");
     const singleDateInput = document.getElementById("mSingleDateInput");
+    const mTeacher = document.getElementById("mTeacherName");
 
     if (mDay) mDay.value = day;
     if (mStart) mStart.value = `${h < 10 ? "0" + h : h}:00`;
     if (mEnd) mEnd.value = `${h + 2 < 10 ? "0" + (h + 2) : h + 2}:00`;
     if (mFreq) mFreq.value = "Chaque semaine";
+    if (mTeacher) mTeacher.value = "";
     if (singleDateBox) singleDateBox.style.display = "none";
 
     const d = new Date(state.currentMonday);

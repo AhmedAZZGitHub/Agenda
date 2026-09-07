@@ -4,7 +4,7 @@
 
 import { database, auth, ref, set, get, remove, update } from "./firebase-config.js";
 import { state, getStudentPath, showLoading, hideLoading, formatM } from "./state.js";
-import { getSessionDateKey, render, openTimer, setTimerPreset, toggleTimer } from "./calendar.js?v=20.3";
+import { getSessionDateKey, render, openTimer, setTimerPreset, toggleTimer } from "./calendar.js?v=20.4";
 import { loadAdminKPIs } from "./admin.js";
 import { getAiModelName, getAiApiKey } from "./ai-assistant.js";
 
@@ -201,6 +201,10 @@ export const STUDENT_TOOLS_DECLARATIONS = [
         date_specifique: {
           type: "STRING",
           description: "Date exacte YYYY-MM-DD si séance ponctuelle.",
+        },
+        nom_professeur: {
+          type: "STRING",
+          description: "Nom de l'enseignant ou du professeur particulier (ex: 'M. Trabelsi', 'Mme Ben Ali').",
         },
         travail_a_faire: {
           type: "STRING",
@@ -402,7 +406,7 @@ export async function executeJarvisToolCall(toolName, toolArgs) {
     // 1. AJOUTER UNE SÉANCE
     case "ajouter_seance": {
       if (state.isReadOnly) throw new Error("Accès en lecture seule.");
-      const { matiere, jour, heure_debut, heure_fin, type_lieu, frequence, date_specifique, travail_a_faire } = toolArgs;
+      const { matiere, jour, heure_debut, heure_fin, type_lieu, frequence, date_specifique, travail_a_faire, nom_professeur } = toolArgs;
 
       const dayIdx = dayStringToIndex(jour);
       const sMin = timeStringToMinutes(heure_debut, 8 * 60);
@@ -422,6 +426,7 @@ export async function executeJarvisToolCall(toolName, toolArgs) {
         freq: frequence || (date_specifique ? "Ce jour seulement" : "Chaque semaine"),
         singleDate: date_specifique || (frequence === "Ce jour seulement" ? targetDateKey : null),
         location: type_lieu === "Particulier" ? { address: "Cours Particulier", lat: 36.8065, lng: 10.1815 } : null,
+        teacher: nom_professeur || null,
       };
 
       await set(ref(database, getStudentPath("seances/" + newId)), sessionObj);

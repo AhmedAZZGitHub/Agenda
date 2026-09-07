@@ -197,7 +197,7 @@ export function checkUpcomingSessions() {
       const notifKey = `remind_pre_${ev.id}_${todayDateKey}`;
       if (!sentNotifications.has(notifKey)) {
         sentNotifications.add(notifKey);
-        const sessionKind = isPart ? "Cours Particulier" : "Cours en Ligne";
+        const sessionKind = isPart ? (ev.teacher ? `Cours Particulier (Prof: ${ev.teacher})` : "Cours Particulier") : "Cours en Ligne";
         sendAppNotification(
           `⏳ Dans ${minsUntilStart} min : ${meta.ico} ${ev.sub} (${sessionKind})`,
           `📝 <b>Rappel Devoirs :</b> ${todoSummary}\n🕒 Début à ${formatM(ev.s)} (jusqu'à ${formatM(ev.e)})`,
@@ -212,7 +212,7 @@ export function checkUpcomingSessions() {
       const notifKey = `start_session_${ev.id}_${todayDateKey}`;
       if (!sentNotifications.has(notifKey)) {
         sentNotifications.add(notifKey);
-        const sessionKind = isHome ? "🏠 Étude à la maison" : isOnline ? "🌐 Cours en Ligne" : isPart ? "📍 Cours Particulier" : "🏫 Cours";
+        const sessionKind = isHome ? "🏠 Étude à la maison" : isOnline ? "🌐 Cours en Ligne" : isPart ? (ev.teacher ? `📍 Cours Particulier (Prof: ${ev.teacher})` : "📍 Cours Particulier") : "🏫 Cours";
         sendAppNotification(
           `🔔 Début de votre séance : ${meta.ico} ${ev.sub}`,
           `🎯 <b>${sessionKind}</b> en cours de <b>${formatM(ev.s)}</b> à <b>${formatM(ev.e)}</b>.\n${hasTodo && !isDone ? "⚠️ N'oubliez pas vos exercices : " + todoObj.todo : "Bonne concentration et bon travail !"}`,
