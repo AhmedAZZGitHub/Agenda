@@ -35,7 +35,7 @@ onAuthStateChanged(auth, async (user) => {
     if (authOverlay) authOverlay.style.display = "none";
     if (mainApp) mainApp.style.display = "flex";
     if (authBtn) {
-      authBtn.innerHTML = '<span style="margin-right:4px;">🚪</span>Déconnexion';
+      authBtn.innerHTML = '<span class="pill-ico" style="margin-right:4px;">🚪</span><span class="pill-full">Déconnexion</span><span class="pill-short">Quitter</span>';
       authBtn.title = "Déconnexion";
       authBtn.style.color = "#ef4444";
       authBtn.onclick = window.handleLogout;
@@ -57,7 +57,7 @@ onAuthStateChanged(auth, async (user) => {
     if (authOverlay) authOverlay.style.display = "flex";
     if (mainApp) mainApp.style.display = "none";
     if (authBtn) {
-      authBtn.innerHTML = '<span style="margin-right:4px;">🔑</span>Connexion';
+      authBtn.innerHTML = '<span class="pill-ico" style="margin-right:4px;">🔑</span><span class="pill-full">Connexion</span><span class="pill-short">Entrer</span>';
       authBtn.title = "Connexion";
       authBtn.style.color = "var(--primary)";
       authBtn.onclick = window.showAuthModal;
