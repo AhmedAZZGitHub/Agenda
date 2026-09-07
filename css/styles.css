@@ -2915,13 +2915,35 @@
       border-color: var(--primary);
     }
 
+    /* Neutralisation totale et définitive de tout overlay de rotation résiduel */
+    #landscapeLockOverlay,
+    .landscape-lock-overlay,
+    .rotate-phone-animation,
+    .lock-content {
+      display: none !important;
+      visibility: hidden !important;
+      pointer-events: none !important;
+      width: 0 !important;
+      height: 0 !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      border: none !important;
+      overflow: hidden !important;
+      position: absolute !important;
+      top: -9999px !important;
+      left: -9999px !important;
+    }
+
     /* ============================================================
        CORRECTIF STRICT SMARTPHONE (@media (max-width: 600px) UNIQUEMENT)
        ============================================================ */
     @media (max-width: 600px) {
-      /* 1. Éviter tout débordement d'écran sur smartphone */
-      html, body, #app, .main-container {
-        max-width: 100vw !important;
+      /* 1. Éviter tout débordement d'écran sur smartphone & 100% largeur */
+      html, body, #app, .main-container, .main-wrap {
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+        left: 0 !important;
         overflow-x: hidden !important;
         box-sizing: border-box !important;
       }
