@@ -4,7 +4,7 @@
 
 import { database, auth, ref, set, get, remove, update } from "./firebase-config.js";
 import { state, getStudentPath, showLoading, hideLoading, formatM } from "./state.js";
-import { getSessionDateKey, render, openTimer, setTimerPreset, toggleTimer } from "./calendar.js";
+import { getSessionDateKey, render, openTimer, setTimerPreset, toggleTimer } from "./calendar.js?v=20.3";
 import { loadAdminKPIs } from "./admin.js";
 import { getAiModelName, getAiApiKey } from "./ai-assistant.js";
 

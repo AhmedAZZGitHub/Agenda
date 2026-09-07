@@ -4,7 +4,7 @@
 import { auth, onAuthStateChanged } from "./firebase-config.js";
 import { state } from "./state.js";
 import { loadUserProfile, detachAllDataListeners, renderUserProfileBar, updateReadOnlyUI } from "./auth.js";
-import { render, updateBacCountdown, updateHomeStreak } from "./calendar.js";
+import { render, updateBacCountdown, updateHomeStreak } from "./calendar.js?v=20.3";
 import { initBacArchiveTabs, switchTrimester } from "./grades.js";
 
 // Import modules to register window bindings

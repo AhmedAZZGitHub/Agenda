@@ -32,7 +32,7 @@
     // Initialisation Service Worker pour PWA avec mise à jour immédiate
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", () => {
-        navigator.serviceWorker.register("./sw.js?v=20.2").then((reg) => {
+        navigator.serviceWorker.register("./sw.js?v=20.3").then((reg) => {
           reg.update();
           console.log("PWA Service Worker actif:", reg.scope);
         }).catch((err) => {
@@ -44,7 +44,7 @@
     if ("caches" in window) {
       caches.keys().then((names) => {
         names.forEach((name) => {
-          if (name !== "agenda-bac-v20.2") {
+          if (name !== "agenda-bac-v20.3") {
             caches.delete(name);
           }
         });
@@ -174,7 +174,7 @@
       if (viewImport) viewImport.style.display = tab === "import" ? "flex" : "none";
     };
   </script>
-  <link rel="stylesheet" href="css/styles.css?v=20.2" />
+  <link rel="stylesheet" href="css/styles.css?v=20.3" />
 </head>
 
 <body class="dark-mode">
@@ -1210,6 +1210,13 @@
             </button>
           </div>
         </div>
+
+        <!-- BOUTON SUPPRIMER DIRECT DANS LA VUE D'ENSEMBLE -->
+        <div id="sdOverviewActionSec" style="display: flex; justify-content: flex-end; margin-top: 4px; padding-top: 4px; border-top: 1px solid var(--dash);">
+          <button type="button" class="btn-action" style="color: #ef4444; border-color: #fca5a5; padding: 6px 12px; font-size: 11.5px; font-weight: 700;" onclick="window.handleDeleteActiveSession()">
+            🗑️ Supprimer cette séance
+          </button>
+        </div>
       </div>
 
       <!-- CONTENU VUE 2 : FORMULAIRE COMPLET D'ÉDITION -->
@@ -1312,6 +1319,86 @@
         </button>
         <button type="button" class="btn-add" id="customConfirmOkBtn" style="padding: 10px 18px; font-size: 13px; background: #ef4444; color: white;">
           Confirmer
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODALE DE SUPPRESSION DE SÉANCE RÉCURRENTE -->
+  <div class="modal" id="deleteRecurringModal">
+    <div class="modal-box" style="max-width: 480px; text-align: left; gap: 14px; border-radius: 20px; padding: 20px 22px;">
+      <div style="display: flex; align-items: flex-start; justify-content: space-between;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div style="font-size: 24px; width: 42px; height: 42px; border-radius: 12px; background: rgba(239, 68, 68, 0.12); display: flex; align-items: center; justify-content: center;">
+            🗑️
+          </div>
+          <div>
+            <div style="font-weight: 900; font-size: 16px; color: var(--text);">Supprimer la séance</div>
+            <div style="font-size: 12px; color: var(--muted);" id="delRecurFreqSubtitle">Séance récurrente</div>
+          </div>
+        </div>
+        <span onclick="window.closeModal('deleteRecurringModal')" style="cursor: pointer; color: var(--muted); font-size: 18px; font-weight: 800;">✕</span>
+      </div>
+
+      <!-- Badge récapitulatif de la séance sélectionnée -->
+      <div style="background: var(--dash); border-radius: 12px; padding: 10px 14px; display: flex; flex-direction: column; gap: 4px;">
+        <div style="font-weight: 800; font-size: 13.5px; color: var(--text); display: flex; align-items: center; gap: 6px;">
+          <span id="delRecurIco">📚</span> <span id="delRecurSub">Matière</span>
+        </div>
+        <div style="color: var(--muted); font-size: 11.5px; font-weight: 600;" id="delRecurDateInfo">
+          🗓️ Date et Heure
+        </div>
+      </div>
+
+      <div style="font-size: 12.5px; color: var(--text); font-weight: 800;">
+        Que souhaitez-vous supprimer ?
+      </div>
+
+      <!-- Options de suppression -->
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        <!-- Option 1: Cette séance uniquement -->
+        <button type="button" class="recurrence-opt-btn" onclick="window.confirmDeleteSessionOccurrence('this_only')">
+          <div class="recurrence-opt-icon" style="background: rgba(2, 132, 199, 0.12); color: #0284c7;">
+            📍
+          </div>
+          <div class="recurrence-opt-content">
+            <div class="recurrence-opt-title" style="color: var(--text);">Cette séance uniquement</div>
+            <div class="recurrence-opt-desc">
+              Supprime seulement la séance du <b id="delRecurDateThisOnly">ce jour</b>. Vos séances passées et futures restent intactes.
+            </div>
+          </div>
+        </button>
+
+        <!-- Option 2: Cette séance et toutes les suivantes -->
+        <button type="button" class="recurrence-opt-btn" onclick="window.confirmDeleteSessionOccurrence('this_and_following')">
+          <div class="recurrence-opt-icon" style="background: rgba(234, 88, 12, 0.12); color: #ea580c;">
+            ⏩
+          </div>
+          <div class="recurrence-opt-content">
+            <div class="recurrence-opt-title" style="color: #ea580c;">Cette séance et toutes les suivantes</div>
+            <div class="recurrence-opt-desc">
+              Supprime à partir du <b id="delRecurDateFollowing">ce jour</b> pour les semaines à venir. <span style="color: #15803d; font-weight: 700;">Vos séances passées sont conservées.</span>
+            </div>
+          </div>
+        </button>
+
+        <!-- Option 3: Toutes les séances -->
+        <button type="button" class="recurrence-opt-btn" onclick="window.confirmDeleteSessionOccurrence('all')">
+          <div class="recurrence-opt-icon" style="background: rgba(239, 68, 68, 0.12); color: #ef4444;">
+            🗑️
+          </div>
+          <div class="recurrence-opt-content">
+            <div class="recurrence-opt-title" style="color: #ef4444;">Toutes les séances (Passées et futures)</div>
+            <div class="recurrence-opt-desc">
+              Supprime définitivement cette séance de toutes les semaines (passé, présent et futur).
+            </div>
+          </div>
+        </button>
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; margin-top: 4px;">
+        <button type="button" class="btn-action" style="padding: 8px 18px; font-size: 12.5px;" onclick="window.closeModal('deleteRecurringModal')">
+          Annuler
         </button>
       </div>
     </div>
@@ -1909,7 +1996,7 @@
   </div>
 
   <!-- SCRIPT APPLICATION -->
-  <script type="module" src="js/app.js?v=19.8"></script>
+  <script type="module" src="js/app.js?v=20.3"></script>
 </body>
 
 </html>

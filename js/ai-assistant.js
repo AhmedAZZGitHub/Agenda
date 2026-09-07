@@ -3,7 +3,7 @@
 
 import { database, ref, set } from "./firebase-config.js";
 import { state, getStudentPath, showLoading, hideLoading } from "./state.js";
-import { getSessionDateKey, render } from "./calendar.js";
+import { getSessionDateKey, render } from "./calendar.js?v=20.3";
 import { executeJarvisCommand, toggleJarvisSpeechMute, isJarvisMuted, speakJarvisVoice } from "./jarvis-engine.js";
 
 let selectedAiSpeechLang = "ar-TN";

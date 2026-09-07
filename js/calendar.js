@@ -107,6 +107,27 @@ export function shouldShowSession(ev, dayIndex, currentMonday) {
     }
   }
 
+  // 3. Cas Séance annulée / exclue pour cette date précise (Cette séance uniquement)
+  if (ev.excludedDates) {
+    if (Array.isArray(ev.excludedDates) && ev.excludedDates.includes(dateKey)) {
+      return false;
+    }
+    if (typeof ev.excludedDates === "object" && ev.excludedDates[dateKey]) {
+      return false;
+    }
+  }
+
+  // 4. Cas Fin de récurrence (Cette séance et toutes les suivantes)
+  // Toutes les séances passées (dateKey < ev.untilDate) restent visibles !
+  if (ev.untilDate && dateKey >= ev.untilDate) {
+    return false;
+  }
+
+  // 5. Cas Début de récurrence (si défini)
+  if (ev.startDate && dateKey < ev.startDate) {
+    return false;
+  }
+
   return true;
 }
 
@@ -341,16 +362,13 @@ export function saveEvent() {
   window.closeModal("addModal");
 }
 
-export function deleteEvent(id) {
+export function deleteEvent(id, explicitDateKey = null) {
   if (state.isReadOnly) return;
-  window.showStyledConfirm(
-    "Supprimer la séance",
-    "Voulez-vous vraiment retirer cette séance de votre planning ?",
-    "🗑️",
-    () => {
-      remove(ref(database, getStudentPath("seances/" + id)));
-    }
-  );
+  const ev = state.db.find((e) => e.id === id);
+  if (!ev) return;
+  activeDetailSessionId = id;
+  activeDetailSessionDate = explicitDateKey || getSessionDateKey(ev.day);
+  handleDeleteActiveSession();
 }
 
 export function openSessionDetails(id, explicitDateKey = null) {
@@ -419,6 +437,11 @@ export function openSessionDetails(id, explicitDateKey = null) {
   const editTabBtn = document.getElementById("sdTabEditBtn");
   if (editTabBtn) {
     editTabBtn.style.display = state.isReadOnly ? "none" : "block";
+  }
+
+  const overviewActionSec = document.getElementById("sdOverviewActionSec");
+  if (overviewActionSec) {
+    overviewActionSec.style.display = state.isReadOnly ? "none" : "flex";
   }
 
   const isPart = ev.type && ev.type.includes("Particulier");
@@ -645,17 +668,144 @@ export async function handleSaveEditedSession(e) {
 
 export function handleDeleteActiveSession() {
   if (state.isReadOnly || !activeDetailSessionId) return;
-  window.showStyledConfirm(
-    "Supprimer la séance",
-    "Voulez-vous vraiment retirer cette séance de votre planning ?",
-    "🗑️",
-    async () => {
-      showLoading("Suppression...");
-      await remove(ref(database, getStudentPath("seances/" + activeDetailSessionId)));
-      hideLoading();
-      window.closeModal("sessionDetailModal");
+  const ev = state.db.find((e) => e.id === activeDetailSessionId);
+  if (!ev) return;
+
+  const dateKey = activeDetailSessionDate || getSessionDateKey(ev.day);
+  const isSingle = Boolean(ev.freq && ev.freq.includes("Ce jour seulement"));
+
+  let formattedDateStr = state.days[ev.day];
+  let formattedDateShort = dateKey;
+  if (dateKey) {
+    const parts = dateKey.split("-").map(Number);
+    if (parts.length === 3) {
+      const dObj = new Date(parts[0], parts[1] - 1, parts[2]);
+      formattedDateStr = `${state.days[ev.day]} ${dObj.getDate()} ${state.months[dObj.getMonth()]} ${dObj.getFullYear()}`;
+      formattedDateShort = `${String(dObj.getDate()).padStart(2, "0")}/${String(dObj.getMonth() + 1).padStart(2, "0")}/${dObj.getFullYear()}`;
     }
-  );
+  }
+
+  const meta = getSubjectMeta(ev.sub);
+
+  if (isSingle) {
+    // Séance unique ponctuelle
+    window.showStyledConfirm(
+      "Supprimer la séance unique",
+      `Voulez-vous vraiment supprimer cette séance unique de ${ev.sub} du ${formattedDateStr} (${formatM(ev.s)} - ${formatM(ev.e)}) ?`,
+      "🗑️",
+      async () => {
+        showLoading("Suppression...");
+        try {
+          await remove(ref(database, getStudentPath("seances/" + activeDetailSessionId)));
+          const todoKey = `${activeDetailSessionId}_${dateKey}`;
+          await remove(ref(database, getStudentPath(`seances_todos/${todoKey}`)));
+          if (state.sessionDateTodos && state.sessionDateTodos[todoKey]) {
+            delete state.sessionDateTodos[todoKey];
+          }
+          state.db = state.db.filter((e) => e.id !== activeDetailSessionId);
+          hideLoading();
+          window.closeModal("sessionDetailModal");
+          render();
+        } catch (err) {
+          hideLoading();
+          alert("Erreur lors de la suppression : " + err.message);
+        }
+      }
+    );
+    return;
+  }
+
+  // Séance récurrente hebdomadaire ou quinzaine
+  const delRecurSub = document.getElementById("delRecurSub");
+  const delRecurIco = document.getElementById("delRecurIco");
+  const delRecurDateInfo = document.getElementById("delRecurDateInfo");
+  const delRecurFreqSubtitle = document.getElementById("delRecurFreqSubtitle");
+  const delRecurDateThisOnly = document.getElementById("delRecurDateThisOnly");
+  const delRecurDateFollowing = document.getElementById("delRecurDateFollowing");
+
+  if (delRecurSub) delRecurSub.innerText = ev.sub;
+  if (delRecurIco) delRecurIco.innerText = meta.ico || "📚";
+  if (delRecurFreqSubtitle) delRecurFreqSubtitle.innerText = `Séance récurrente (${ev.freq || "Chaque semaine"})`;
+  if (delRecurDateInfo) {
+    delRecurDateInfo.innerText = `🗓️ ${formattedDateStr} • ⏰ ${formatM(ev.s)} - ${formatM(ev.e)}`;
+  }
+  if (delRecurDateThisOnly) delRecurDateThisOnly.innerText = formattedDateShort;
+  if (delRecurDateFollowing) delRecurDateFollowing.innerText = formattedDateShort;
+
+  window.openModal("deleteRecurringModal");
+}
+
+export async function confirmDeleteSessionOccurrence(mode) {
+  if (state.isReadOnly || !activeDetailSessionId) return;
+  const ev = state.db.find((e) => e.id === activeDetailSessionId);
+  if (!ev) {
+    window.closeModal("deleteRecurringModal");
+    return;
+  }
+
+  const dateKey = activeDetailSessionDate || getSessionDateKey(ev.day);
+  showLoading("Suppression...");
+
+  try {
+    if (mode === "this_only") {
+      // Option 1 : Supprimer cette séance uniquement (ne touche ni avant ni après)
+      await set(ref(database, getStudentPath(`seances/${ev.id}/excludedDates/${dateKey}`)), true);
+      if (!ev.excludedDates) ev.excludedDates = {};
+      if (Array.isArray(ev.excludedDates)) {
+        if (!ev.excludedDates.includes(dateKey)) ev.excludedDates.push(dateKey);
+      } else {
+        ev.excludedDates[dateKey] = true;
+      }
+
+      // Nettoyer les devoirs éventuels pour cette date précise
+      const todoKey = `${ev.id}_${dateKey}`;
+      await remove(ref(database, getStudentPath(`seances_todos/${todoKey}`)));
+      if (state.sessionDateTodos && state.sessionDateTodos[todoKey]) {
+        delete state.sessionDateTodos[todoKey];
+      }
+
+    } else if (mode === "this_and_following") {
+      // Option 2 : Supprimer cette séance et toutes les suivantes
+      // Définit untilDate = dateKey. Toutes les dates strictement avant dateKey restent visibles dans l'historique !
+      await update(ref(database, getStudentPath(`seances/${ev.id}`)), {
+        untilDate: dateKey,
+      });
+      ev.untilDate = dateKey;
+
+      // Nettoyer les devoirs pour cette date et les dates futures
+      if (state.sessionDateTodos) {
+        for (const [key, tObj] of Object.entries(state.sessionDateTodos)) {
+          if (tObj && tObj.sessionId === ev.id && tObj.date && tObj.date >= dateKey) {
+            delete state.sessionDateTodos[key];
+            await remove(ref(database, getStudentPath(`seances_todos/${key}`)));
+          }
+        }
+      }
+
+    } else if (mode === "all") {
+      // Option 3 : Supprimer toute la série (passée, présente et future)
+      await remove(ref(database, getStudentPath(`seances/${ev.id}`)));
+      state.db = state.db.filter((e) => e.id !== ev.id);
+
+      // Nettoyer tous les devoirs associés à cette séance
+      if (state.sessionDateTodos) {
+        for (const [key, tObj] of Object.entries(state.sessionDateTodos)) {
+          if (tObj && tObj.sessionId === ev.id) {
+            delete state.sessionDateTodos[key];
+            await remove(ref(database, getStudentPath(`seances_todos/${key}`)));
+          }
+        }
+      }
+    }
+
+    hideLoading();
+    window.closeModal("deleteRecurringModal");
+    window.closeModal("sessionDetailModal");
+    render();
+  } catch (err) {
+    hideLoading();
+    alert("Erreur lors de la suppression : " + err.message);
+  }
 }
 
 // --- EXAMENS ET DEVOIRS ---
@@ -952,8 +1102,10 @@ export function updateHomeStreak() {
   const badgeVal = document.getElementById("streakDaysCount");
   const daysWithHome = new Set();
   state.db.forEach((ev) => {
-    if (ev.type && (ev.type.includes("maison") || ev.type.includes("ligne"))) {
-      daysWithHome.add(ev.day);
+    if (shouldShowSession(ev, ev.day, state.currentMonday)) {
+      if (ev.type && (ev.type.includes("maison") || ev.type.includes("ligne"))) {
+        daysWithHome.add(ev.day);
+      }
     }
   });
 
@@ -1104,6 +1256,7 @@ window.askTutorAboutSessionTodo = askTutorAboutSessionTodo;
 window.toggleSessionTodoDone = toggleSessionTodoDone;
 window.handleSaveEditedSession = handleSaveEditedSession;
 window.handleDeleteActiveSession = handleDeleteActiveSession;
+window.confirmDeleteSessionOccurrence = confirmDeleteSessionOccurrence;
 window.saveExam = saveExam;
 window.deleteExam = deleteExam;
 window.renderExams = renderExams;

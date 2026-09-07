@@ -19,7 +19,7 @@ import {
 } from "./firebase-config.js";
 import { state, getStudentPath, showLoading, hideLoading } from "./state.js";
 import { loadAdminKPIs, listenToAnnouncements } from "./admin.js";
-import { render } from "./calendar.js";
+import { render } from "./calendar.js?v=20.3";
 import { switchTrimester, selectBacSubject } from "./grades.js";
 
 export const MASTER_ADMIN_EMAILS = [
