@@ -104,7 +104,7 @@ function initApp() {
   // Enregistrement proactif du Service Worker PWA
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker
-      .register("./sw.js?v=21.0")
+      .register("./sw.js?v=21.1")
       .then((reg) => {
         console.log("PWA Service Worker actif:", reg.scope);
       })

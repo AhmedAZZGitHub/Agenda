@@ -32,7 +32,7 @@
     // Initialisation Service Worker pour PWA avec mise à jour immédiate
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", () => {
-        navigator.serviceWorker.register("./sw.js?v=21.0").then((reg) => {
+        navigator.serviceWorker.register("./sw.js?v=21.1").then((reg) => {
           reg.update();
           console.log("PWA Service Worker actif:", reg.scope);
         }).catch((err) => {
@@ -44,7 +44,7 @@
     if ("caches" in window) {
       caches.keys().then((names) => {
         names.forEach((name) => {
-          if (name !== "agenda-bac-v21.0") {
+          if (name !== "agenda-bac-v21.1") {
             caches.delete(name);
           }
         });
@@ -174,7 +174,7 @@
       if (viewImport) viewImport.style.display = tab === "import" ? "flex" : "none";
     };
   </script>
-  <link rel="stylesheet" href="css/styles.css?v=21.0" />
+  <link rel="stylesheet" href="css/styles.css?v=21.1" />
 </head>
 
 <body class="dark-mode">
@@ -476,6 +476,8 @@
         </div>
       </form>
     </div>
+  </div>
+
   <!-- MODALE PERSONNALISATION DU THÈME & COULEURS -->
   <div class="modal" id="themeModal">
     <div class="modal-box" style="gap: 16px; max-width: 520px;">
@@ -2180,7 +2182,7 @@
   </div>
 
   <!-- SCRIPT APPLICATION -->
-  <script type="module" src="js/app.js?v=21.0"></script>
+  <script type="module" src="js/app.js?v=21.1"></script>
 </body>
 
 </html>
