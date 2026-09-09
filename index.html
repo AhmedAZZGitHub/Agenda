@@ -449,22 +449,136 @@
     </div>
   </div>
 
-  <!-- MODALE LIER UN ENFANT -->
+  <!-- MODALE LIER UN ENFANT (COMPTE PARENT) -->
   <div class="modal" id="linkChildModal">
-    <div class="modal-box" style="gap: 14px">
+    <div class="modal-box" style="gap: 16px; max-width: 440px;">
       <div style="display: flex; justify-content: space-between; align-items: center">
-        <span style="font-weight: 800; font-size: 16px">👨‍👩‍👧 Lier le compte d'un Élève</span>
+        <span style="font-weight: 800; font-size: 17px; display: flex; align-items: center; gap: 8px;">
+          👨‍👩‍👧 Lier le compte d'un Élève
+        </span>
         <span onclick="window.closeModal('linkChildModal')"
-          style="cursor: pointer; color: #ef4444; font-size: 18px">✕</span>
+          style="cursor: pointer; color: #ef4444; font-size: 20px; font-weight: 800;">✕</span>
       </div>
-      <div style="font-size: 13px; color: var(--muted)">
-        Saisissez le code fourni par votre enfant (ex: <code>BAC-8492</code>) :
+      <div style="font-size: 13px; color: var(--muted); line-height: 1.5;">
+        Saisissez le code fourni par votre enfant dans son profil (format : <code>BAC-XXXX</code> ou code à 4 caractères) :
       </div>
-      <input type="text" id="childLinkInput" class="input" placeholder="ex: BAC-9182"
-        style="font-family: 'JetBrains Mono', monospace; text-transform: uppercase; font-weight: 800; font-size: 16px; text-align: center" />
-      <button class="btn-add" onclick="window.linkChildWithCode()" style="justify-content: center; padding: 10px">
-        ✨ Associer l'élève
-      </button>
+      <form onsubmit="event.preventDefault(); window.linkChildWithCode();" style="display: flex; flex-direction: column; gap: 14px;">
+        <input type="text" id="childLinkInput" class="input" placeholder="ex: BAC-9182"
+          autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false"
+          style="font-family: 'JetBrains Mono', monospace; text-transform: uppercase; font-weight: 800; font-size: 18px; text-align: center; letter-spacing: 2px; padding: 12px;" />
+        <div style="display: flex; gap: 10px;">
+          <button type="button" class="btn-cancel" onclick="window.closeModal('linkChildModal')" style="flex: 1; padding: 10px; font-weight: 700; border-radius: 10px;">
+            Annuler
+          </button>
+          <button type="submit" class="btn-add" id="btnSubmitLinkChild" style="flex: 2; justify-content: center; padding: 10px 18px; font-weight: 800; font-size: 14px; background: linear-gradient(135deg, #0284c7, #4f46e5); color: #ffffff;">
+            ✨ Associer l'élève
+          </button>
+        </div>
+      </form>
+    </div>
+  <!-- MODALE PERSONNALISATION DU THÈME & COULEURS -->
+  <div class="modal" id="themeModal">
+    <div class="modal-box" style="gap: 16px; max-width: 520px;">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <span style="font-weight: 800; font-size: 17px; display: flex; align-items: center; gap: 8px;">
+          🎨 Personnalisation & Thèmes
+        </span>
+        <span onclick="window.closeModal('themeModal')" style="cursor: pointer; color: #ef4444; font-size: 20px; font-weight: 800;">✕</span>
+      </div>
+
+      <!-- 1. MODE SOMBRE / CLAIR TOGGLE CARDS -->
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        <div style="font-size: 12px; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px;">
+          🌓 Mode d'affichage
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+          <div class="theme-mode-card" id="themeModeDarkCard" onclick="window.setDarkMode(true)">
+            <div style="font-size: 24px;">🌙</div>
+            <div>
+              <div style="font-weight: 800; font-size: 13px;">Mode Sombre</div>
+              <div style="font-size: 11px; color: var(--muted);">Reposant pour les yeux</div>
+            </div>
+            <div class="theme-check-icon" id="themeModeDarkCheck">✓</div>
+          </div>
+          <div class="theme-mode-card" id="themeModeLightCard" onclick="window.setDarkMode(false)">
+            <div style="font-size: 24px;">☀️</div>
+            <div>
+              <div style="font-weight: 800; font-size: 13px;">Mode Clair</div>
+              <div style="font-size: 11px; color: var(--muted);">Lumineux et net</div>
+            </div>
+            <div class="theme-check-icon" id="themeModeLightCheck">✓</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. PALETTE DE COULEURS -->
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        <div style="font-size: 12px; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px;">
+          🎨 Palette de Couleurs Principales
+        </div>
+        <div class="theme-color-grid">
+          <!-- BLEU OCÉAN -->
+          <div class="theme-color-card" id="themeColor_blue" onclick="window.setAppColorTheme('blue')">
+            <div class="theme-color-circle" style="background: linear-gradient(135deg, #0284c7, #4f46e5);"></div>
+            <div class="theme-color-name">Bleu Océan</div>
+            <div class="theme-color-tag">Par défaut</div>
+          </div>
+          <!-- ROSE RUBIS -->
+          <div class="theme-color-card" id="themeColor_rose" onclick="window.setAppColorTheme('rose')">
+            <div class="theme-color-circle" style="background: linear-gradient(135deg, #e11d48, #db2777);"></div>
+            <div class="theme-color-name">Rose Rubis</div>
+            <div class="theme-color-tag">Élégant</div>
+          </div>
+          <!-- VIOLET AMÉTHYSTE -->
+          <div class="theme-color-card" id="themeColor_purple" onclick="window.setAppColorTheme('purple')">
+            <div class="theme-color-circle" style="background: linear-gradient(135deg, #7c3aed, #a855f7);"></div>
+            <div class="theme-color-name">Violet Royal</div>
+            <div class="theme-color-tag">Moderne</div>
+          </div>
+          <!-- VERT ÉMERAUDE -->
+          <div class="theme-color-card" id="themeColor_emerald" onclick="window.setAppColorTheme('emerald')">
+            <div class="theme-color-circle" style="background: linear-gradient(135deg, #059669, #0d9488);"></div>
+            <div class="theme-color-name">Émeraude</div>
+            <div class="theme-color-tag">Nature</div>
+          </div>
+          <!-- ORANGE SUNSET -->
+          <div class="theme-color-card" id="themeColor_orange" onclick="window.setAppColorTheme('orange')">
+            <div class="theme-color-circle" style="background: linear-gradient(135deg, #ea580c, #d97706);"></div>
+            <div class="theme-color-name">Orange Sunset</div>
+            <div class="theme-color-tag">Énergie</div>
+          </div>
+          <!-- CYAN CYBER -->
+          <div class="theme-color-card" id="themeColor_cyan" onclick="window.setAppColorTheme('cyan')">
+            <div class="theme-color-circle" style="background: linear-gradient(135deg, #0891b2, #2563eb);"></div>
+            <div class="theme-color-name">Cyan Cyber</div>
+            <div class="theme-color-tag">Néon</div>
+          </div>
+          <!-- OR PRESTIGE -->
+          <div class="theme-color-card" id="themeColor_gold" onclick="window.setAppColorTheme('gold')">
+            <div class="theme-color-circle" style="background: linear-gradient(135deg, #d97706, #f59e0b);"></div>
+            <div class="theme-color-name">Or Prestige</div>
+            <div class="theme-color-tag">Luxe</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. APERÇU EN DIRECT DU STYLE -->
+      <div style="background: var(--dash); border-radius: 12px; padding: 12px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="font-size: 18px;">✨</span>
+          <span style="font-size: 12px; font-weight: 700;">Aperçu des boutons & badges</span>
+        </div>
+        <div style="display: flex; gap: 6px; align-items: center;">
+          <span class="tag-meta" style="background: var(--primary); color: white; padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 800;">Badge Actif</span>
+          <button type="button" class="btn-action" style="background: var(--primary-gradient); color: white; border: none; padding: 4px 10px; border-radius: 8px; font-size: 11.5px; font-weight: 800;">Bouton Thème</button>
+        </div>
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; margin-top: 4px;">
+        <button type="button" class="btn-add" onclick="window.closeModal('themeModal')" style="padding: 8px 18px; font-size: 13px; justify-content: center;">
+          ✅ Enregistrer et Fermer
+        </button>
+      </div>
     </div>
   </div>
 
@@ -753,6 +867,10 @@
             <span class="util-ico">⚙️</span>
             <span>Paramètres</span>
           </button>
+          <button class="sidebar-util-btn" onclick="window.openThemeModal ? window.openThemeModal() : window.openModal('themeModal')" title="Personnaliser le thème et les couleurs">
+            <span class="util-ico">🎨</span>
+            <span>Thème & Style</span>
+          </button>
           <button class="sidebar-util-btn" onclick="window.toggleDarkMode()">
             <span class="util-ico" id="sidebarThemeIco">🌙</span>
             <span id="sidebarThemeTxt">Mode Clair</span>
@@ -781,6 +899,7 @@
             </div>
           </div>
           <div class="user-mobile-quick">
+            <button class="btn-icon-nav" onclick="window.openThemeModal ? window.openThemeModal() : window.openModal('themeModal')" title="Thème & Couleurs" style="color: var(--primary);">🎨</button>
             <button class="btn-icon-nav" onclick="window.openUserProfileModal()" title="Paramètres & Gestion">⚙️</button>
             <button class="btn-top-pill pill-logout" id="authActionBtnMob" onclick="window.handleLogout ? window.handleLogout() : window.showAuthModal()" title="Déconnexion">
               <span class="pill-ico">🚪</span>
@@ -791,12 +910,17 @@
 
         <!-- Ligne 2 : Boutons d'administration côte à côte -->
         <div class="user-actions-side user-top-actions">
-          <!-- SÉLECTEUR ENFANT SI COMPTE PARENT (DISCRET) -->
-          <div id="parentChildControls" style="display: none; align-items: center; gap: 4px;">
-            <select id="parentChildSelect" class="input" style="padding: 4px 8px; font-weight: 700; font-size: 11px;"
+          <!-- CONTRÔLES PARENT : SÉLECTEUR ENFANT + BOUTON AJOUTER ÉLÈVE -->
+          <div id="parentChildControls" style="display: none; align-items: center; gap: 6px;">
+            <select id="parentChildSelect" class="input" style="padding: 5px 8px; font-weight: 700; font-size: 11.5px; max-width: 145px;"
               onchange="window.onParentSelectChild(this.value)">
               <option value="">👶 Aucun enfant</option>
             </select>
+            <button type="button" class="btn-top-pill pill-parent-add btn" id="btnAddChildTopBtn" onclick="window.openLinkChildModal ? window.openLinkChildModal() : window.openModal('linkChildModal')" title="Lier un élève avec son code BAC-XXXX">
+              <span class="pill-ico">➕</span>
+              <span class="pill-full">Lier un Élève</span>
+              <span class="pill-short">Lier</span>
+            </button>
           </div>
 
           <!-- 🛡️ BOUTON GESTION DES COMPTES -->
@@ -815,6 +939,11 @@
             <span class="pill-short">JARVIS</span>
           </button>
 
+          <!-- 🎨 BOUTON THÈME & STYLE (PC) -->
+          <button class="btn-icon-nav pc-only-btn" id="btnOpenThemeModalTop" onclick="window.openThemeModal ? window.openThemeModal() : window.openModal('themeModal')" title="Personnaliser le thème et les couleurs" style="color: var(--primary);">
+            🎨
+          </button>
+
           <!-- ⚙️ BOUTON PARAMÈTRES ICONIQUE (PC) -->
           <button class="btn-icon-nav pc-only-btn" id="btnOpenProfileHub" onclick="window.openUserProfileModal()" title="Paramètres & Gestion">
             ⚙️
@@ -830,11 +959,16 @@
       </div>
 
       <!-- BANNIÈRES D'ÉTAT & ANNONCES -->
-      <div class="view-context-banner" id="viewContextBanner" style="display: none; justify-content: space-between; align-items: center; background: linear-gradient(135deg, #1e1b4b, #312e81); border: 1.5px solid #6366f1; color: #e0e7ff; padding: 10px 16px; border-radius: 12px; margin-bottom: 12px;">
-        <span id="viewContextText">👁️ Mode Consultation en Direct</span>
-        <button type="button" class="btn-action" style="padding: 5px 12px; font-size: 11.5px; font-weight: 800; background: #6366f1; color: white; border: none; border-radius: 8px; cursor: pointer;" onclick="window.resetToOwnSchedule()">
-          ⬅️ Revenir à mon planning
-        </button>
+      <div class="view-context-banner" id="viewContextBanner" style="display: none; justify-content: space-between; align-items: center; background: linear-gradient(135deg, #1e1b4b, #312e81); border: 1.5px solid #6366f1; color: #e0e7ff; padding: 10px 16px; border-radius: 12px; margin-bottom: 12px; gap: 10px; flex-wrap: wrap;">
+        <span id="viewContextText" style="font-weight: 700; display: flex; align-items: center; gap: 6px;">👁️ Mode Consultation en Direct</span>
+        <div style="display: flex; gap: 8px; align-items: center;">
+          <button type="button" class="btn-action" id="bannerBtnAddChild" style="padding: 5px 12px; font-size: 11.5px; font-weight: 800; background: rgba(255, 255, 255, 0.15); color: white; border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 8px; cursor: pointer; display: none;" onclick="window.openLinkChildModal ? window.openLinkChildModal() : window.openModal('linkChildModal')">
+            ➕ Lier un autre élève
+          </button>
+          <button type="button" class="btn-action" id="bannerBtnResetOwn" style="padding: 5px 12px; font-size: 11.5px; font-weight: 800; background: #6366f1; color: white; border: none; border-radius: 8px; cursor: pointer;" onclick="window.resetToOwnSchedule()">
+            ⬅️ Revenir à mon planning
+          </button>
+        </div>
       </div>
 
       <div class="announcement-bar" id="activeAnnouncementBar" style="display: none">
@@ -1734,6 +1868,14 @@
               💡 Donnez ce code à vos parents pour qu'ils créent un compte Parent et suivent votre emploi du temps et vos notes.
             </div>
           </div>
+          <!-- SECTION ENFANTS LIÉS (COMPTE PARENT) -->
+          <div id="profParentLinkedRow" style="display: none; flex-direction: column; gap: 6px;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span style="color: var(--muted); font-weight: 700;">👨‍👩‍👧 Élèves Liés à votre compte :</span>
+              <button type="button" class="btn-action" style="padding: 3px 10px; font-size: 11px; font-weight: 700; background: var(--primary); color: white;" onclick="window.closeModal('userProfileModal'); (window.openLinkChildModal ? window.openLinkChildModal() : window.openModal('linkChildModal'));">➕ Lier un élève</button>
+            </div>
+            <div id="profParentLinkedStudentsList" style="display: flex; flex-direction: column; gap: 4px;"></div>
+          </div>
           <div style="display: flex; justify-content: space-between; align-items: center;">
             <span style="color: var(--muted); font-weight: 700;">Statut du compte :</span>
             <span style="color: #15803d; font-weight: 800; background: #dcfce7; padding: 2px 8px; border-radius: 99px; font-size: 11px;" id="profStatusBadge">✅ Validé & Actif</span>
@@ -1762,12 +1904,21 @@
             </div>
           </div>
 
-          <!-- 2. COPIER / PARTAGER PLANNING -->
-          <div class="profile-hub-card" onclick="window.closeModal('userProfileModal'); window.openShareScheduleModal();">
+          <!-- 2. COPIER / PARTAGER PLANNING (ÉLÈVE) -->
+          <div class="profile-hub-card" id="btnHubShareSchedule" onclick="window.closeModal('userProfileModal'); window.openShareScheduleModal();">
             <div class="card-icon" style="color: #6366f1;">📋</div>
             <div>
               <div style="font-weight: 800;">Partager Planning</div>
               <div style="font-size: 10.5px; color: var(--muted);">Code & Copie</div>
+            </div>
+          </div>
+
+          <!-- 2bis. LIER / AJOUTER UN ÉLÈVE (POUR COMPTE PARENT) -->
+          <div class="profile-hub-card" id="btnHubLinkChild" style="display: none; border-color: #0284c7; background: rgba(2, 132, 199, 0.06);" onclick="window.closeModal('userProfileModal'); (window.openLinkChildModal ? window.openLinkChildModal() : window.openModal('linkChildModal'));">
+            <div class="card-icon" style="color: #0284c7;">👨‍👩‍👧</div>
+            <div>
+              <div style="font-weight: 800; color: #0284c7;">Lier un Élève</div>
+              <div style="font-size: 10.5px; color: var(--muted);">Code de liaison BAC-XXXX</div>
             </div>
           </div>
 
@@ -1786,6 +1937,15 @@
             <div>
               <div style="font-weight: 800;">Configuration IA</div>
               <div style="font-size: 10.5px; color: var(--muted);">Clé Google Gemini</div>
+            </div>
+          </div>
+
+          <!-- 4bis. PERSONNALISATION / THÈME & COULEURS -->
+          <div class="profile-hub-card" onclick="window.closeModal('userProfileModal'); (window.openThemeModal ? window.openThemeModal() : window.openModal('themeModal'));">
+            <div class="card-icon" style="color: var(--primary);">🎨</div>
+            <div>
+              <div style="font-weight: 800; color: var(--primary);">Style & Couleurs</div>
+              <div style="font-size: 10.5px; color: var(--muted);">Bleu, Rose, Violet, etc.</div>
             </div>
           </div>
 

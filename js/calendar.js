@@ -151,14 +151,20 @@ export function renderPc() {
   pHead.innerHTML = '<div style="background:var(--dash);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:var(--muted);">H</div>';
 
   const now = new Date();
-  const isThisWeek = state.currentMonday.getDate() === getMon(now).getDate() && state.currentMonday.getMonth() === getMon(now).getMonth();
-  const realDay = (now.getDay() + 6) % 7;
+  const todayDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
   for (let i = 0; i < 7; i++) {
     const d = new Date(state.currentMonday);
     d.setDate(d.getDate() + i);
-    const isToday = isThisWeek && i === realDay;
-    pHead.innerHTML += `<div style="background:${isToday ? "#0284c7" : "var(--dash)"};color:${isToday ? "#fff" : "var(--text)"};border-radius:10px;padding:6px;text-align:center;font-weight:700;font-size:12px;cursor:pointer;" onclick="window.curDayIdx=${i};window.render();">${state.days[i]}<br><span style="font-size:10px;opacity:0.85;">${d.getDate()} ${state.months[d.getMonth()]}</span></div>`;
+    const dayDate = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    const isToday = dayDate.getTime() === todayDate.getTime();
+    const isPast = dayDate < todayDate;
+
+    let headerBg = isToday ? "var(--primary)" : "var(--dash)";
+    let headerColor = isToday ? "#fff" : (isPast ? "var(--muted)" : "var(--text)");
+    let headerOpacity = isPast ? "opacity: 0.7;" : "";
+
+    pHead.innerHTML += `<div style="background:${headerBg};color:${headerColor};${headerOpacity}border-radius:10px;padding:6px;text-align:center;font-weight:700;font-size:12px;cursor:pointer;transition:all 0.2s ease;" onclick="window.curDayIdx=${i};window.render();">${state.days[i]}${isToday ? ' <span style="font-size:9px;background:rgba(255,255,255,0.25);padding:1px 4px;border-radius:99px;font-weight:900;">Auj.</span>' : ''}<br><span style="font-size:10px;opacity:0.85;">${d.getDate()} ${state.months[d.getMonth()]}</span></div>`;
   }
 
   const tCol = document.getElementById("timeCol");
@@ -170,8 +176,13 @@ export function renderPc() {
   if (!dCol) return;
   dCol.innerHTML = "";
   for (let day = 0; day < 7; day++) {
+    const d = new Date(state.currentMonday);
+    d.setDate(d.getDate() + day);
+    const dayDate = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    const isPastDay = dayDate < todayDate;
+
     const col = document.createElement("div");
-    col.className = "col-day";
+    col.className = `col-day ${isPastDay ? "col-passed" : ""}`;
     for (let h = 8; h <= 24; h++) {
       const clickAttr = state.isReadOnly ? "" : `onclick="window.openModal('addModal', ${day}, ${h === 24 ? 23 : h})"`;
       col.innerHTML += `<div class="h-slot" ${clickAttr}></div>`;
@@ -182,7 +193,7 @@ export function renderPc() {
       .filter((e) => shouldShowSession(e, day, state.currentMonday))
       .forEach((ev) => {
         const meta = getSubjectMeta(ev.sub);
-        const status = getEventStatus(ev.day, ev.s, ev.e);
+        const status = getEventStatus(ev.day, ev.s, ev.e, state.currentMonday);
         const top = ((ev.s - 480) / 60) * 46;
         const hPx = Math.max(30, ((ev.e - ev.s) / 60) * 46);
 
@@ -232,10 +243,25 @@ export function renderMob() {
   const sc = document.getElementById("mobScroller");
   if (!sc) return;
   sc.innerHTML = "";
+
+  const now = new Date();
+  const todayDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
   for (let i = 0; i < 7; i++) {
     const d = new Date(state.currentMonday);
     d.setDate(d.getDate() + i);
-    sc.innerHTML += `<div class="mob-chip ${i === state.curDayIdx ? "active" : ""}" onclick="window.curDayIdx=${i};window.render();"><div style="font-size:12px;font-weight:700;">${state.days[i].substring(0, 3)}</div><div style="font-size:10px;">${d.getDate()} ${state.months[d.getMonth()]}</div></div>`;
+    const dayDate = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    const isToday = dayDate.getTime() === todayDate.getTime();
+    const isPast = dayDate < todayDate;
+
+    sc.innerHTML += `
+      <div class="mob-chip ${i === state.curDayIdx ? "active" : ""} ${isPast ? "chip-past" : ""}" onclick="window.curDayIdx=${i};window.render();">
+        <div style="font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:3px;">
+          ${state.days[i].substring(0, 3)} ${isToday ? '<span style="font-size:8px;">🔵</span>' : ""}
+        </div>
+        <div style="font-size:10px;opacity:${isPast ? '0.7' : '0.9'};">${d.getDate()} ${state.months[d.getMonth()]}</div>
+      </div>
+    `;
   }
   const ml = document.getElementById("mobList");
   if (!ml) return;
@@ -248,7 +274,7 @@ export function renderMob() {
   const curDateKey = getSessionDateKey(state.curDayIdx);
   dayEvs.forEach((ev) => {
     const meta = getSubjectMeta(ev.sub);
-    const status = getEventStatus(ev.day, ev.s, ev.e);
+    const status = getEventStatus(ev.day, ev.s, ev.e, state.currentMonday);
     const isQuin = ev.freq && ev.freq.includes("quinzaine");
     const isSingle = ev.freq && ev.freq.includes("Ce jour seulement");
     const isHome = ev.type && ev.type.includes("maison");

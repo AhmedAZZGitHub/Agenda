@@ -85,20 +85,33 @@ export function getSubjectMeta(sub = "") {
   return { cls: "ev-option", ico: "📌", name: sub || "Autre", coef: 1 };
 }
 
-export function getEventStatus(eventDay, startMins, endMins) {
+export function getEventStatus(eventDay, startMins, endMins, refMonday = state.currentMonday) {
   const now = new Date();
-  const currentWeekMon = getMon(now);
-  const isCurrentWeek = state.currentMonday.getDate() === currentWeekMon.getDate() && state.currentMonday.getMonth() === currentWeekMon.getMonth();
-  const realDayIdx = (now.getDay() + 6) % 7;
+  const todayDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+  const d = new Date(refMonday);
+  d.setDate(d.getDate() + eventDay);
+  const sessionDayDate = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+
   const currentMinutes = now.getHours() * 60 + now.getMinutes();
 
-  if (!isCurrentWeek) return { class: "", text: "" };
-  if (eventDay < realDayIdx) return { class: "passed", text: '<span class="status-badge badge-passed">✓ FAIT</span>' };
-  if (eventDay === realDayIdx) {
-    if (currentMinutes >= endMins) return { class: "passed", text: '<span class="status-badge badge-passed">✓ FAIT</span>' };
-    if (currentMinutes >= startMins && currentMinutes < endMins) return { class: "in-progress", text: '<span class="status-badge badge-progress">⚡ EN COURS</span>' };
+  // 1. Jour passé (date antérieure à aujourd'hui)
+  if (sessionDayDate < todayDate) {
+    return { class: "passed", text: '<span class="status-badge badge-passed">✓ PASSÉ</span>' };
+  }
+
+  // 2. Même jour qu'aujourd'hui
+  if (sessionDayDate.getTime() === todayDate.getTime()) {
+    if (currentMinutes >= endMins) {
+      return { class: "passed", text: '<span class="status-badge badge-passed">✓ TERMINÉ</span>' };
+    }
+    if (currentMinutes >= startMins && currentMinutes < endMins) {
+      return { class: "in-progress", text: '<span class="status-badge badge-progress">⚡ EN COURS</span>' };
+    }
     return { class: "upcoming", text: '<span class="status-badge badge-upcoming">🕒 À VENIR</span>' };
   }
+
+  // 3. Jour futur (date postérieure à aujourd'hui)
   return { class: "upcoming", text: '<span class="status-badge badge-upcoming">🕒 À VENIR</span>' };
 }
 
@@ -185,10 +198,31 @@ window.showStyledConfirm = function (title, msg, icon, onConfirm) {
   window.openModal("customConfirmModal");
 };
 
-window.toggleDarkMode = function () {
-  document.body.classList.toggle("dark-mode");
-  const isDark = document.body.classList.contains("dark-mode");
+export function setAppColorTheme(themeName) {
+  const validThemes = ["blue", "rose", "purple", "emerald", "orange", "cyan", "gold"];
+  const theme = validThemes.includes(themeName) ? themeName : "blue";
+
+  validThemes.forEach((t) => document.body.classList.remove(`theme-${t}`));
+  document.body.classList.add(`theme-${theme}`);
+  localStorage.setItem("app_color_theme", theme);
+
+  // Mise à jour des cartes actives dans la modale
+  validThemes.forEach((t) => {
+    const el = document.getElementById(`themeColor_${t}`);
+    if (el) el.classList.toggle("active", t === theme);
+  });
+
+  if (window.render) window.render();
+}
+
+export function setDarkMode(isDark) {
+  if (isDark) {
+    document.body.classList.add("dark-mode");
+  } else {
+    document.body.classList.remove("dark-mode");
+  }
   localStorage.setItem("app_dark_mode", isDark ? "true" : "false");
+
   const btn = document.getElementById("btnToggleDark");
   if (btn) {
     btn.innerText = isDark ? "☀️" : "🌙";
@@ -198,4 +232,39 @@ window.toggleDarkMode = function () {
   const sIco = document.getElementById("sidebarThemeIco");
   if (sTxt) sTxt.innerText = isDark ? "Mode Clair" : "Mode Sombre";
   if (sIco) sIco.innerText = isDark ? "☀️" : "🌙";
-};
+
+  const darkCard = document.getElementById("themeModeDarkCard");
+  const lightCard = document.getElementById("themeModeLightCard");
+  if (darkCard) darkCard.classList.toggle("active", isDark);
+  if (lightCard) lightCard.classList.toggle("active", !isDark);
+
+  if (window.render) window.render();
+}
+
+export function toggleDarkMode() {
+  const isDark = !document.body.classList.contains("dark-mode");
+  setDarkMode(isDark);
+}
+
+export function openThemeModal() {
+  const currentTheme = localStorage.getItem("app_color_theme") || "blue";
+  const isDark = document.body.classList.contains("dark-mode");
+
+  const validThemes = ["blue", "rose", "purple", "emerald", "orange", "cyan", "gold"];
+  validThemes.forEach((t) => {
+    const el = document.getElementById(`themeColor_${t}`);
+    if (el) el.classList.toggle("active", t === currentTheme);
+  });
+
+  const darkCard = document.getElementById("themeModeDarkCard");
+  const lightCard = document.getElementById("themeModeLightCard");
+  if (darkCard) darkCard.classList.toggle("active", isDark);
+  if (lightCard) lightCard.classList.toggle("active", !isDark);
+
+  window.openModal("themeModal");
+}
+
+window.setAppColorTheme = setAppColorTheme;
+window.setDarkMode = setDarkMode;
+window.toggleDarkMode = toggleDarkMode;
+window.openThemeModal = openThemeModal;

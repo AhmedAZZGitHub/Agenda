@@ -333,13 +333,18 @@ export function renderUserProfileBar() {
 
   const btnParent = document.getElementById("btnMyParentCode");
   const pCtrl = document.getElementById("parentChildControls");
+  const hubShare = document.getElementById("btnHubShareSchedule");
+  const hubLinkChild = document.getElementById("btnHubLinkChild");
+  const isParent = state.currentUserProfile.role === "parent";
   const isAdmin =
     state.currentUserProfile.role === "admin" ||
     isMasterAdmin(state.currentUser?.email, state.currentUser?.uid) ||
     (state.currentUser?.email && state.currentUser.email.toLowerCase().includes("ahmedazzouzi72"));
 
   if (btnParent) btnParent.style.display = state.currentUserProfile.role === "student" || isAdmin ? "inline-flex" : "none";
-  if (pCtrl) pCtrl.style.display = state.currentUserProfile.role === "parent" ? "inline-flex" : "none";
+  if (pCtrl) pCtrl.style.display = isParent ? "inline-flex" : "none";
+  if (hubShare) hubShare.style.display = isParent ? "none" : "flex";
+  if (hubLinkChild) hubLinkChild.style.display = isParent ? "flex" : "none";
   const btnAdminNav = document.getElementById("btnAdminConsoleNav");
   if (btnAdminNav) btnAdminNav.style.display = isAdmin ? "inline-flex" : "none";
 
@@ -348,7 +353,6 @@ export function renderUserProfileBar() {
 
   const hubAdminCard = document.getElementById("btnHubAdminConsole");
   if (hubAdminCard) hubAdminCard.style.display = isAdmin ? "flex" : "none";
-  if (btnProf) btnProf.style.display = "inline-flex";
 
   const pCodeDisp = document.getElementById("myParentCodeDisplay");
   if (pCodeDisp && state.currentUserProfile.parentLinkCode) {
@@ -405,14 +409,24 @@ export function openUserProfileModal() {
     set(ref(database, `parent_codes/${state.currentUserProfile.parentLinkCode}`), state.currentUser.uid);
   }
 
+  const isParent = state.currentUserProfile.role === "parent";
   const pCodeRow = document.getElementById("profParentCodeRow");
   const pCodeVal = document.getElementById("profParentCodeVal");
+  const pLinkedRow = document.getElementById("profParentLinkedRow");
+
   if (pCodeRow) {
-    if (state.currentUserProfile.parentLinkCode) {
+    if (!isParent && state.currentUserProfile.parentLinkCode) {
       pCodeRow.style.display = "flex";
       if (pCodeVal) pCodeVal.innerText = state.currentUserProfile.parentLinkCode;
     } else {
       pCodeRow.style.display = "none";
+    }
+  }
+
+  if (pLinkedRow) {
+    pLinkedRow.style.display = isParent ? "flex" : "none";
+    if (isParent) {
+      renderParentLinkedStudentsList();
     }
   }
 
@@ -566,8 +580,14 @@ export async function sendResetPassEmail() {
 export function updateReadOnlyUI() {
   const banner = document.getElementById("viewContextBanner");
   const isConsultation = state.isReadOnly;
+  const isParent = state.currentUserProfile?.role === "parent";
 
   if (banner) banner.style.display = isConsultation ? "flex" : "none";
+  const btnReset = document.getElementById("bannerBtnResetOwn");
+  const btnAddChild = document.getElementById("bannerBtnAddChild");
+  if (btnReset) btnReset.style.display = isParent ? "none" : (isConsultation ? "inline-flex" : "none");
+  if (btnAddChild) btnAddChild.style.display = isParent ? "inline-flex" : "none";
+
   document.querySelectorAll(".student-action-btn").forEach((btn) => {
     btn.style.display = isConsultation ? "none" : "";
   });
@@ -575,6 +595,17 @@ export function updateReadOnlyUI() {
 
 export function openStudentCodeModal() {
   window.openModal("studentCodeModal");
+}
+
+export function openLinkChildModal() {
+  const codeInp = document.getElementById("childLinkInput");
+  if (codeInp) {
+    codeInp.value = "";
+  }
+  window.openModal("linkChildModal");
+  setTimeout(() => {
+    if (codeInp) codeInp.focus();
+  }, 100);
 }
 
 export function copyParentCode() {
@@ -587,73 +618,183 @@ export function copyParentCode() {
 
 export async function linkChildWithCode() {
   const codeInp = document.getElementById("childLinkInput");
-  const code = codeInp ? codeInp.value.trim().toUpperCase() : "";
-  if (!code) return alert("Veuillez saisir un code.");
+  let code = codeInp ? codeInp.value.trim().toUpperCase() : "";
+  if (!code) return alert("Veuillez saisir le code de l'élève (ex: BAC-XXXX).");
 
-  showLoading("Vérification...");
+  showLoading("Recherche du compte élève...");
   try {
-    const codeSnap = await get(ref(database, `parent_codes/${code}`));
+    let codeSnap = await get(ref(database, `parent_codes/${code}`));
+    if (!codeSnap.exists() && !code.startsWith("BAC-")) {
+      codeSnap = await get(ref(database, `parent_codes/BAC-${code}`));
+    }
     if (!codeSnap.exists()) {
       hideLoading();
-      return alert("Code introuvable. Vérifiez le code fourni par l'élève.");
+      return alert("⚠️ Code introuvable. Vérifiez le code fourni par l'élève dans son profil (format: BAC-XXXX).");
     }
 
     const studentUid = codeSnap.val();
-    const currentLinked = state.currentUserProfile.linkedStudents || [];
+    if (state.currentUser && studentUid === state.currentUser.uid) {
+      hideLoading();
+      return alert("⚠️ Vous ne pouvez pas lier votre propre compte en tant qu'élève.");
+    }
+
+    const currentLinked = Array.isArray(state.currentUserProfile.linkedStudents)
+      ? [...state.currentUserProfile.linkedStudents]
+      : [];
+
     if (!currentLinked.includes(studentUid)) {
       currentLinked.push(studentUid);
       await set(ref(database, `users/${state.currentUser.uid}/linkedStudents`), currentLinked);
       state.currentUserProfile.linkedStudents = currentLinked;
     }
+
     hideLoading();
+    if (codeInp) codeInp.value = "";
     window.closeModal("linkChildModal");
-    setupParentDashboard(studentUid);
-    alert("Élève associé avec succès !");
+    await setupParentDashboard(studentUid);
+    updateReadOnlyUI();
+
+    if (document.getElementById("userProfileModal")?.style.display === "flex") {
+      openUserProfileModal();
+    }
+
+    alert("🎉 Élève associé avec succès à votre compte parent !");
   } catch (err) {
     hideLoading();
-    alert("Erreur : " + err.message);
+    alert("Erreur lors de la liaison : " + err.message);
+  }
+}
+
+export async function unlinkChild(studentUid) {
+  if (!state.currentUser || !state.currentUserProfile) return;
+  window.showStyledConfirm(
+    "Dissocier l'élève",
+    "Êtes-vous sûr de vouloir dissocier cet élève de votre compte parent ?",
+    "⚠️",
+    async () => {
+      showLoading("Dissociation en cours...");
+      try {
+        const currentLinked = (state.currentUserProfile.linkedStudents || []).filter((id) => id !== studentUid);
+        await set(ref(database, `users/${state.currentUser.uid}/linkedStudents`), currentLinked);
+        state.currentUserProfile.linkedStudents = currentLinked;
+        hideLoading();
+        alert("✅ Élève dissocié avec succès.");
+        await setupParentDashboard();
+        if (document.getElementById("userProfileModal")?.style.display === "flex") {
+          openUserProfileModal();
+        }
+      } catch (err) {
+        hideLoading();
+        alert("Erreur lors de la dissociation : " + err.message);
+      }
+    }
+  );
+}
+
+export async function renderParentLinkedStudentsList() {
+  const container = document.getElementById("profParentLinkedStudentsList");
+  if (!container) return;
+  const linked = state.currentUserProfile?.linkedStudents || [];
+  if (linked.length === 0) {
+    container.innerHTML = `
+      <div style="font-size: 11.5px; color: var(--muted); font-style: italic; padding: 4px 0;">
+        👶 Aucun élève lié à ce compte. Cliquez sur <b>'+ Lier un élève'</b> pour entrer son code.
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = '<div style="font-size: 11px; color: var(--muted); margin-bottom: 4px; font-weight: 700;">Élèves suivis :</div>';
+  for (const sUid of linked) {
+    let name = sUid;
+    let section = "";
+    try {
+      const snap = await get(ref(database, `users/${sUid}`));
+      const p = snap.val();
+      if (p) {
+        name = p.displayName || p.email || sUid;
+        section = p.section ? ` • ${p.section}` : "";
+      }
+    } catch (e) {}
+
+    const item = document.createElement("div");
+    item.style.cssText = "display: flex; justify-content: space-between; align-items: center; background: var(--card); border: 1px solid var(--dash); border-radius: 8px; padding: 6px 10px; margin-bottom: 4px; font-size: 12px;";
+    item.innerHTML = `
+      <div style="display: flex; align-items: center; gap: 6px; font-weight: 700; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+        <span>🎓</span>
+        <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${name}<small style="color:var(--muted);font-weight:600;">${section}</small></span>
+      </div>
+      <button type="button" class="btn-action" style="padding: 3px 8px; font-size: 11px; font-weight: 700; background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.25); border-radius: 6px; cursor: pointer; flex-shrink: 0;" onclick="window.unlinkChild('${sUid}')" title="Dissocier cet élève">
+        🗑️ Dissocier
+      </button>
+    `;
+    container.appendChild(item);
   }
 }
 
 export async function setupParentDashboard(preselectedUid = null) {
-  const linked = state.currentUserProfile.linkedStudents || [];
+  state.isReadOnly = true;
+  updateReadOnlyUI();
+
+  const linked = state.currentUserProfile?.linkedStudents || [];
   const selectEl = document.getElementById("parentChildSelect");
   if (!selectEl) return;
   selectEl.innerHTML = "";
 
   if (linked.length === 0) {
     state.activeStudentUid = null;
+    state.activeStudentProfile = null;
     detachAllDataListeners();
     state.db = [];
     state.examsDb = [];
     state.userGrades = {};
+    const opt = document.createElement("option");
+    opt.value = "";
+    opt.innerText = "👶 Aucun enfant lié";
+    selectEl.appendChild(opt);
+
+    const bannerText = document.getElementById("viewContextText");
+    if (bannerText) {
+      bannerText.innerHTML = `👨‍👩‍👧 <b>Espace Parent :</b> Aucun élève lié pour le moment. Cliquez sur <i>'Lier un Élève'</i> pour insérer le code BAC-XXXX.`;
+    }
     window.render();
-    window.openModal("linkChildModal");
+    openLinkChildModal();
     return;
   }
 
   for (const sUid of linked) {
-    const sSnap = await get(ref(database, `users/${sUid}`));
-    const sProfile = sSnap.val();
-    const name = sProfile ? sProfile.displayName || sProfile.email : sUid;
+    let name = sUid;
+    try {
+      const sSnap = await get(ref(database, `users/${sUid}`));
+      const sProfile = sSnap.val();
+      if (sProfile) {
+        name = (sProfile.displayName || sProfile.email || sUid) + (sProfile.section ? ` (${sProfile.section})` : "");
+      }
+    } catch (e) {}
     const opt = document.createElement("option");
     opt.value = sUid;
     opt.innerText = name;
     selectEl.appendChild(opt);
   }
 
-  const targetUid = preselectedUid || linked[0];
+  const targetUid = preselectedUid && linked.includes(preselectedUid) ? preselectedUid : linked[0];
   selectEl.value = targetUid;
-  onParentSelectChild(targetUid);
+  await onParentSelectChild(targetUid);
 }
 
 export async function onParentSelectChild(sUid) {
+  if (!sUid) return;
   state.activeStudentUid = sUid;
-  const sSnap = await get(ref(database, `users/${sUid}`));
-  state.activeStudentProfile = sSnap.val();
+  try {
+    const sSnap = await get(ref(database, `users/${sUid}`));
+    state.activeStudentProfile = sSnap.val();
+  } catch (e) {
+    state.activeStudentProfile = null;
+  }
   const bannerText = document.getElementById("viewContextText");
   if (bannerText) {
-    bannerText.innerText = `👁️ Consultation en direct du planning de : ${state.activeStudentProfile?.displayName || sUid}`;
+    const sName = state.activeStudentProfile?.displayName || state.activeStudentProfile?.email || sUid;
+    bannerText.innerText = `👁️ Consultation en direct du planning de : ${sName}`;
   }
   attachStudentDataListeners(sUid);
 }
@@ -737,8 +878,11 @@ window.handleUpdateProfileInfo = handleUpdateProfileInfo;
 window.handleUpdatePassword = handleUpdatePassword;
 window.sendResetPassEmail = sendResetPassEmail;
 window.openStudentCodeModal = openStudentCodeModal;
+window.openLinkChildModal = openLinkChildModal;
 window.copyParentCode = copyParentCode;
 window.linkChildWithCode = linkChildWithCode;
+window.unlinkChild = unlinkChild;
+window.renderParentLinkedStudentsList = renderParentLinkedStudentsList;
 window.onParentSelectChild = onParentSelectChild;
 window.updateReadOnlyUI = updateReadOnlyUI;
 window.attachStudentDataListeners = attachStudentDataListeners;

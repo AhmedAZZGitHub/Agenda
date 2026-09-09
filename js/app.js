@@ -2,7 +2,7 @@
 // Point d'Entrée Principal de l'Application
 
 import { auth, onAuthStateChanged } from "./firebase-config.js";
-import { state } from "./state.js";
+import { state, setAppColorTheme, setDarkMode } from "./state.js";
 import { loadUserProfile, detachAllDataListeners, renderUserProfileBar, updateReadOnlyUI } from "./auth.js";
 import { render, updateBacCountdown, updateHomeStreak } from "./calendar.js?v=20.4";
 import { initBacArchiveTabs, switchTrimester } from "./grades.js";
@@ -88,6 +88,8 @@ onAuthStateChanged(auth, async (user) => {
     if (avatarEl) avatarEl.innerText = "👤";
     if (btnParent) btnParent.style.display = "none";
     if (pCtrl) pCtrl.style.display = "none";
+    const hubLinkChild = document.getElementById("btnHubLinkChild");
+    if (hubLinkChild) hubLinkChild.style.display = "none";
     if (btnAdmin) btnAdmin.style.display = "none";
     if (btnJarvis) btnJarvis.style.display = "inline-flex";
     if (btnProf) btnProf.style.display = "none";
@@ -111,15 +113,16 @@ document.addEventListener("DOMContentLoaded", () => {
       });
   }
 
-  // Thème sombre
+  // Initialisation du thème de couleur (Bleu, Rose, Violet, etc.)
+  const savedColorTheme = localStorage.getItem("app_color_theme") || "blue";
+  setAppColorTheme(savedColorTheme);
+
+  // Initialisation du mode sombre / clair
   const savedDark = localStorage.getItem("app_dark_mode");
-  if (savedDark === "true") {
-    document.body.classList.add("dark-mode");
-    const btn = document.getElementById("btnToggleDark");
-    if (btn) {
-      btn.innerText = "☀️";
-      btn.title = "Activer le mode clair";
-    }
+  if (savedDark === "false") {
+    setDarkMode(false);
+  } else {
+    setDarkMode(true);
   }
 
   // Initialisations
