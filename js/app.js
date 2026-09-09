@@ -100,11 +100,11 @@ onAuthStateChanged(auth, async (user) => {
 });
 
 // Initialisation globale au chargement du DOM
-document.addEventListener("DOMContentLoaded", () => {
+function initApp() {
   // Enregistrement proactif du Service Worker PWA
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker
-      .register("./sw.js")
+      .register("./sw.js?v=21.0")
       .then((reg) => {
         console.log("PWA Service Worker actif:", reg.scope);
       })
@@ -126,10 +126,26 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // Initialisations
-  initBacArchiveTabs();
-  switchTrimester("trim1");
-  updateBacCountdown();
-  setInterval(updateBacCountdown, 60000);
-  initNotificationsSystem();
-  render();
-});
+  try {
+    initBacArchiveTabs();
+  } catch (e) {}
+  try {
+    switchTrimester("trim1");
+  } catch (e) {}
+  try {
+    updateBacCountdown();
+    setInterval(updateBacCountdown, 60000);
+  } catch (e) {}
+  try {
+    initNotificationsSystem();
+  } catch (e) {}
+  try {
+    render();
+  } catch (e) {}
+}
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", initApp);
+} else {
+  initApp();
+}

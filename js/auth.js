@@ -305,7 +305,7 @@ export async function loadUserProfile(uid) {
   } finally {
     const authOverlay = document.getElementById("authOverlay");
     const mainApp = document.getElementById("mainAppWrap");
-    if (state.currentUser && state.currentUserProfile && state.currentUserProfile.status !== "pending" && state.currentUserProfile.status !== "rejected") {
+    if (state.currentUser && (!state.currentUserProfile || (state.currentUserProfile.status !== "pending" && state.currentUserProfile.status !== "rejected"))) {
       if (authOverlay) authOverlay.style.display = "none";
       if (mainApp) mainApp.style.display = "flex";
     }
