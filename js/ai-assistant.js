@@ -2,9 +2,9 @@
 // Assistant Vocal Multilingue Continu (Tounsi / Arabe / Français), Gemini Pro & Vision Scanner
 
 import { database, ref, set } from "./firebase-config.js";
-import { state, getStudentPath, showLoading, hideLoading } from "./state.js";
-import { getSessionDateKey, render } from "./calendar.js?v=20.4";
-import { executeJarvisCommand, toggleJarvisSpeechMute, isJarvisMuted, speakJarvisVoice } from "./jarvis-engine.js";
+import { state, getStudentPath, showLoading, hideLoading } from "./state.js?v=21.0";
+import { getSessionDateKey, render } from "./calendar.js?v=21.0";
+import { executeJarvisCommand, toggleJarvisSpeechMute, isJarvisMuted, speakJarvisVoice } from "./jarvis-engine.js?v=21.0";
 
 let selectedAiSpeechLang = "ar-TN";
 let aiSpeechRecognition = null;

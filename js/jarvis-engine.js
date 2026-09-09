@@ -3,10 +3,10 @@
 // Aucune règle locale ou regex : toute la compréhension est déléguée directement à l'Intelligence Artificielle
 
 import { database, auth, ref, set, get, remove, update } from "./firebase-config.js";
-import { state, getStudentPath, showLoading, hideLoading, formatM } from "./state.js";
-import { getSessionDateKey, render, openTimer, setTimerPreset, toggleTimer } from "./calendar.js?v=20.4";
-import { loadAdminKPIs } from "./admin.js";
-import { getAiModelName, getAiApiKey } from "./ai-assistant.js";
+import { state, getStudentPath, showLoading, hideLoading, formatM } from "./state.js?v=21.0";
+import { getSessionDateKey, render, openTimer, setTimerPreset, toggleTimer } from "./calendar.js?v=21.0";
+import { loadAdminKPIs } from "./admin.js?v=21.0";
+import { getAiModelName, getAiApiKey } from "./ai-assistant.js?v=21.0";
 
 // État de la synthèse vocale (Audio TTS activé par défaut)
 let isJarvisAudioMuted = false;

@@ -17,10 +17,10 @@ import {
   onValue,
   off,
 } from "./firebase-config.js";
-import { state, getStudentPath, showLoading, hideLoading } from "./state.js";
-import { loadAdminKPIs, listenToAnnouncements } from "./admin.js";
-import { render } from "./calendar.js?v=20.4";
-import { switchTrimester, selectBacSubject } from "./grades.js";
+import { state, getStudentPath, showLoading, hideLoading } from "./state.js?v=21.0";
+import { loadAdminKPIs, listenToAnnouncements } from "./admin.js?v=21.0";
+import { render } from "./calendar.js?v=21.0";
+import { switchTrimester, selectBacSubject } from "./grades.js?v=21.0";
 
 export const MASTER_ADMIN_EMAILS = [
   "ahmedazzouzi72@gmail.com",

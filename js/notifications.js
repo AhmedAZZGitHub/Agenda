@@ -1,7 +1,7 @@
 // js/notifications.js
 // Système de Notifications et Rappels Intelligents pour les Cours et Séances d'Étude
 
-import { state, formatM, getSubjectMeta, getMon } from "./state.js";
+import { state, formatM, getSubjectMeta, getMon } from "./state.js?v=21.0";
 
 const sentNotifications = new Set();
 

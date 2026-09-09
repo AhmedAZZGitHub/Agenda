@@ -1,7 +1,7 @@
 // js/maps.js
 // Gestion des Cartes Interactives Leaflet pour les cours particuliers et Navigation GPS
 
-import { state, getSubjectMeta, formatM } from "./state.js";
+import { state, getSubjectMeta, formatM } from "./state.js?v=21.0";
 
 let pickerMap = null;
 let pickerMarker = null;

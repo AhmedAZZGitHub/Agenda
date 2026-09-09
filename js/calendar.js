@@ -11,8 +11,8 @@ import {
   getEventStatus,
   showLoading,
   hideLoading,
-} from "./state.js";
-import { renderDetailSessionMap, initEditPickerMap } from "./maps.js";
+} from "./state.js?v=21.0";
+import { renderDetailSessionMap, initEditPickerMap } from "./maps.js?v=21.0";
 
 let activeDetailSessionId = null;
 let activeDetailSessionDate = null;

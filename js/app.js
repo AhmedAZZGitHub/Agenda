@@ -2,18 +2,18 @@
 // Point d'Entrée Principal de l'Application
 
 import { auth, onAuthStateChanged } from "./firebase-config.js";
-import { state, setAppColorTheme, setDarkMode } from "./state.js";
-import { loadUserProfile, detachAllDataListeners, renderUserProfileBar, updateReadOnlyUI } from "./auth.js";
+import { state, setAppColorTheme, setDarkMode } from "./state.js?v=21.0";
+import { loadUserProfile, detachAllDataListeners, renderUserProfileBar, updateReadOnlyUI } from "./auth.js?v=21.0";
 import { render, updateBacCountdown, updateHomeStreak } from "./calendar.js?v=21.0";
-import { initBacArchiveTabs, switchTrimester } from "./grades.js";
+import { initBacArchiveTabs, switchTrimester } from "./grades.js?v=21.0";
 
 // Import modules to register window bindings
-import "./maps.js";
-import "./ai-assistant.js";
-import "./jarvis-engine.js";
-import "./admin.js";
-import "./tutor-ai.js";
-import { initNotificationsSystem } from "./notifications.js";
+import "./maps.js?v=21.0";
+import "./ai-assistant.js?v=21.0";
+import "./jarvis-engine.js?v=21.0";
+import "./admin.js?v=21.0";
+import "./tutor-ai.js?v=21.0";
+import { initNotificationsSystem } from "./notifications.js?v=21.0";
 
 // Initialisation par défaut du modèle officiel Google Gemini 3.6 Flash
 try {
