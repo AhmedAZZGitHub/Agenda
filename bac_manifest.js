@@ -59,7 +59,6 @@ window.BAC_LOCAL_MANIFEST = {
       "sujet": "Bac_Math_2009_2026_Principale/01_Mathematiques/Bac_2023_Sujet.pdf"
     },
     "2024": {
-      "correction": "Bac_Math_2009_2026_Principale/01_Mathematiques/Bac_2024_Correction.pdf",
       "sujet": "Bac_Math_2009_2026_Principale/01_Mathematiques/Bac_2024_Sujet.pdf"
     },
     "2025": {
@@ -195,7 +194,6 @@ window.BAC_LOCAL_MANIFEST = {
       "sujet": "Bac_Math_2009_2026_Principale/03_Option_Espagnol/Bac_2023_Sujet.pdf"
     },
     "2024": {
-      "correction": "Bac_Math_2009_2026_Principale/03_Option_Espagnol/Bac_2024_Correction.pdf",
       "sujet": "Bac_Math_2009_2026_Principale/03_Option_Espagnol/Bac_2024_Sujet.pdf"
     },
     "2025": {
@@ -326,7 +324,6 @@ window.BAC_LOCAL_MANIFEST = {
       "sujet": "Bac_Math_2009_2026_Principale/05_Informatique/Bac_2023_Sujet.pdf"
     },
     "2024": {
-      "correction": "Bac_Math_2009_2026_Principale/05_Informatique/Bac_2024_Correction.pdf",
       "sujet": "Bac_Math_2009_2026_Principale/05_Informatique/Bac_2024_Sujet.pdf"
     },
     "2025": {
@@ -391,7 +388,6 @@ window.BAC_LOCAL_MANIFEST = {
       "sujet": "Bac_Math_2009_2026_Principale/06_Francais/Bac_2023_Sujet.pdf"
     },
     "2024": {
-      "correction": "Bac_Math_2009_2026_Principale/06_Francais/Bac_2024_Correction.pdf",
       "sujet": "Bac_Math_2009_2026_Principale/06_Francais/Bac_2024_Sujet.pdf"
     },
     "2025": {
@@ -460,7 +456,6 @@ window.BAC_LOCAL_MANIFEST = {
       "sujet": "Bac_Math_2009_2026_Principale/08_Philosophie/Bac_2023_Sujet.pdf"
     },
     "2024": {
-      "correction": "Bac_Math_2009_2026_Principale/08_Philosophie/Bac_2024_Correction.pdf",
       "sujet": "Bac_Math_2009_2026_Principale/08_Philosophie/Bac_2024_Sujet.pdf"
     },
     "2025": {
@@ -529,7 +524,6 @@ window.BAC_LOCAL_MANIFEST = {
       "sujet": "Bac_Math_2009_2026_Principale/09_Arabe/Bac_2023_Sujet.pdf"
     },
     "2024": {
-      "correction": "Bac_Math_2009_2026_Principale/09_Arabe/Bac_2024_Correction.pdf",
       "sujet": "Bac_Math_2009_2026_Principale/09_Arabe/Bac_2024_Sujet.pdf"
     },
     "2026": {

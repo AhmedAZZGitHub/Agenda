@@ -157,9 +157,18 @@ window.openModal = function (id, day = state.curDayIdx, h = 8) {
     if (mDay) mDay.value = day;
     if (mStart) mStart.value = `${h < 10 ? "0" + h : h}:00`;
     if (mEnd) mEnd.value = `${h + 2 < 10 ? "0" + (h + 2) : h + 2}:00`;
-    if (mFreq) mFreq.value = "Chaque semaine";
+    if (mFreq) {
+      mFreq.value = "Chaque semaine";
+      mFreq.disabled = false;
+    }
     if (mTeacher) mTeacher.value = "";
     if (singleDateBox) singleDateBox.style.display = "none";
+
+    const mRepeatCheck = document.getElementById("mRepeatCheck");
+    if (mRepeatCheck) mRepeatCheck.checked = true;
+
+    const mPropFuture = document.getElementById("mPropFuture");
+    if (mPropFuture) mPropFuture.checked = true;
 
     const d = new Date(state.currentMonday);
     d.setDate(d.getDate() + day);
@@ -167,6 +176,11 @@ window.openModal = function (id, day = state.curDayIdx, h = 8) {
     const m = String(d.getMonth() + 1).padStart(2, "0");
     const dateStr = String(d.getDate()).padStart(2, "0");
     if (singleDateInput) singleDateInput.value = `${y}-${m}-${dateStr}`;
+
+    const dateLockLbl = document.getElementById("mStartDateLockLabel");
+    if (dateLockLbl) {
+      dateLockLbl.innerText = `${state.days[day]} ${d.getDate()} ${state.months[d.getMonth()]} ${y}`;
+    }
   }
   const el = document.getElementById(id);
   if (el) el.style.display = "flex";

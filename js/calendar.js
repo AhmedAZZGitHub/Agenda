@@ -91,23 +91,29 @@ export function shouldShowSession(ev, dayIndex, currentMonday) {
   d.setDate(d.getDate() + dayIndex);
   const dateKey = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 
-  // 1. Cas "Ce jour seulement" (Séance unique)
+  // 1. RÈGLE STRICTE DE NON-RÉTROACTIVITÉ (START DATE LOCK)
+  // Ne JAMAIS afficher de séance pour les dates antérieures à sa date de début startDate !
+  if (ev.startDate && dateKey < ev.startDate) {
+    return false;
+  }
+
+  // 2. Cas "Ce jour seulement" (Séance unique)
   if (ev.freq && ev.freq.includes("Ce jour seulement")) {
     if (ev.singleDate && ev.singleDate !== dateKey) {
       return false;
     }
-  }
-
-  // 2. Cas "Par quinzaine" (1 semaine sur 2)
-  if (ev.freq && ev.freq.includes("quinzaine")) {
-    const weekNum = getWeekNumber(d);
-    const baseParity = ev.baseWeekParity ?? 0;
-    if (weekNum % 2 !== baseParity) {
+    if (!ev.singleDate && ev.startDate && ev.startDate !== dateKey) {
       return false;
     }
   }
 
-  // 3. Cas Séance annulée / exclue pour cette date précise (Cette séance uniquement)
+  // 3. Cas Fin de récurrence (Cette séance et toutes les suivantes)
+  // Toutes les séances passées (dateKey < ev.untilDate) restent visibles !
+  if (ev.untilDate && dateKey >= ev.untilDate) {
+    return false;
+  }
+
+  // 4. Cas Séance annulée / exclue pour cette date précise (Cette séance uniquement)
   if (ev.excludedDates) {
     if (Array.isArray(ev.excludedDates) && ev.excludedDates.includes(dateKey)) {
       return false;
@@ -117,18 +123,68 @@ export function shouldShowSession(ev, dayIndex, currentMonday) {
     }
   }
 
-  // 4. Cas Fin de récurrence (Cette séance et toutes les suivantes)
-  // Toutes les séances passées (dateKey < ev.untilDate) restent visibles !
-  if (ev.untilDate && dateKey >= ev.untilDate) {
-    return false;
-  }
-
-  // 5. Cas Début de récurrence (si défini)
-  if (ev.startDate && dateKey < ev.startDate) {
-    return false;
+  // 5. Cas "Par quinzaine" (1 semaine sur 2)
+  if (ev.freq && ev.freq.includes("quinzaine")) {
+    const weekNum = getWeekNumber(d);
+    const baseParity = ev.baseWeekParity ?? 0;
+    if (weekNum % 2 !== baseParity) {
+      return false;
+    }
   }
 
   return true;
+}
+
+export function updateAddModalDateLock() {
+  const day = parseInt(document.getElementById("mDay")?.value || "0");
+  const baseMonday = state.currentMonday ? new Date(state.currentMonday) : getMon(new Date());
+  const d = new Date(baseMonday);
+  d.setDate(d.getDate() + day);
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const dt = String(d.getDate()).padStart(2, "0");
+  const dateStr = `${y}-${m}-${dt}`;
+
+  const lbl = document.getElementById("mStartDateLockLabel");
+  if (lbl) {
+    lbl.innerText = `${state.days[day]} ${d.getDate()} ${state.months[d.getMonth()]} ${y}`;
+  }
+  const singleDateInp = document.getElementById("mSingleDateInput");
+  if (singleDateInp) {
+    singleDateInp.value = dateStr;
+  }
+}
+
+export function onRepeatToggle(checked) {
+  const freqSel = document.getElementById("mFreq");
+  const singleBox = document.getElementById("singleDateBox");
+  const radFuture = document.getElementById("mPropFuture");
+  const radThisOnly = document.getElementById("mPropThisOnly");
+
+  if (checked) {
+    if (radFuture) radFuture.checked = true;
+    if (freqSel) freqSel.disabled = false;
+    if (singleBox) singleBox.style.display = "none";
+  } else {
+    if (radThisOnly) radThisOnly.checked = true;
+    if (freqSel) freqSel.disabled = true;
+  }
+}
+
+export function onPropagationChange(mode) {
+  const repeatCheck = document.getElementById("mRepeatCheck");
+  const singleBox = document.getElementById("singleDateBox");
+  const freqSel = document.getElementById("mFreq");
+
+  if (mode === "this_week_only") {
+    if (repeatCheck) repeatCheck.checked = false;
+    if (freqSel) freqSel.disabled = true;
+    if (singleBox) singleBox.style.display = "none";
+  } else {
+    if (repeatCheck) repeatCheck.checked = true;
+    if (freqSel) freqSel.disabled = false;
+    if (singleBox) singleBox.style.display = "none";
+  }
 }
 
 export function onFreqChange(val) {
@@ -201,7 +257,21 @@ export function renderPc() {
         const isSingle = ev.freq && ev.freq.includes("Ce jour seulement");
         const isHome = ev.type && ev.type.includes("maison");
         const isOnline = ev.type && ev.type.includes("ligne");
-        const isPart = ev.type && ev.type.includes("Particulier");
+        const isPart = ev.type && (ev.type.includes("Particulier") || ev.type.toLowerCase().includes("etude") || ev.type.toLowerCase().includes("étude"));
+        const isLycee = !isPart && !isHome && !isOnline;
+
+        let typeClass = "type-card-lycee";
+        let typePill = '<span class="type-pill pill-lycee">🏫 LYCÉE</span>';
+        if (isPart) {
+          typeClass = "type-card-etude";
+          typePill = '<span class="type-pill pill-etude">⭐ ÉTUDE</span>';
+        } else if (isHome) {
+          typeClass = "type-card-maison";
+          typePill = '<span class="type-pill pill-maison">🏠 MAISON</span>';
+        } else if (isOnline) {
+          typeClass = "type-card-enligne";
+          typePill = '<span class="type-pill pill-enligne">💻 LIGNE</span>';
+        }
 
         const todoKey = `${ev.id}_${dateKey}`;
         const todoObj = state.sessionDateTodos && state.sessionDateTodos[todoKey];
@@ -209,17 +279,21 @@ export function renderPc() {
         const isDone = todoObj && todoObj.todoDone === true;
 
         const c = document.createElement("div");
-        c.className = `event-card ${meta.cls} ${status.class}`;
+        c.className = `event-card ${typeClass} ${meta.cls} ${status.class}`;
         c.style.top = `${top}px`;
         c.style.height = `${hPx}px`;
         c.innerHTML = `
           <div>
-            ${status.text}
-            <div style="font-weight:800; font-size:10.5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+            <div style="display:flex; justify-content:space-between; align-items:center; gap:2px; margin-bottom:1px;">
+              ${typePill}
+              ${status.text}
+            </div>
+            <div style="font-weight:800; font-size:11px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
               ${meta.ico} ${ev.sub}
             </div>
+            ${isPart && ev.teacher ? `<div style="font-size:9.5px; font-weight:700; color:#7c3aed; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">👨‍🏫 ${ev.teacher}</div>` : ""}
             <div style="margin-top:1px; display:flex; gap:2px; flex-wrap:wrap;">
-              ${isPart ? `<span class="tag-meta" style="background:#7c3aed; color:white; cursor:pointer;" onclick="event.stopPropagation(); window.openMapViewer('${ev.id}')" title="Cours particulier ${ev.teacher ? `avec ${ev.teacher}` : ''} - Voir sur la carte">📍 ${ev.teacher ? "Prof: " + (ev.teacher.length > 10 ? ev.teacher.substring(0, 10) + "..." : ev.teacher) : (ev.location?.address ? (ev.location.address.length > 12 ? ev.location.address.substring(0, 12) + "..." : ev.location.address) : "Particulier")}</span>` : ev.type ? `<span class="tag-meta" style="${isHome ? "background:#059669; color:white;" : isOnline ? "background:#0891b2; color:white;" : ""}">${ev.type}</span>` : ""}
+              ${isPart ? `<span class="tag-meta tag-particular-loc" onclick="event.stopPropagation(); window.openMapViewer('${ev.id}')" title="Cours particulier ${ev.teacher ? `avec ${ev.teacher}` : ''} - Voir sur la carte">📍 ${ev.location?.address ? (ev.location.address.length > 12 ? ev.location.address.substring(0, 12) + "..." : ev.location.address) : "Particulier"}</span>` : ""}
               ${isQuin ? `<span class="tag-meta" style="background:#f59e0b; color:white;">⏳ 1/2</span>` : ""}
               ${isSingle ? `<span class="tag-meta" style="background:#ec4899; color:white;">📍 Unique</span>` : ""}
               ${hasTodo ? `<span class="tag-meta" style="${isDone ? "background:#059669; color:white; font-weight:800;" : "background:#ea580c; color:white; font-weight:800;"}" onclick="event.stopPropagation(); window.toggleSessionTodoDone('${ev.id}', '${dateKey}', event)" title="Exercices pour le ${dateKey} : ${todoObj.todo.replace(/"/g, '&quot;')} (Cliquer pour basculer Fait/Non fait)">${isDone ? "✅ Ex. Fait" : "⏳ Ex. À faire"}</span>` : ""}
@@ -279,7 +353,21 @@ export function renderMob() {
     const isSingle = ev.freq && ev.freq.includes("Ce jour seulement");
     const isHome = ev.type && ev.type.includes("maison");
     const isOnline = ev.type && ev.type.includes("ligne");
-    const isPart = ev.type && ev.type.includes("Particulier");
+    const isPart = ev.type && (ev.type.includes("Particulier") || ev.type.toLowerCase().includes("etude") || ev.type.toLowerCase().includes("étude"));
+    const isLycee = !isPart && !isHome && !isOnline;
+
+    let typeClass = "type-card-lycee";
+    let typePill = '<span class="type-pill pill-lycee">🏫 LYCÉE</span>';
+    if (isPart) {
+      typeClass = "type-card-etude";
+      typePill = '<span class="type-pill pill-etude">⭐ ÉTUDE / COURS PRIVÉ</span>';
+    } else if (isHome) {
+      typeClass = "type-card-maison";
+      typePill = '<span class="type-pill pill-maison">🏠 MAISON / AUTONOMIE</span>';
+    } else if (isOnline) {
+      typeClass = "type-card-enligne";
+      typePill = '<span class="type-pill pill-enligne">💻 EN LIGNE</span>';
+    }
 
     const todoKey = `${ev.id}_${curDateKey}`;
     const todoObj = state.sessionDateTodos && state.sessionDateTodos[todoKey];
@@ -287,12 +375,16 @@ export function renderMob() {
     const isDone = todoObj && todoObj.todoDone === true;
 
     ml.innerHTML += `
-      <div class="mob-card ${meta.cls} ${status.class}" style="cursor: pointer;" onclick="window.openSessionDetails('${ev.id}', '${curDateKey}')">
+      <div class="mob-card ${typeClass} ${meta.cls} ${status.class}" style="cursor: pointer;" onclick="window.openSessionDetails('${ev.id}', '${curDateKey}')">
         <div>
-          ${status.text}
-          <div style="font-size:14px;font-weight:800;">${meta.ico} ${ev.sub}</div>
-          <div style="margin:3px 0; display:flex; gap:3px; flex-wrap:wrap;">
-            ${isPart ? `<span class="tag-meta" style="background:#7c3aed; color:white; font-weight:800;">📍 ${ev.teacher ? "Prof: " + ev.teacher : (ev.location?.address || "Cours Particulier")}</span>` : ev.type ? `<span class="tag-meta" style="${isHome ? "background:#059669; color:white;" : isOnline ? "background:#0891b2; color:white;" : ""}">${ev.type}</span>` : ""}
+          <div style="display:flex; justify-content:space-between; align-items:center; gap:4px; margin-bottom:3px;">
+            ${typePill}
+            ${status.text}
+          </div>
+          <div style="font-size:15px;font-weight:800;">${meta.ico} ${ev.sub}</div>
+          ${isPart && ev.teacher ? `<div style="font-size:12px; font-weight:700; color:#7c3aed; margin-top:1px;">👨‍🏫 Professeur : ${ev.teacher}</div>` : ""}
+          <div style="margin:4px 0; display:flex; gap:3px; flex-wrap:wrap;">
+            ${isPart ? `<span class="tag-meta tag-particular-loc" style="background:#7c3aed; color:white; font-weight:800;">📍 ${ev.location?.address || "Cours Particulier"}</span>` : ""}
             ${isQuin ? `<span class="tag-meta" style="background:#f59e0b; color:white;">⏳ 1/2 quinzaine</span>` : ""}
             ${isSingle ? `<span class="tag-meta" style="background:#ec4899; color:white;">📍 Unique</span>` : ""}
             ${hasTodo ? `<span class="tag-meta" style="${isDone ? "background:#059669; color:white; font-weight:800;" : "background:#ea580c; color:white; font-weight:800;"}" onclick="event.stopPropagation(); window.toggleSessionTodoDone('${ev.id}', '${curDateKey}', event)" title="Cliquer pour basculer Fait/Non fait">${isDone ? "✅ Exercices Faits" : "⏳ Exercices À faire"}</span>` : ""}
@@ -342,23 +434,75 @@ export function clearAllData() {
   );
 }
 
+export function clearLyceeData() {
+  if (state.isReadOnly) return alert("Accès en lecture seule.");
+  const lyceeSessions = (state.db || []).filter((e) => {
+    const t = (e.type || "").toLowerCase();
+    return t.includes("lyc") || t === "lycée" || t === "lycee";
+  });
+
+  if (!lyceeSessions.length) {
+    alert("ℹ️ Aucun cours de lycée n'a été trouvé dans votre emploi du temps.");
+    return;
+  }
+
+  window.showStyledConfirm(
+    "Supprimer les cours de lycée",
+    `Voulez-vous supprimer les ${lyceeSessions.length} séance(s) de lycée pour votre changement d'emploi du temps ?\n\n(Vos cours particuliers, études et devoirs personnels seront soigneusement conservés)`,
+    "🏫",
+    async () => {
+      showLoading("Suppression des cours de lycée...");
+      try {
+        const promises = lyceeSessions.map((ev) =>
+          remove(ref(database, getStudentPath("seances/" + ev.id)))
+        );
+        await Promise.all(promises);
+        state.db = (state.db || []).filter((e) => !lyceeSessions.some((l) => l.id === e.id));
+        render();
+        hideLoading();
+        alert(`✅ ${lyceeSessions.length} cours de lycée ont été supprimés avec succès !\nVous pouvez maintenant scanner ou saisir votre nouvel emploi du temps.`);
+      } catch (err) {
+        hideLoading();
+        alert("Erreur lors de la suppression : " + err.message);
+      }
+    }
+  );
+}
+
 export function saveEvent() {
   if (state.isReadOnly) return alert("Accès en lecture seule.");
   const sub = document.getElementById("mSub")?.value.trim();
-  if (!sub) return;
+  if (!sub) return alert("Veuillez sélectionner une matière.");
   const type = document.getElementById("mType")?.value;
-  const freq = document.getElementById("mFreq")?.value || "Chaque semaine";
+  const day = parseInt(document.getElementById("mDay")?.value || "0");
   const [sH, sM] = (document.getElementById("mStart")?.value || "08:00").split(":").map(Number);
   const [eH, eM] = (document.getElementById("mEnd")?.value || "10:00").split(":").map(Number);
-  const day = parseInt(document.getElementById("mDay")?.value || "0");
 
-  const targetDate = new Date(state.currentMonday);
+  // RÈGLE STRICTE DE NON-RÉTROACTIVITÉ (START DATE LOCK)
+  // Détermine la date de départ précise (startDate) correspondant à la semaine affichée à l'écran
+  const baseMonday = state.currentMonday ? new Date(state.currentMonday) : getMon(new Date());
+  const targetDate = new Date(baseMonday);
   targetDate.setDate(targetDate.getDate() + day);
   const baseWeekParity = getWeekNumber(targetDate) % 2;
+  const targetDateStr = `${targetDate.getFullYear()}-${String(targetDate.getMonth() + 1).padStart(2, "0")}-${String(targetDate.getDate()).padStart(2, "0")}`;
 
+  const isRepeatChecked = document.getElementById("mRepeatCheck") ? document.getElementById("mRepeatCheck").checked : true;
+  const propagationMode = document.querySelector('input[name="mPropagation"]:checked')?.value || (isRepeatChecked ? "future" : "this_week_only");
+
+  let freq = "Chaque semaine";
   let singleDate = null;
-  if (freq.includes("Ce jour seulement")) {
-    singleDate = document.getElementById("mSingleDateInput")?.value || `${targetDate.getFullYear()}-${String(targetDate.getMonth() + 1).padStart(2, "0")}-${String(targetDate.getDate()).padStart(2, "0")}`;
+  const startDate = targetDateStr; // Verrouillage absolu sur la date active du calendrier (t >= startDate)
+
+  if (!isRepeatChecked || propagationMode === "this_week_only") {
+    freq = "Ce jour seulement";
+    singleDate = document.getElementById("mSingleDateInput")?.value || targetDateStr;
+  } else {
+    const rawFreq = document.getElementById("mFreq")?.value;
+    if (rawFreq && rawFreq.includes("quinzaine")) {
+      freq = "Par quinzaine (1 semaine sur 2)";
+    } else {
+      freq = "Chaque semaine";
+    }
   }
 
   const newId = Date.now().toString();
@@ -383,6 +527,7 @@ export function saveEvent() {
     freq,
     baseWeekParity,
     singleDate,
+    startDate, // INTERDICTION STRICTE D'ÉCRIRE OU AFFICHER DES SÉANCES DANS LE PASSÉ
     location: locData,
     teacher: teacher || null,
   };
@@ -1257,11 +1402,18 @@ export async function importScheduleWithCode() {
           }
 
           let count = 0;
+          const baseMonday = state.currentMonday ? new Date(state.currentMonday) : getMon(new Date());
           for (const seance of seancesList) {
+            const dayNum = typeof seance.day === "number" ? seance.day : 0;
+            const targetDate = new Date(baseMonday);
+            targetDate.setDate(targetDate.getDate() + dayNum);
+            const fallbackStartKey = `${targetDate.getFullYear()}-${String(targetDate.getMonth() + 1).padStart(2, "0")}-${String(targetDate.getDate()).padStart(2, "0")}`;
+
             const newId = Date.now().toString() + Math.floor(Math.random() * 100000);
             const clonedSeance = {
               ...seance,
               id: newId,
+              startDate: seance.startDate || fallbackStartKey,
             };
             await set(ref(database, getStudentPath(`seances/${newId}`)), clonedSeance);
             count++;
@@ -1288,6 +1440,7 @@ window.render = render;
 window.shift = shift;
 window.goToToday = goToToday;
 window.clearAllData = clearAllData;
+window.clearLyceeData = clearLyceeData;
 window.saveEvent = saveEvent;
 window.deleteEvent = deleteEvent;
 window.openSessionDetails = openSessionDetails;
@@ -1295,6 +1448,9 @@ window.switchSdTab = switchSdTab;
 window.onEditSessionTypeChange = onEditSessionTypeChange;
 window.onFreqChange = onFreqChange;
 window.onEditFreqChange = onEditFreqChange;
+window.onRepeatToggle = onRepeatToggle;
+window.onPropagationChange = onPropagationChange;
+window.updateAddModalDateLock = updateAddModalDateLock;
 window.shouldShowSession = shouldShowSession;
 window.getWeekNumber = getWeekNumber;
 window.getSessionDateKey = getSessionDateKey;

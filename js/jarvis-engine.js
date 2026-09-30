@@ -302,6 +302,16 @@ export const STUDENT_TOOLS_DECLARATIONS = [
       },
     },
   },
+  {
+    name: "vider_cours_lycee",
+    description: "Supprime tous les cours de lycée uniquement (pour changement d'emploi du temps), en conservant les cours particuliers et devoirs.",
+    parameters: {
+      type: "OBJECT",
+      properties: {
+        confirmation: { type: "BOOLEAN", description: "Confirmation explicite." },
+      },
+    },
+  },
 ];
 
 // Outils exclusifs administrateur
@@ -412,7 +422,14 @@ export async function executeJarvisToolCall(toolName, toolArgs) {
       const sMin = timeStringToMinutes(heure_debut, 8 * 60);
       const eMin = timeStringToMinutes(heure_fin, sMin + 120);
 
-      const targetDateKey = date_specifique || getSessionDateKey(dayIdx);
+      // Calcul précis du jour dans la semaine active du calendrier (state.currentMonday)
+      const baseMonday = state.currentMonday ? new Date(state.currentMonday) : getMon(new Date());
+      const targetDate = new Date(baseMonday);
+      targetDate.setDate(targetDate.getDate() + dayIdx);
+      const activeWeekDayKey = `${targetDate.getFullYear()}-${String(targetDate.getMonth() + 1).padStart(2, "0")}-${String(targetDate.getDate()).padStart(2, "0")}`;
+
+      const targetDateKey = date_specifique || activeWeekDayKey;
+      const isSingleDay = frequence === "Ce jour seulement" || Boolean(date_specifique);
       const newId = Date.now().toString() + Math.floor(Math.random() * 1000);
       const finalSubject = matiere && matiere.trim() ? matiere.trim() : "Étude / Révision";
 
@@ -423,8 +440,9 @@ export async function executeJarvisToolCall(toolName, toolArgs) {
         s: sMin,
         e: Math.max(sMin + 30, eMin),
         type: type_lieu || "À la maison",
-        freq: frequence || (date_specifique ? "Ce jour seulement" : "Chaque semaine"),
-        singleDate: date_specifique || (frequence === "Ce jour seulement" ? targetDateKey : null),
+        freq: isSingleDay ? "Ce jour seulement" : (frequence || "Chaque semaine"),
+        singleDate: isSingleDay ? targetDateKey : null,
+        startDate: targetDateKey, // RÈGLE STRICTE : Verrouillé sur la date de la semaine active (INTERDICTION DE RÉTROACTIVITÉ)
         location: type_lieu === "Particulier" ? { address: "Cours Particulier", lat: 36.8065, lng: 10.1815 } : null,
         teacher: nom_professeur || null,
       };
@@ -454,9 +472,10 @@ export async function executeJarvisToolCall(toolName, toolArgs) {
 
       const dayNames = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"];
       const timeFmt = `${formatM(sMin)} à ${formatM(eMin)}`;
+      const recurMsg = isSingleDay ? "pour cette date uniquement" : "à partir de cette semaine pour les semaines suivantes";
       return {
         succes: true,
-        message: `Séance de ${finalSubject} ajoutée pour ${dayNames[dayIdx]} de ${timeFmt} (${sessionObj.type})${todoMsg}.`,
+        message: `Séance de ${finalSubject} ajoutée pour ${dayNames[dayIdx]} de ${timeFmt} (${sessionObj.type}, ${recurMsg})${todoMsg}.`,
       };
     }
 
@@ -604,6 +623,34 @@ export async function executeJarvisToolCall(toolName, toolArgs) {
       return {
         succes: true,
         message: "L'emploi du temps a été entièrement vidé.",
+      };
+    }
+
+    // 7b. VIDER COURS LYCÉE (POUR CHANGEMENT D'EMPLOI DU TEMPS)
+    case "vider_cours_lycee": {
+      if (state.isReadOnly) throw new Error("Accès en lecture seule.");
+      const lyceeSessions = (state.db || []).filter((e) => {
+        const t = (e.type || "").toLowerCase();
+        return t.includes("lyc") || t === "lycée" || t === "lycee";
+      });
+
+      if (!lyceeSessions.length) {
+        return {
+          succes: true,
+          message: "Aucun cours de lycée trouvé dans votre emploi du temps.",
+        };
+      }
+
+      for (const ev of lyceeSessions) {
+        await remove(ref(database, getStudentPath("seances/" + ev.id)));
+      }
+      state.db = (state.db || []).filter((e) => !lyceeSessions.some((l) => l.id === e.id));
+
+      if (render) render();
+
+      return {
+        succes: true,
+        message: `${lyceeSessions.length} cours de lycée ont été supprimés avec succès pour votre changement d'emploi du temps. Vos cours particuliers et devoirs restent intacts.`,
       };
     }
 

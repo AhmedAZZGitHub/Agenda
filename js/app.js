@@ -9,6 +9,7 @@ import { initBacArchiveTabs, switchTrimester } from "./grades.js?v=21.0";
 
 // Import modules to register window bindings
 import "./maps.js?v=21.0";
+import "./scanner.js?v=21.0";
 import "./ai-assistant.js?v=21.0";
 import "./jarvis-engine.js?v=21.0";
 import "./admin.js?v=21.0";

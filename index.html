@@ -24,7 +24,7 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@700;800;900&display=swap"
     rel="stylesheet" />
-  <script src="bac_manifest.js"></script>
+  <script src="bac_manifest.js?v=21.2"></script>
   <!-- LIBRAIRIE CARTOGRAPHIQUE INTERACTIVE LEAFLET -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -32,7 +32,7 @@
     // Initialisation Service Worker pour PWA avec mise à jour immédiate
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", () => {
-        navigator.serviceWorker.register("./sw.js?v=21.1").then((reg) => {
+        navigator.serviceWorker.register("./sw.js?v=21.2").then((reg) => {
           reg.update();
           console.log("PWA Service Worker actif:", reg.scope);
         }).catch((err) => {
@@ -1020,16 +1020,28 @@
           <button class="btn-pill-action btn-pill-mic student-action-btn" id="mainMicBtn" onclick="window.voiceInput()" title="Assistant vocal IA">
             🎙️ Micro IA
           </button>
-          <button class="btn-pill-action btn-pill-scan student-action-btn" onclick="document.getElementById('photoInput').click()" title="Scanner un emploi du temps">
+          <button class="btn-pill-action btn-pill-scan student-action-btn" onclick="window.openScanConfigModal ? window.openScanConfigModal() : document.getElementById('photoInput').click()" title="Scanner un emploi du temps">
             📸 Scanner
           </button>
           <button class="btn-pill-action btn-pill-add student-action-btn" onclick="window.openModal('addModal')" title="Ajouter une séance">
             ➕ Séance
           </button>
-          <button class="btn-pill-action btn-pill-clear student-action-btn" onclick="window.clearAllData()" title="Effacer l'emploi du temps">
-            🗑️ Vider
+          <button class="btn-pill-action btn-pill-clear-lycee student-action-btn" onclick="window.clearLyceeData()" title="Supprimer uniquement les cours de lycée pour changement d'emploi du temps">
+            🏫 Vider Lycée
+          </button>
+          <button class="btn-pill-action btn-pill-clear student-action-btn" onclick="window.clearAllData()" title="Effacer tout l'emploi du temps">
+            🗑️ Tout Vider
           </button>
         </div>
+      </div>
+
+      <!-- BARRE DE LÉGENDE RAPIDE DES TYPES DE COURS -->
+      <div class="schedule-type-legend-bar" style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 8px; padding: 6px 12px; background: var(--card); border: 1px solid var(--dash); border-radius: 10px; font-size: 11.5px; font-weight: 700;">
+        <span style="opacity: 0.75; font-size: 11px; display: flex; align-items: center; gap: 4px;">🎯 Types de cours :</span>
+        <span class="type-pill pill-lycee" style="font-size: 10.5px; padding: 3px 8px;">🏫 Lycée (Officiel)</span>
+        <span class="type-pill pill-etude" style="font-size: 10.5px; padding: 3px 8px;">⭐ Étude / Cours Particulier</span>
+        <span class="type-pill pill-maison" style="font-size: 10.5px; padding: 3px 8px;">🏠 Maison (Autonomie)</span>
+        <span class="type-pill pill-enligne" style="font-size: 10.5px; padding: 3px 8px;">💻 En ligne</span>
       </div>
 
       <!-- 4. PC CALENDAR GRID -->
@@ -1079,7 +1091,7 @@
         </select>
       </div>
 
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px">
+      <div style="display: flex; flex-direction: column; gap: 10px;">
         <div>
           <label
             style="font-size: 11px; font-weight: 700; color: var(--muted); display: block; margin-bottom: 4px;">Lieu /
@@ -1091,16 +1103,42 @@
             <option value="Particulier">👨‍🏫 Étude / Particulier</option>
           </select>
         </div>
-        <div>
-          <label style="font-size: 11px; font-weight: 700; color: var(--muted); display: block; margin-bottom: 4px;">
-            📅 Répétition / Fréquence :
-          </label>
-          <select id="mFreq" class="input" style="width: 100%" onchange="window.onFreqChange(this.value)">
-            <option value="Chaque semaine">🔁 Chaque semaine (Régulier)</option>
-            <option value="Par quinzaine (1 semaine sur 2)">⏳ Par quinzaine (1 semaine sur 2)</option>
-            <option value="Ce jour seulement">📍 Ce jour seulement (Séance unique)</option>
-          </select>
-          <div id="singleDateBox" style="display: none; margin-top: 6px;">
+
+        <!-- MODULE RÉPÉTITION & RÈGLE STRICTE DE NON-RÉTROACTIVITÉ -->
+        <div style="background: var(--dash); border-radius: 12px; padding: 12px; border: 1.5px solid var(--dash); display: flex; flex-direction: column; gap: 8px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
+            <label style="display: flex; align-items: center; gap: 8px; font-size: 12.5px; font-weight: 800; cursor: pointer; color: var(--text);">
+              <input type="checkbox" id="mRepeatCheck" checked onchange="window.onRepeatToggle(this.checked)" style="width: 17px; height: 17px; accent-color: var(--primary); cursor: pointer;" />
+              <span>🔁 Répéter chaque semaine</span>
+            </label>
+            <select id="mFreq" class="input" style="font-size: 11px; padding: 3px 8px; width: auto;" onchange="window.onFreqChange(this.value)">
+              <option value="Chaque semaine">Chaque semaine (1/1)</option>
+              <option value="Par quinzaine (1 semaine sur 2)">Par quinzaine (1/2)</option>
+            </select>
+          </div>
+
+          <!-- Options de propagation -->
+          <div id="mPropagationBox" style="display: flex; flex-direction: column; gap: 6px; padding-top: 6px; border-top: 1px solid rgba(255, 255, 255, 0.08);">
+            <div style="font-size: 10.5px; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px;">
+              Options de propagation :
+            </div>
+            <label style="display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 700; cursor: pointer; color: var(--text);">
+              <input type="radio" name="mPropagation" id="mPropFuture" value="future" checked onchange="window.onPropagationChange('future')" style="accent-color: var(--primary); cursor: pointer;" />
+              <span>À partir de cette semaine et pour les semaines suivantes (par défaut)</span>
+            </label>
+            <label style="display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 700; cursor: pointer; color: var(--text);">
+              <input type="radio" name="mPropagation" id="mPropThisOnly" value="this_week_only" onchange="window.onPropagationChange('this_week_only')" style="accent-color: var(--primary); cursor: pointer;" />
+              <span>Uniquement cette semaine</span>
+            </label>
+          </div>
+
+          <!-- Indicateur de verrouillage de la date de début (Start Date Lock) -->
+          <div id="mStartDateLockBadge" style="font-size: 11px; color: var(--primary); font-weight: 800; display: flex; align-items: center; gap: 6px; background: rgba(2, 132, 199, 0.1); padding: 6px 10px; border-radius: 8px; border: 1px dashed var(--primary); margin-top: 2px;">
+            <span>🔒 Date de départ verrouillée :</span>
+            <span id="mStartDateLockLabel" style="color: var(--text); font-weight: 900;">--</span>
+          </div>
+
+          <div id="singleDateBox" style="display: none; margin-top: 4px;">
             <label style="font-size: 10.5px; font-weight: 700; color: #ec4899; display: block; margin-bottom: 2px;">
               🗓️ Date exacte de la séance :
             </label>
@@ -1152,7 +1190,7 @@
           <label
             style="font-size: 11px; font-weight: 700; color: var(--muted); display: block; margin-bottom: 4px;">Jour
             :</label>
-          <select id="mDay" class="input" style="width: 100%">
+          <select id="mDay" class="input" style="width: 100%" onchange="window.updateAddModalDateLock ? window.updateAddModalDateLock() : null">
             <option value="0">Lundi</option>
             <option value="1">Mardi</option>
             <option value="2">Mercredi</option>
@@ -1179,6 +1217,130 @@
         style="width: 100%; margin-top: 6px; padding: 10px; justify-content: center;">
         Enregistrer dans le planning
       </button>
+    </div>
+  </div>
+
+  <!-- MODALE CONFIGURATION DU SCAN D'EMPLOI DU TEMPS -->
+  <div class="modal" id="scanConfigModal">
+    <div class="modal-box" style="max-width: 480px; gap: 14px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; font-weight: 800; font-size: 16px;">
+        <span style="display: flex; align-items: center; gap: 6px;">
+          📸 Scanner d'Emploi du Temps (IA Vision)
+        </span>
+        <span onclick="window.closeModal('scanConfigModal')" style="cursor: pointer; color: #ef4444; font-size: 18px">✕</span>
+      </div>
+
+      <!-- Étape 1 : Photo de l'emploi du temps -->
+      <div style="background: var(--dash); border-radius: 12px; padding: 12px; border: 1.5px solid var(--dash); display: flex; flex-direction: column; gap: 8px;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <span style="font-size: 11.5px; font-weight: 800; color: var(--text);">
+            1. Photo de votre emploi du temps :
+          </span>
+          <button type="button" class="btn-action" style="padding: 4px 10px; font-size: 11px;" onclick="document.getElementById('scannerModalPhotoInput').click()">
+            📁 Choisir une photo
+          </button>
+        </div>
+        <input type="file" id="scannerModalPhotoInput" accept="image/*" style="display: none" onchange="window.onScannerFileSelected(event)" />
+        <div id="scanFileBadge" style="font-size: 11.5px; color: var(--muted); font-weight: 600; padding: 8px 10px; background: rgba(255,255,255,0.05); border-radius: 8px; border: 1px dashed var(--dash); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+          Aucun fichier sélectionné (Cliquez sur "Choisir une photo")
+        </div>
+      </div>
+
+      <!-- Étape 2 : Choix du Groupe (TP / TD) -->
+      <div style="background: var(--dash); border-radius: 12px; padding: 12px; border: 1.5px solid var(--dash); display: flex; flex-direction: column; gap: 8px;">
+        <label style="font-size: 11.5px; font-weight: 800; color: var(--text);">
+          2. Votre Groupe pour les séances dédoublées (TP/TD) :
+        </label>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+          <label style="display: flex; align-items: center; gap: 8px; font-size: 12.5px; font-weight: 700; cursor: pointer; padding: 8px 12px; background: var(--card); border-radius: 8px; border: 1px solid var(--dash);">
+            <input type="radio" name="scanGroupRadio" value="1" checked style="accent-color: var(--primary); cursor: pointer;" />
+            <span>🔵 Groupe 1</span>
+          </label>
+          <label style="display: flex; align-items: center; gap: 8px; font-size: 12.5px; font-weight: 700; cursor: pointer; padding: 8px 12px; background: var(--card); border-radius: 8px; border: 1px solid var(--dash);">
+            <input type="radio" name="scanGroupRadio" value="2" style="accent-color: var(--primary); cursor: pointer;" />
+            <span>🟣 Groupe 2</span>
+          </label>
+        </div>
+        <div style="font-size: 10.5px; color: var(--muted);">
+          💡 <i>L'IA conservera uniquement les TP de votre groupe et éliminera automatiquement ceux du groupe opposé.</i>
+        </div>
+      </div>
+
+      <!-- Étape 3 : Choix de l'Option (3ème langue) -->
+      <div style="background: var(--dash); border-radius: 12px; padding: 12px; border: 1.5px solid var(--dash); display: flex; flex-direction: column; gap: 8px;">
+        <label style="font-size: 11.5px; font-weight: 800; color: var(--text);">
+          3. Votre Matière d'Option (3ème langue) :
+        </label>
+        <select id="scanOptionSelect" class="input" style="width: 100%;">
+          <option value="Espagnol">🇪🇸 Espagnol</option>
+          <option value="Allemand">🇩🇪 Allemand</option>
+          <option value="Italien">🇮🇹 Italien</option>
+          <option value="Russe">🇷🇺 Russe</option>
+          <option value="Chinois">🇨🇳 Chinois</option>
+          <option value="Aucune">🚫 Aucune / Sans option</option>
+        </select>
+        <div style="font-size: 10.5px; color: var(--muted);">
+          💡 <i>Dans les cases d'option divisées, l'IA gardera strictement votre langue et rejettera les autres.</i>
+        </div>
+      </div>
+
+      <!-- Étape 4 : Début de récurrence (Lock) -->
+      <div style="font-size: 11px; color: var(--primary); font-weight: 800; display: flex; align-items: center; gap: 6px; background: rgba(2, 132, 199, 0.1); padding: 8px 12px; border-radius: 8px; border: 1px dashed var(--primary);">
+        <span>🔒 Prise d'effet :</span>
+        <span id="scanActiveWeekLabel" style="color: var(--text); font-weight: 900;">Semaine active</span>
+      </div>
+
+      <button type="button" class="btn-add" id="btnLaunchScanAi" onclick="window.launchAiScheduleScan()" style="width: 100%; justify-content: center; padding: 12px; font-size: 13.5px;">
+        🚀 Lancer l'Analyse IA (Gemini Vision)
+      </button>
+    </div>
+  </div>
+
+  <!-- MODALE DE VÉRIFICATION AVANT ENREGISTREMENT -->
+  <div class="modal" id="scanReviewModal">
+    <div class="modal-box" style="max-width: 520px; max-height: 85vh; display: flex; flex-direction: column; gap: 12px;">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <span style="font-weight: 800; font-size: 16px; display: flex; align-items: center; gap: 6px;">
+          📋 Vérification des Séances Détectées
+        </span>
+        <span onclick="window.closeModal('scanReviewModal')" style="cursor: pointer; color: #ef4444; font-size: 18px">✕</span>
+      </div>
+
+      <div style="font-size: 12px; color: var(--muted);" id="scanReviewSubtitle">
+        Vérifiez et ajustez les séances extraites avant de les ajouter à votre planning :
+      </div>
+
+      <div style="display: flex; justify-content: space-between; align-items: center; padding: 4px 0; border-bottom: 1px solid var(--dash);">
+        <div style="font-size: 11.5px; font-weight: 800; color: var(--primary);" id="scanReviewCountBadge">
+          0 séance(s) sélectionnée(s)
+        </div>
+        <div style="display: flex; gap: 6px;">
+          <button type="button" class="btn-action" style="padding: 3px 8px; font-size: 11px;" onclick="window.toggleAllScanReviewItems(true)">
+            Tout cocher
+          </button>
+          <button type="button" class="btn-action" style="padding: 3px 8px; font-size: 11px;" onclick="window.toggleAllScanReviewItems(false)">
+            Tout décocher
+          </button>
+        </div>
+      </div>
+
+      <!-- Liste défilable des séances détectées -->
+      <div id="scanReviewList" style="display: flex; flex-direction: column; gap: 6px; overflow-y: auto; max-height: 320px; padding-right: 4px;">
+        <!-- Injecté dynamiquement -->
+      </div>
+
+      <div style="background: rgba(2, 132, 199, 0.08); border-radius: 8px; padding: 8px 12px; font-size: 11px; color: var(--primary); font-weight: 700; border: 1px dashed var(--primary);">
+        🔒 <b>Sécurité :</b> Les séances validées débuteront à la semaine affichée sans toucher à vos semaines antérieures.
+      </div>
+
+      <div style="display: flex; gap: 8px; margin-top: 4px;">
+        <button type="button" class="btn-action" style="flex: 1; justify-content: center; padding: 10px;" onclick="window.closeModal('scanReviewModal')">
+          Annuler
+        </button>
+        <button type="button" class="btn-add" style="flex: 2; justify-content: center; padding: 10px; font-size: 13px;" onclick="window.commitScanReviewSessions()">
+          💾 Enregistrer dans mon planning
+        </button>
+      </div>
     </div>
   </div>
 

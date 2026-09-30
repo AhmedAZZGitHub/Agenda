@@ -886,6 +886,32 @@
       box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
     }
 
+    .btn-pill-clear-lycee {
+      background: rgba(245, 158, 11, 0.12);
+      color: #d97706;
+      border: 1.5px solid rgba(245, 158, 11, 0.45);
+      font-weight: 700;
+    }
+
+    .btn-pill-clear-lycee:hover {
+      background: #f59e0b;
+      color: white;
+      border-color: #f59e0b;
+      transform: translateY(-1.5px);
+      box-shadow: 0 4px 14px rgba(245, 158, 11, 0.45);
+    }
+
+    body.dark-mode .btn-pill-clear-lycee {
+      background: rgba(245, 158, 11, 0.2);
+      color: #fbbf24;
+      border-color: rgba(245, 158, 11, 0.55);
+    }
+
+    body.dark-mode .btn-pill-clear-lycee:hover {
+      background: #d97706;
+      color: white;
+    }
+
     /* ============================================================
        4. HUB DE GESTION & PROFIL DANS LA MODALE
        ============================================================ */
@@ -1616,6 +1642,188 @@
       transform: scale(1.02);
       z-index: 30;
       box-shadow: var(--shadow-md);
+    }
+
+    /* ============================================================
+       DIFFÉRENCIATION MAJEURE ENTRE TYPES DE COURS (LYCÉE, ÉTUDE, MAISON, LIGNE)
+       ============================================================ */
+    
+    /* 1. LYCÉE : Style Académique Institutionnel Bleu */
+    .event-card.type-card-lycee {
+      border-left: 6px solid #2563eb !important;
+      background: linear-gradient(135deg, #f8faff 0%, #eff6ff 100%) !important;
+      border-color: #bfdbfe !important;
+      box-shadow: 0 1px 3px rgba(37, 99, 235, 0.08) !important;
+    }
+    body.dark-mode .event-card.type-card-lycee {
+      background: linear-gradient(135deg, #0f172a 0%, #172554 100%) !important;
+      border-color: #1e3a8a !important;
+      border-left: 6px solid #3b82f6 !important;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3) !important;
+    }
+
+    /* 2. ÉTUDE / COURS PARTICULIER : Style VIP Violet / Ambre Éclatant à Fort Contraste */
+    .event-card.type-card-etude {
+      border-left: 7px solid #7c3aed !important;
+      background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%) !important;
+      border: 1.5px solid #d8b4fe !important;
+      border-left: 7px solid #7c3aed !important;
+      box-shadow: 0 3px 10px rgba(124, 58, 237, 0.18) !important;
+      position: absolute;
+    }
+    .event-card.type-card-etude:hover {
+      box-shadow: 0 6px 18px rgba(124, 58, 237, 0.35) !important;
+      border-color: #a855f7 !important;
+    }
+    body.dark-mode .event-card.type-card-etude {
+      background: linear-gradient(135deg, #261345 0%, #1d0e36 100%) !important;
+      border: 1.5px solid #7e22ce !important;
+      border-left: 7px solid #a855f7 !important;
+      box-shadow: 0 3px 12px rgba(168, 85, 247, 0.25) !important;
+    }
+
+    /* 3. À LA MAISON : Vert Émeraude / Travail Personnel Autonome */
+    .event-card.type-card-maison {
+      border-left: 6px solid #059669 !important;
+      background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%) !important;
+      border-color: #a7f3d0 !important;
+      box-shadow: 0 1px 3px rgba(5, 150, 105, 0.08) !important;
+    }
+    body.dark-mode .event-card.type-card-maison {
+      background: linear-gradient(135deg, #022c22 0%, #064e3b 100%) !important;
+      border-color: #047857 !important;
+      border-left: 6px solid #10b981 !important;
+    }
+
+    /* 4. EN LIGNE : Cyan / Bleu Ciel Numérique */
+    .event-card.type-card-enligne {
+      border-left: 6px solid #0891b2 !important;
+      background: linear-gradient(135deg, #ecfeff 0%, #cffafe 100%) !important;
+      border-color: #a5f3fc !important;
+    }
+    body.dark-mode .event-card.type-card-enligne {
+      background: linear-gradient(135deg, #083344 0%, #164e63 100%) !important;
+      border-color: #155e75 !important;
+      border-left: 6px solid #06b6d4 !important;
+    }
+
+    /* BADGES DE CATÉGORIE PROÉMINENTS (VISIBLE SANS OUVRIR LES DÉTAILS) */
+    .type-pill {
+      font-size: 7.5px;
+      font-weight: 900;
+      padding: 1.5px 5px;
+      border-radius: 4px;
+      letter-spacing: 0.35px;
+      text-transform: uppercase;
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+      line-height: 1.3;
+      white-space: nowrap;
+    }
+
+    .pill-lycee {
+      background: #dbeafe;
+      color: #1e40af;
+      border: 1px solid #bfdbfe;
+    }
+    body.dark-mode .pill-lycee {
+      background: #1e3a8a;
+      color: #bfdbfe;
+      border-color: #3b82f6;
+    }
+
+    .pill-etude {
+      background: linear-gradient(135deg, #7c3aed, #a855f7);
+      color: #ffffff !important;
+      box-shadow: 0 1px 4px rgba(124, 58, 237, 0.4);
+      border: 1px solid #c084fc;
+      font-weight: 900;
+    }
+    body.dark-mode .pill-etude {
+      background: linear-gradient(135deg, #9333ea, #c084fc);
+      color: #ffffff !important;
+      box-shadow: 0 2px 6px rgba(168, 85, 247, 0.5);
+      border-color: #e9d5ff;
+    }
+
+    .pill-maison {
+      background: #d1fae5;
+      color: #065f46;
+      border: 1px solid #a7f3d0;
+    }
+    body.dark-mode .pill-maison {
+      background: #065f46;
+      color: #a7f3d0;
+      border-color: #10b981;
+    }
+
+    .pill-enligne {
+      background: #cffafe;
+      color: #0e7490;
+      border: 1px solid #a5f3fc;
+    }
+    body.dark-mode .pill-enligne {
+      background: #155e75;
+      color: #a5f3fc;
+      border-color: #06b6d4;
+    }
+
+    /* VUE MOBILE - CARTES DIFFÉRENCIÉES */
+    .mob-card.type-card-lycee {
+      border-left: 7px solid #2563eb !important;
+      background: #f8faff !important;
+      border-color: #bfdbfe !important;
+    }
+    body.dark-mode .mob-card.type-card-lycee {
+      background: #0f172a !important;
+      border-color: #1e3a8a !important;
+      border-left: 7px solid #3b82f6 !important;
+    }
+
+    .mob-card.type-card-etude {
+      border-left: 8px solid #7c3aed !important;
+      background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%) !important;
+      border-color: #c084fc !important;
+      box-shadow: 0 4px 14px rgba(124, 58, 237, 0.15) !important;
+    }
+    body.dark-mode .mob-card.type-card-etude {
+      background: linear-gradient(135deg, #261345 0%, #1a0c30 100%) !important;
+      border-color: #9333ea !important;
+      border-left: 8px solid #a855f7 !important;
+      box-shadow: 0 4px 16px rgba(168, 85, 247, 0.25) !important;
+    }
+
+    .mob-card.type-card-maison {
+      border-left: 7px solid #059669 !important;
+      background: #f0fdf4 !important;
+      border-color: #a7f3d0 !important;
+    }
+    body.dark-mode .mob-card.type-card-maison {
+      background: #042417 !important;
+      border-color: #065f46 !important;
+      border-left: 7px solid #10b981 !important;
+    }
+
+    .mob-card.type-card-enligne {
+      border-left: 7px solid #0891b2 !important;
+      background: #ecfeff !important;
+      border-color: #a5f3fc !important;
+    }
+    body.dark-mode .mob-card.type-card-enligne {
+      background: #082936 !important;
+      border-color: #155e75 !important;
+      border-left: 7px solid #06b6d4 !important;
+    }
+
+    .tag-particular-loc {
+      background: #7c3aed !important;
+      color: white !important;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .tag-particular-loc:hover {
+      background: #6d28d9 !important;
     }
 
     .sub-math {
